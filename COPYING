@@ -1,0 +1,10 @@
+Copyright © 2020 John Sullivan <jsullivan@csumb.edu>
+
+os-compatibility.h and os-compatibility.c are licensed by the Wayland project
+under the MIT/X license. See more details in COPYING_WESTON.
+
+wld submodule is licensed by Michael Forney under the MIT license, see COPYING
+in `wld/`.
+
+All other code in this repository falls under the terms of the GPL v3.0 license,
+which can be found in LICENSE.

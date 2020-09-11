@@ -1,0 +1,8 @@
+*~
+*\#*
+*.o
+*-client-protocol.h
+include/config.h
+.gdb_history
+*.log
+wvkbd
