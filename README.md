@@ -48,7 +48,7 @@ You'll need the following developer packages
  - xkbcommon
  - pixman
 
-After cloning this repo, run `git submodules update --init --recursive`
+After cloning this repo, run `git submodule update --init --recursive`
 
 Make any customizations you would like in `config.h` and run `make`, then `./wvkbd`
 
