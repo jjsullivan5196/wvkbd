@@ -12,6 +12,7 @@ enum key_type {
 	Layout,
 	EndRow,
 	Last,
+	CodeMod,
 };
 
 /* Modifiers passed to the virtual_keyboard protocol. They are based on
@@ -41,6 +42,7 @@ struct key {
 
 	const uint32_t code;
 	struct layout *layout;
+	const uint32_t code_mod;
 
 	//actual coordinates on the surface
 	uint32_t x, y, w, h;
@@ -154,7 +156,21 @@ kbd_unpress_key(struct kbd *kb, uint32_t time) {
 
 void
 kbd_press_key(struct kbd *kb, struct key *k, uint32_t time) {
+	uint8_t mods_before;
 	switch (k->type) {
+	case CodeMod:
+		mods_before = kb->mods;
+
+		kb->mods = k->code_mod;
+		kb->last_press = k;
+		kbd_draw_key(kb, k, true);
+		zwp_virtual_keyboard_v1_modifiers(kb->vkbd, kb->mods, 0, 0, 0);
+		zwp_virtual_keyboard_v1_key(kb->vkbd, time, kb->last_press->code,
+		                            WL_KEYBOARD_KEY_STATE_PRESSED);
+
+		kb->mods = mods_before;
+		zwp_virtual_keyboard_v1_modifiers(kb->vkbd, kb->mods, 0, 0, 0);
+		break;
 	case Code:
 		kb->last_press = k;
 		kbd_draw_key(kb, k, true);
