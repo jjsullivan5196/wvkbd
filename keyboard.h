@@ -1,7 +1,3 @@
-/* clang-format off */
-#define KBD_POINTS KBD_ROWS * KBD_COLS
-/* clang-format on */
-
 enum key_type;
 enum key_modifier_type;
 struct clr_scheme;
@@ -14,6 +10,7 @@ enum key_type {
 	Code,
 	Mod,
 	Layout,
+	EndRow,
 	Last,
 };
 
@@ -39,18 +36,19 @@ struct clr_scheme {
 struct key {
 	const char *label;
 	const char *shift_label;
-	const uint8_t width;
+	const double width;
 	const enum key_type type;
 
 	const uint32_t code;
 	struct layout *layout;
 
-	uint8_t col, row;
+	//actual coordinates on the surface
+	uint32_t x, y, w, h;
 };
 
 struct layout {
 	struct key *keys;
-	struct key *gridpoints[KBD_POINTS];
+	uint32_t keyheight;
 };
 
 struct kbd {
@@ -58,7 +56,6 @@ struct kbd {
 	struct clr_scheme scheme;
 
 	uint32_t w, h;
-	uint32_t kw, kh;
 	uint8_t mods;
 	struct key *last_press;
 
@@ -70,58 +67,77 @@ static inline void draw_inset(struct drwsurf *d, uint32_t x, uint32_t y,
                               uint32_t width, uint32_t height, uint32_t border,
                               uint32_t color);
 
-static void kbd_init_layout(struct layout *l);
+static void kbd_init_layout(struct layout *l, uint32_t width, uint32_t height);
 static struct key *kbd_get_key(struct kbd *kb, uint32_t x, uint32_t y);
 static void kbd_unpress_key(struct kbd *kb, uint32_t time);
 static void kbd_press_key(struct kbd *kb, struct key *k, uint32_t time);
 static void kbd_draw_key(struct kbd *kb, struct key *k, bool pressed);
-static void kbd_draw_key(struct kbd *kb, struct key *k, bool pressed);
 static void kbd_draw_layout(struct kbd *kb);
-static void kbd_resize(struct kbd *kb, uint32_t w, uint32_t h);
+static void kbd_resize(struct kbd *kb, uint32_t w, uint32_t h, struct layout * layouts, uint8_t layoutcount);
+static uint8_t kbd_get_rows(struct layout *l);
+static double kbd_get_row_length(struct key *k);
 
-void
-kbd_init_layout(struct layout *l) {
-	uint8_t i = 0, width = 0, ncol = 0, col = 0, row = 0;
-
+uint8_t kbd_get_rows(struct layout *l) {
+	uint8_t rows = 0;
 	struct key *k = l->keys;
-	struct key **point = l->gridpoints,
-	           **end_point = l->gridpoints + (KBD_POINTS);
-
-	memset(point, 0, sizeof(uint8_t) * KBD_POINTS);
-
-	while ((k->type != Last) && (point < end_point)) {
-		width = k->width;
-		ncol = col + width;
-
-		if (ncol > KBD_COLS) {
-			width = KBD_COLS - col;
-			col = 0;
-			row += 1;
-
-			for (i = 0; (i < width) && (point < end_point); i++, point++) {
-			}
-			continue;
+	while (k->type != Last) {
+		if (k->type == EndRow) {
+			rows++;
 		}
-
-		k->col = col;
-		k->row = row;
-		col = ncol;
-
-		for (i = 0; (i < width) && (point < end_point); i++, point++) {
-			*point = k;
-		}
-
 		k++;
 	}
+	return rows + 1;
+}
+
+void
+kbd_init_layout(struct layout *l, uint32_t width, uint32_t height) {
+	uint32_t x = 0, y = 0;
+    fprintf(stderr, "Init layout\n");
+	uint8_t rows = kbd_get_rows(l);
+
+	l->keyheight = height / rows;
+
+	struct key *k = l->keys;
+	double rowlength = kbd_get_row_length(k);
+	while (k->type != Last) {
+		if (k->type == EndRow) {
+			y += l->keyheight;
+			x = 0;
+			rowlength = kbd_get_row_length(k+1);
+		} else if (k->width > 0) {
+			k->x = x;
+			k->y = y;
+			fprintf(stderr, "(%d/%f)*%f -> %s\n",width,rowlength,k->width, k->label);
+			k->w = ((double) width / rowlength) * k->width;
+			x += k->w;
+		}
+		k->h = l->keyheight;
+		k++;
+	}
+}
+
+double
+kbd_get_row_length(struct key *k) {
+	double l = 0.0;
+	while ((k->type != Last) && (k->type != EndRow)) {
+		l += k->width;
+		k++;
+	}
+	return l;
 }
 
 struct key *
 kbd_get_key(struct kbd *kb, uint32_t x, uint32_t y) {
 	struct layout *l = kb->layout;
-	uint32_t col = KBD_COLS * ((float)x / (float)kb->w);
-	uint32_t row = KBD_ROWS * ((float)y / (float)kb->h);
-
-	return l->gridpoints[(row * KBD_COLS) + col];
+	struct key *k = l->keys;
+	fprintf(stderr,"get key: +%d+%d\n",x,y);
+	while (k->type != Last) {
+		if ((k->type != EndRow) && (k->type != Pad) && (k->type != Pad) && (x >= k->x) && (y >= k->y) && (x < k->x + k->w) && (y < k->y + k->h)) {
+			return k;
+		}
+		k++;
+	}
+	return NULL;
 }
 
 void
@@ -167,12 +183,13 @@ void
 kbd_draw_key(struct kbd *kb, struct key *k, bool pressed) {
 	struct drwsurf *d = kb->surf;
 	const char *label = (kb->mods & Shift) ? k->shift_label : k->label;
+    fprintf(stderr, "Draw key +%d+%d %dx%d -> %s\n", k->x, k->y, k->w, k->h, k->label);
 	Color *fill = pressed ? &kb->scheme.high : &kb->scheme.fg;
-	uint32_t x = k->col * kb->kw, y = k->row * kb->kh, width = k->width * kb->kw;
-
-	draw_inset(d, x, y, width, kb->kh, KBD_KEY_BORDER, fill->color);
+	draw_inset(d, k->x, k->y, k->w, k->h, KBD_KEY_BORDER, fill->color);
+	uint32_t xoffset = k->w /  (strlen(label) + 2);
+    fprintf(stderr, "  xoffset=%d\n", xoffset);
 	wld_draw_text(d->render, d->ctx->font, kb->scheme.text.color,
-	              x + (width * 0.35), y + (kb->kh / 2), label, -1, NULL);
+	              k->x + xoffset, k->y + (k->h / 2), label, -1, NULL);
 }
 
 void
@@ -180,11 +197,12 @@ kbd_draw_layout(struct kbd *kb) {
 	struct drwsurf *d = kb->surf;
 	struct key *next_key = kb->layout->keys;
 	bool pressed = false;
+    fprintf(stderr, "Draw layout");
 
 	wld_fill_rectangle(d->render, kb->scheme.bg.color, 0, 0, kb->w, kb->h);
 
 	while (next_key->type != Last) {
-		if (next_key->type == Pad) {
+		if ((next_key->type == Pad) || (next_key->type == EndRow)) {
 			next_key++;
 			continue;
 		}
@@ -195,16 +213,19 @@ kbd_draw_layout(struct kbd *kb) {
 }
 
 void
-kbd_resize(struct kbd *kb, uint32_t w, uint32_t h) {
+kbd_resize(struct kbd *kb, uint32_t w, uint32_t h, struct layout * layouts, uint8_t layoutcount) {
 	struct drwsurf *d = kb->surf;
 
 	kb->w = w;
 	kb->h = h;
 
-	kb->kw = (float)w / (float)KBD_COLS;
-	kb->kh = (float)h / (float)KBD_ROWS;
+	fprintf(stderr, "Resize %dx%d, %d layouts\n",w,h,layoutcount);
 
 	drwsurf_resize(d, w, h);
+	for (int i = 0; i < layoutcount; i++) {
+		fprintf(stderr,"i=%d\n",i );
+		kbd_init_layout(&layouts[i], w, h);
+	}
 	kbd_draw_layout(kb);
 	d->dirty = true;
 }

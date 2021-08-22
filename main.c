@@ -258,7 +258,7 @@ handle_global_remove(void *data, struct wl_registry *registry, uint32_t name) {}
 void
 layer_surface_configure(void *data, struct zwlr_layer_surface_v1 *surface,
                         uint32_t serial, uint32_t w, uint32_t h) {
-	kbd_resize(&keyboard, w + KBD_PIXEL_OVERSCAN_WIDTH, h);
+	kbd_resize(&keyboard, w + KBD_PIXEL_OVERSCAN_WIDTH, h, layouts, NumLayouts);
 	zwlr_layer_surface_v1_ack_configure(surface, serial);
 }
 
@@ -314,13 +314,6 @@ main(int argc, char **argv) {
 	strcpy(ptr, keymap_str);
 	zwp_virtual_keyboard_v1_keymap(
 	  keyboard.vkbd, WL_KEYBOARD_KEYMAP_FORMAT_XKB_V1, keymap_fd, keymap_size);
-
-	/* init layouts */
-	for (i = 0; i < NumLayouts; i++) {
-		if (layouts[i].keys) {
-			kbd_init_layout(&layouts[i]);
-		}
-	}
 
 	/* assign kbd state */
 	keyboard.surf = &draw_surf;
