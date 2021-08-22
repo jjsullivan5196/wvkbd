@@ -1,25 +1,22 @@
 /* constants */
 
 /* how tall the keyboard should be */
-#define KBD_PIXEL_HEIGHT 155
+#define KBD_PIXEL_HEIGHT 240
 
 /* if your layout leaves an empty margin, increase this to fix it */
-#define KBD_PIXEL_OVERSCAN_WIDTH 0
+#define KBD_PIXEL_OVERSCAN_WIDTH 5
 
-/* rows for each layout */
-#define KBD_ROWS 4
-
-/* columns for each layout (maximum keys per row) */
-#define KBD_COLS 10
+/* Maximum number of keys */
+#define KBD_POINTS 66
 
 /* spacing between keys */
-#define KBD_KEY_BORDER 1
+#define KBD_KEY_BORDER 2
 
 #include "keyboard.h"
 
 /* font (see `man fonts-conf` for instructions) */
 static const char *fc_font_pattern =
-  "monospace:size=14:antialias=true:hinting=true";
+  "FiraMono Nerd Font:size=16:antialias=true:hinting=true";
 
 /* layout declarations */
 enum layout_names {
@@ -57,7 +54,7 @@ static struct kbd keyboard = {
  *     "label",
  *     "SHIFT_LABEL",
  *     1,
- *     [Code, Mod, Layout, Last],
+ *     [Code, Mod, Layout, EndRow, Last],
  *     [KEY_CODE, Modifier],
  *     [&layout]
  *  },`
@@ -78,88 +75,147 @@ static struct kbd keyboard = {
  * - layout: layout to switch to when key is pressed
  */
 static struct key keys_basic[] = {
-  {"q", "Q", 1, Code, KEY_Q},
-  {"w", "W", 1, Code, KEY_W},
-  {"e", "E", 1, Code, KEY_E},
-  {"r", "R", 1, Code, KEY_R},
-  {"t", "T", 1, Code, KEY_T},
-  {"y", "Y", 1, Code, KEY_Y},
-  {"u", "U", 1, Code, KEY_U},
-  {"i", "I", 1, Code, KEY_I},
-  {"o", "O", 1, Code, KEY_O},
-  {"p", "P", 1, Code, KEY_P},
+  {"Esc", "Esc", 1.0, Code, KEY_ESC},
+  {"Tab", "Tab", 1.0, Code, KEY_TAB},
+  {"↑", "↑", 1.0, Code, KEY_UP},
+  {"↓", "↓", 1.0, Code, KEY_DOWN},
+  {"←", "←", 1.0, Code, KEY_LEFT},
+  {"→", "→", 1.0, Code, KEY_RIGHT},
+  {"'", "\"", 1.0, Code, KEY_APOSTROPHE},
+  {"/", "?", 1.0, Code, KEY_SLASH},
+  {";", ":", 1.0, Code, KEY_SEMICOLON},
+  {"`", "~", 1.0, Code, KEY_GRAVE},
+  {"", "", 0.0, EndRow},
 
-  {"a", "A", 1, Code, KEY_A},
-  {"s", "S", 1, Code, KEY_S},
-  {"d", "D", 1, Code, KEY_D},
-  {"f", "F", 1, Code, KEY_F},
-  {"g", "G", 1, Code, KEY_G},
-  {"h", "H", 1, Code, KEY_H},
-  {"j", "J", 1, Code, KEY_J},
-  {"k", "K", 1, Code, KEY_K},
-  {"l", "L", 1, Code, KEY_L},
-  {";", ":", 1, Code, KEY_SEMICOLON},
+  {"1", "!", 1.0, Code, KEY_1},
+  {"2", "@", 1.0, Code, KEY_2},
+  {"3", "#", 1.0, Code, KEY_3},
+  {"4", "$", 1.0, Code, KEY_4},
+  {"5", "%", 1.0, Code, KEY_5},
+  {"6", "^", 1.0, Code, KEY_6},
+  {"7", "&", 1.0, Code, KEY_7},
+  {"8", "*", 1.0, Code, KEY_8},
+  {"9", "(", 1.0, Code, KEY_9},
+  {"0", ")", 1.0, Code, KEY_0},
+  {"-", "_", 1.0, Code, KEY_MINUS},
+  {"=", "+", 1.0, Code, KEY_EQUAL},
+  {"", "", 0.0, EndRow},
 
-  {"z", "Z", 1, Code, KEY_Z},
-  {"x", "X", 1, Code, KEY_X},
-  {"c", "C", 1, Code, KEY_C},
-  {"v", "V", 1, Code, KEY_V},
-  {"b", "B", 1, Code, KEY_B},
-  {"n", "N", 1, Code, KEY_N},
-  {"m", "M", 1, Code, KEY_M},
-  {"Tab", "Tab", 1, Code, KEY_TAB},
-  {"Bk", "Bk", 1, Code, KEY_BACKSPACE},
-  {"Ret", "Ret", 1, Code, KEY_ENTER},
+  {"", "", 0.5, Pad},
+  {"q", "Q", 1.0, Code, KEY_Q},
+  {"w", "W", 1.0, Code, KEY_W},
+  {"e", "E", 1.0, Code, KEY_E},
+  {"r", "R", 1.0, Code, KEY_R},
+  {"t", "T", 1.0, Code, KEY_T},
+  {"y", "Y", 1.0, Code, KEY_Y},
+  {"u", "U", 1.0, Code, KEY_U},
+  {"i", "I", 1.0, Code, KEY_I},
+  {"o", "O", 1.0, Code, KEY_O},
+  {"p", "P", 1.0, Code, KEY_P},
+  {"", "", 0.0, EndRow},
 
-  {"Sft", "Sft", 1, Mod, Shift},
-  {"Sp", "Sp", 1, Mod, Super},
-  {"Alt", "Alt", 1, Mod, AltGr},
-  {"", "", 3, Code, KEY_SPACE},
-  {"Esc", "Esc", 1, Code, KEY_ESC},
-  {"Ctl", "Ctl", 1, Mod, Ctrl},
-  {"Sm", "Sm", 2, Layout, 0, &layouts[Special]},
+  {"Ct", "Ct", 1.0, Mod, Ctrl},
+  {"a", "A", 1.0, Code, KEY_A},
+  {"s", "S", 1.0, Code, KEY_S},
+  {"d", "D", 1.0, Code, KEY_D},
+  {"f", "F", 1.0, Code, KEY_F},
+  {"g", "G", 1.0, Code, KEY_G},
+  {"h", "H", 1.0, Code, KEY_H},
+  {"j", "J", 1.0, Code, KEY_J},
+  {"k", "K", 1.0, Code, KEY_K},
+  {"l", "L", 1.0, Code, KEY_L},
+  {"", "", 0.5, Pad},
+  {"", "", 0.0, EndRow},
+
+  {"⇧", "⇧", 1.5, Mod, Shift},
+  {"z", "Z", 1.0, Code, KEY_Z},
+  {"x", "X", 1.0, Code, KEY_X},
+  {"c", "C", 1.0, Code, KEY_C},
+  {"v", "V", 1.0, Code, KEY_V},
+  {"b", "B", 1.0, Code, KEY_B},
+  {"n", "N", 1.0, Code, KEY_N},
+  {"m", "M", 1.0, Code, KEY_M},
+  {"⌫", "⌫", 1.5, Code, KEY_BACKSPACE},
+  {"", "", 0.0, EndRow},
+
+  {"Sym", "Sym", 1.0, Layout, 0, &layouts[Special]},
+  {"Alt", "Alt", 1.0, Mod, AltGr},
+  {",", "<", 1.0, Code, KEY_COMMA},
+  {"", "", 4.0, Code, KEY_SPACE},
+  {".", ">", 1.0, Code, KEY_DOT},
+  {"Entr", "Entr", 2.0, Code, KEY_ENTER},
+
 
   /* end of layout */
-  {"", "", 0, Last},
+  {"", "", 0.0, Last},
 };
 
 static struct key keys_special[] = {
-  {"1", "!", 1, Code, KEY_1},
-  {"2", "@", 1, Code, KEY_2},
-  {"3", "#", 1, Code, KEY_3},
-  {"4", "$", 1, Code, KEY_4},
-  {"5", "%", 1, Code, KEY_5},
-  {"6", "^", 1, Code, KEY_6},
-  {"7", "&", 1, Code, KEY_7},
-  {"8", "*", 1, Code, KEY_8},
-  {"9", "(", 1, Code, KEY_9},
-  {"0", ")", 1, Code, KEY_0},
+  {"Esc", "Esc", 1.0, Code, KEY_ESC},
+  {"Tab", "Tab", 1.0, Code, KEY_TAB},
+  {"↑", "↑", 1.0, Code, KEY_UP},
+  {"↓", "↓", 1.0, Code, KEY_DOWN},
+  {"←", "←", 1.0, Code, KEY_LEFT},
+  {"→", "→", 1.0, Code, KEY_RIGHT},
+  {"⇈", "⇈", 1.0, Code, KEY_PAGEUP},
+  {"⇊", "⇊", 1.0, Code, KEY_PAGEDOWN},
+  {"⇤", "⇤", 1.0, Code, KEY_HOME},
+  {"⇥", "⇥", 1.0, Code, KEY_END},
+  {"", "", 0.0, EndRow},
 
-  {"'", "\"", 1, Code, KEY_APOSTROPHE},
-  {"`", "~", 1, Code, KEY_GRAVE},
-  {"-", "_", 1, Code, KEY_MINUS},
-  {"=", "+", 1, Code, KEY_EQUAL},
-  {"[", "{", 1, Code, KEY_LEFTBRACE},
-  {"]", "}", 1, Code, KEY_RIGHTBRACE},
-  {",", "<", 1, Code, KEY_COMMA},
-  {".", ">", 1, Code, KEY_DOT},
-  {"/", "?", 1, Code, KEY_SLASH},
-  {"\\", "|", 1, Code, KEY_BACKSLASH},
+  {"1", "!", 1.0, Code, KEY_1},
+  {"2", "@", 1.0, Code, KEY_2},
+  {"3", "#", 1.0, Code, KEY_3},
+  {"4", "$", 1.0, Code, KEY_4},
+  {"5", "%", 1.0, Code, KEY_5},
+  {"6", "^", 1.0, Code, KEY_6},
+  {"7", "&", 1.0, Code, KEY_7},
+  {"8", "*", 1.0, Code, KEY_8},
+  {"9", "(", 1.0, Code, KEY_9},
+  {"0", ")", 1.0, Code, KEY_0},
+  {"", "", 0.0, EndRow},
 
-  {"↑", "↑", 1, Code, KEY_UP},
-  {"↓", "↓", 1, Code, KEY_DOWN},
-  {"←", "←", 1, Code, KEY_LEFT},
-  {"→", "→", 1, Code, KEY_RIGHT},
-  {"Sp", "Sp", 1, Mod, Super},
-  {"Alt", "Alt", 1, Mod, AltGr},
-  {"Ctl", "Ctl", 1, Mod, Ctrl},
-  {"Sft", "Sft", 1, Mod, Shift},
+  {"", "", 1.0, Code, KEY_SPACE},
+  {"", "", 1.0, Code, KEY_SPACE},
+  {"", "", 1.0, Code, KEY_SPACE},
+  {"", "", 1.0, Code, KEY_SPACE},
+  {"", "", 1.0, Code, KEY_SPACE},
+  {"", "", 1.0, Code, KEY_SPACE},
+  {"", "", 1.0, Code, KEY_SPACE},
+  {"", "", 1.0, Code, KEY_SPACE},
+  {"", "", 1.0, Code, KEY_SPACE},
+  {"", "", 1.0, Code, KEY_SPACE},
+  {"", "", 0.0, EndRow},
 
-  {"Ret", "Ret", 1, Code, KEY_ENTER},
-  {"Bk", "Bk", 1, Code, KEY_BACKSPACE},
-  {"", "", 3, Code, KEY_SPACE},
-  {"Bsc", "Bsc", 2, Layout, 0, &layouts[Basic]},
+  {"Ct", "Ct", 2.0, Mod, Ctrl},
+  {"`", "~", 1.0, Code, KEY_GRAVE},
+  {"'", "\"", 1.0, Code, KEY_APOSTROPHE},
+  {"-", "_", 1.0, Code, KEY_MINUS},
+  {"=", "+", 1.0, Code, KEY_EQUAL},
+  {"[", "{", 1.0, Code, KEY_LEFTBRACE},
+  {"]", "}", 1.0, Code, KEY_RIGHTBRACE},
+  {"\\", "|", 1.0, Code, KEY_BACKSLASH},
+  {"Del", "Del", 1.0, Code, KEY_DELETE},
+  {"", "", 0.0, EndRow},
+
+  {"⇧", "⇧", 2.0, Mod, Shift},
+  {";", ":", 1.0, Code, KEY_SEMICOLON},
+  {"/", "?", 1.0, Code, KEY_SLASH},
+  {"", "", 1.0, Code, KEY_SPACE},
+  {"", "", 1.0, Code, KEY_SPACE},
+  {"", "", 1.0, Code, KEY_SPACE},
+  {"", "", 1.0, Code, KEY_SPACE},
+  {"", "", 1.0, Code, KEY_SPACE},
+  {"⌫", "⌫", 1.0, Code, KEY_BACKSPACE},
+  {"", "", 0.0, EndRow},
+
+  {"Abc", "Abc", 1.0, Layout, 0, &layouts[Basic]},
+  {"Alt", "Alt", 1.0, Mod, AltGr},
+  {",", "<", 1.0, Code, KEY_COMMA},
+  {"", "", 4.0, Code, KEY_SPACE},
+  {".", ">", 1.0, Code, KEY_DOT},
+  {"Entr", "Entr", 2.0, Code, KEY_ENTER},
 
   /* end of layout */
-  {"", "", 0, Last},
+  {"", "", 0.0, Last},
 };
