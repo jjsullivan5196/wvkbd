@@ -126,7 +126,11 @@ static const struct zwlr_layer_surface_v1_listener layer_surface_listener = {
   .closed = layer_surface_closed,
 };
 
-#include "config.h"
+/* configuration, allows nested code to access above variables */
+#ifndef LAYOUT
+#error "make sure to define LAYOUT"
+#endif
+#include LAYOUT
 
 void
 wl_touch_down(void *data, struct wl_touch *wl_touch, uint32_t serial,
