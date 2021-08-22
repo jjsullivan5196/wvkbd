@@ -6,6 +6,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <wchar.h>
 #include <sys/mman.h>
 #include <wayland-client.h>
 
@@ -46,6 +47,7 @@ static uint32_t anchor = ZWLR_LAYER_SURFACE_V1_ANCHOR_BOTTOM |
 /* application state */
 static bool run_display = true;
 static int cur_x = -1, cur_y = -1;
+static int compose = 0;
 
 /* event handler prototypes */
 static void wl_pointer_enter(void *data, struct wl_pointer *wl_pointer,
@@ -92,6 +94,7 @@ static void layer_surface_configure(void *data,
                                     uint32_t serial, uint32_t w, uint32_t h);
 static void layer_surface_closed(void *data,
                                  struct zwlr_layer_surface_v1 *surface);
+static void create_and_upload_keymap(uint32_t comp_unichr, uint32_t comp_shift_unichr);
 
 /* event handlers */
 static const struct wl_pointer_listener pointer_listener = {
@@ -273,10 +276,27 @@ layer_surface_closed(void *data, struct zwlr_layer_surface_v1 *surface) {
 	run_display = false;
 }
 
+void
+create_and_upload_keymap(uint32_t comp_unichr, uint32_t comp_shift_unichr) {
+    const char * keymap_str = get_keymap(comp_unichr, comp_shift_unichr);
+    size_t keymap_size = strlen(keymap_str) + 1;
+	int keymap_fd = os_create_anonymous_file(keymap_size);
+	if (keymap_fd < 0) {
+		die("could not create keymap fd\n");
+	}
+	void *ptr =
+	  mmap(NULL, keymap_size, PROT_READ | PROT_WRITE, MAP_SHARED, keymap_fd, 0);
+	if (ptr == (void *)-1) {
+		die("could not map keymap data\n");
+	}
+	strcpy(ptr, keymap_str);
+	zwp_virtual_keyboard_v1_keymap(
+	  keyboard.vkbd, WL_KEYBOARD_KEYMAP_FORMAT_XKB_V1, keymap_fd, keymap_size);
+}
+
 int
 main(int argc, char **argv) {
 	uint8_t i;
-	int keymap_fd = os_create_anonymous_file(keymap_size);
 
 	/* connect to compositor */
 	display = wl_display_connect(NULL);
@@ -307,17 +327,7 @@ main(int argc, char **argv) {
 	  zwp_virtual_keyboard_manager_v1_create_virtual_keyboard(vkbd_mgr, seat);
 
 	/* upload keymap */
-	if (keymap_fd < 0) {
-		die("could not create keymap fd\n");
-	}
-	void *ptr =
-	  mmap(NULL, keymap_size, PROT_READ | PROT_WRITE, MAP_SHARED, keymap_fd, 0);
-	if (ptr == (void *)-1) {
-		die("could not map keymap data\n");
-	}
-	strcpy(ptr, keymap_str);
-	zwp_virtual_keyboard_v1_keymap(
-	  keyboard.vkbd, WL_KEYBOARD_KEYMAP_FORMAT_XKB_V1, keymap_fd, keymap_size);
+    create_and_upload_keymap(0,0);
 
 	/* assign kbd state */
 	keyboard.surf = &draw_surf;
