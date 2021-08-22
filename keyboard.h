@@ -12,7 +12,9 @@ enum key_type {
 	Layout,
 	EndRow,
 	Last,
+	Compose,
 	CodeMod,
+	Copy,
 };
 
 /* Modifiers passed to the virtual_keyboard protocol. They are based on
@@ -23,6 +25,7 @@ enum key_modifier_type {
 	Shift = 1,
 	CapsLock = 2,
 	Ctrl = 4,
+	Alt = 8,
 	Super = 64,
 	AltGr = 128,
 };
@@ -35,26 +38,30 @@ struct clr_scheme {
 };
 
 struct key {
-	const char *label;
-	const char *shift_label;
-	const double width;
+	const char *label;              //primary label
+	const char *shift_label;        //secondary label
+	const double width;             //relative width (1.0)
 	const enum key_type type;
 
-	const uint32_t code;
-	struct layout *layout;
-	const uint32_t code_mod;
+	const uint32_t code;  /* code: key scancode or modifier name (see
+						   *   `/usr/include/linux/input-event-codes.h` for scancode names, and
+						   *   `keyboard.h` for modifiers)
+						   *   XKB keycodes are +8 */
+	struct layout *layout; //pointer back to the parent layout that holds this key
+	const uint32_t code_mod; /* modifier to force when this key is pressed */
 
-	//actual coordinates on the surface
+	//actual coordinates on the surface (pixels), will be computed automatically for all keys
 	uint32_t x, y, w, h;
 };
 
 struct layout {
 	struct key *keys;
-	uint32_t keyheight;
+	uint32_t keyheight; //absolute height (pixels)
 };
 
 struct kbd {
 	struct layout *layout;
+	struct layout *prevlayout;
 	struct clr_scheme scheme;
 
 	uint32_t w, h;
@@ -148,8 +155,13 @@ kbd_unpress_key(struct kbd *kb, uint32_t time) {
 		kbd_draw_key(kb, kb->last_press, false);
 		kb->surf->dirty = true;
 
-		zwp_virtual_keyboard_v1_key(kb->vkbd, time, kb->last_press->code,
-		                            WL_KEYBOARD_KEY_STATE_RELEASED);
+		if (kb->last_press->type == Copy) {
+			zwp_virtual_keyboard_v1_key(kb->vkbd, time, 127, //COMP key
+										WL_KEYBOARD_KEY_STATE_RELEASED);
+		} else {
+			zwp_virtual_keyboard_v1_key(kb->vkbd, time, kb->last_press->code,
+										WL_KEYBOARD_KEY_STATE_RELEASED);
+		}
 		kb->last_press = NULL;
 	}
 }
@@ -161,7 +173,7 @@ kbd_press_key(struct kbd *kb, struct key *k, uint32_t time) {
 	case CodeMod:
 		mods_before = kb->mods;
 
-		kb->mods = k->code_mod;
+		kb->mods ^= k->code_mod;
 		kb->last_press = k;
 		kbd_draw_key(kb, k, true);
 		zwp_virtual_keyboard_v1_modifiers(kb->vkbd, kb->mods, 0, 0, 0);
@@ -172,10 +184,26 @@ kbd_press_key(struct kbd *kb, struct key *k, uint32_t time) {
 		zwp_virtual_keyboard_v1_modifiers(kb->vkbd, kb->mods, 0, 0, 0);
 		break;
 	case Code:
-		kb->last_press = k;
-		kbd_draw_key(kb, k, true);
-		zwp_virtual_keyboard_v1_key(kb->vkbd, time, kb->last_press->code,
-		                            WL_KEYBOARD_KEY_STATE_PRESSED);
+		if (compose == 1) {
+			if (k->layout) {
+				compose++;
+				if (compose) {
+					fprintf(stderr,"showing compose %d\n", compose);
+				}
+				kb->prevlayout = kb->layout;
+				kb->layout = k->layout;
+				kbd_draw_layout(kb);
+			}
+		} else {
+			kb->last_press = k;
+			kbd_draw_key(kb, k, true);
+			zwp_virtual_keyboard_v1_key(kb->vkbd, time, kb->last_press->code,
+										WL_KEYBOARD_KEY_STATE_PRESSED);
+			if (compose) {
+				fprintf(stderr,"pressing composed key\n");
+				compose++;
+			}
+		}
 		break;
 	case Mod:
 		kb->mods ^= k->code;
@@ -185,11 +213,34 @@ kbd_press_key(struct kbd *kb, struct key *k, uint32_t time) {
 		kbd_draw_key(kb, k, kb->mods & k->code);
 		zwp_virtual_keyboard_v1_modifiers(kb->vkbd, kb->mods, 0, 0, 0);
 		break;
+	case Compose:
+		if (compose == 0) {
+			compose = 1;
+		} else {
+			compose = 0;
+		}
+		kbd_draw_key(kb, k, (bool) compose);
+		break;
 	case Layout:
 		kb->layout = k->layout;
 		kbd_draw_layout(kb);
+	case Copy:
+		kb->last_press = k;
+		kbd_draw_key(kb, k, true);
+		fprintf(stderr,"pressing copy key\n");
+		create_and_upload_keymap(k->code, k->code_mod);
+		zwp_virtual_keyboard_v1_modifiers(kb->vkbd, kb->mods, 0, 0, 0);
+		zwp_virtual_keyboard_v1_key(kb->vkbd, time, 127, //COMP key
+									WL_KEYBOARD_KEY_STATE_PRESSED);
+		break;
 	default:
 		break;
+	}
+
+	if (compose == 3) {
+		compose = 0;
+		kb->layout = kb->prevlayout;
+		kbd_draw_layout(kb);
 	}
 
 	kb->surf->dirty = true;
@@ -252,3 +303,5 @@ draw_inset(struct drwsurf *d, uint32_t x, uint32_t y, uint32_t width,
 	wld_fill_rectangle(d->render, color, x + border, y + border, width - border,
 	                   height - border);
 }
+
+
