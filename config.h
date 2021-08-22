@@ -22,14 +22,16 @@ static const char *fc_font_pattern =
 enum layout_names {
 	Basic = 0,
 	Special,
+	Simple,
 	NumLayouts,
 };
 
-static struct key keys_basic[], keys_special[];
+static struct key keys_basic[], keys_special[], keys_simple[];
 
 static struct layout layouts[NumLayouts] = {
   [Basic] = {keys_basic},
   [Special] = {keys_special},
+  [Simple] = {keys_simple},
 };
 
 /* keyboard settings */
@@ -175,16 +177,16 @@ static struct key keys_special[] = {
   {"0", ")", 1.0, Code, KEY_0},
   {"", "", 0.0, EndRow},
 
-  {"", "", 1.0, Code, KEY_SPACE},
-  {"", "", 1.0, Code, KEY_SPACE},
-  {"", "", 1.0, Code, KEY_SPACE},
-  {"", "", 1.0, Code, KEY_SPACE},
-  {"", "", 1.0, Code, KEY_SPACE},
-  {"", "", 1.0, Code, KEY_SPACE},
-  {"", "", 1.0, Code, KEY_SPACE},
-  {"", "", 1.0, Code, KEY_SPACE},
-  {"", "", 1.0, Code, KEY_SPACE},
-  {"", "", 1.0, Code, KEY_SPACE},
+  {"", "", 1.0, Pad},
+  {"", "", 1.0, Pad},
+  {"", "", 1.0, Pad},
+  {"", "", 1.0, Pad},
+  {"", "", 1.0, Pad},
+  {"", "", 1.0, Pad},
+  {"", "", 1.0, Pad},
+  {"", "", 1.0, Pad},
+  {"", "", 1.0, Pad},
+  {"", "", 1.0, Pad},
   {"", "", 0.0, EndRow},
 
   {"Ct", "Ct", 2.0, Mod, Ctrl},
@@ -201,15 +203,15 @@ static struct key keys_special[] = {
   {"⇧", "⇧", 2.0, Mod, Shift},
   {";", ":", 1.0, Code, KEY_SEMICOLON},
   {"/", "?", 1.0, Code, KEY_SLASH},
-  {"", "", 1.0, Code, KEY_SPACE},
-  {"", "", 1.0, Code, KEY_SPACE},
-  {"", "", 1.0, Code, KEY_SPACE},
-  {"", "", 1.0, Code, KEY_SPACE},
-  {"", "", 1.0, Code, KEY_SPACE},
+  {"", "", 1.0, Pad},
+  {"", "", 1.0, Pad},
+  {"", "", 1.0, Pad},
+  {"", "", 1.0, Pad},
+  {"", "", 1.0, Pad},
   {"⌫", "⌫", 1.0, Code, KEY_BACKSPACE},
   {"", "", 0.0, EndRow},
 
-  {"Abc", "Abc", 1.0, Layout, 0, &layouts[Basic]},
+  {"Abc", "Abc", 1.0, Layout, 0, &layouts[Simple]},
   {"Alt", "Alt", 1.0, Mod, AltGr},
   {",", "<", 1.0, Code, KEY_COMMA},
   {"", "", 4.0, Code, KEY_SPACE},
@@ -219,3 +221,54 @@ static struct key keys_special[] = {
   /* end of layout */
   {"", "", 0.0, Last},
 };
+
+static struct key keys_simple[] = {
+  {"", "", 0.5, Pad},
+  {"q", "Q", 1.0, Code, KEY_Q},
+  {"w", "W", 1.0, Code, KEY_W},
+  {"e", "E", 1.0, Code, KEY_E},
+  {"r", "R", 1.0, Code, KEY_R},
+  {"t", "T", 1.0, Code, KEY_T},
+  {"y", "Y", 1.0, Code, KEY_Y},
+  {"u", "U", 1.0, Code, KEY_U},
+  {"i", "I", 1.0, Code, KEY_I},
+  {"o", "O", 1.0, Code, KEY_O},
+  {"p", "P", 1.0, Code, KEY_P},
+  {"", "", 0.0, EndRow},
+
+  {"Ct", "Ct", 1.0, Mod, Ctrl},
+  {"a", "A", 1.0, Code, KEY_A},
+  {"s", "S", 1.0, Code, KEY_S},
+  {"d", "D", 1.0, Code, KEY_D},
+  {"f", "F", 1.0, Code, KEY_F},
+  {"g", "G", 1.0, Code, KEY_G},
+  {"h", "H", 1.0, Code, KEY_H},
+  {"j", "J", 1.0, Code, KEY_J},
+  {"k", "K", 1.0, Code, KEY_K},
+  {"l", "L", 1.0, Code, KEY_L},
+  {"", "", 0.5, Pad},
+  {"", "", 0.0, EndRow},
+
+  {"⇧", "⇧", 1.5, Mod, Shift},
+  {"z", "Z", 1.0, Code, KEY_Z},
+  {"x", "X", 1.0, Code, KEY_X},
+  {"c", "C", 1.0, Code, KEY_C},
+  {"v", "V", 1.0, Code, KEY_V},
+  {"b", "B", 1.0, Code, KEY_B},
+  {"n", "N", 1.0, Code, KEY_N},
+  {"m", "M", 1.0, Code, KEY_M},
+  {"⌫", "⌫", 1.5, Code, KEY_BACKSPACE},
+  {"", "", 0.0, EndRow},
+
+  {"Abc", "Abc", 1.0, Layout, 0, &layouts[Basic]},
+  {"Alt", "Alt", 1.0, Mod, AltGr},
+  {",", "<", 1.0, Code, KEY_COMMA},
+  {"", "", 4.0, Code, KEY_SPACE},
+  {".", ">", 1.0, Code, KEY_DOT},
+  {"Entr", "Entr", 2.0, Code, KEY_ENTER},
+
+
+  /* end of layout */
+  {"", "", 0.0, Last},
+};
+
