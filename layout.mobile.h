@@ -6,13 +6,11 @@
 /* if your layout leaves an empty margin, increase this to fix it */
 #define KBD_PIXEL_OVERSCAN_WIDTH 5
 
-/* Maximum number of keys */
-#define KBD_POINTS 66
-
 /* spacing between keys */
 #define KBD_KEY_BORDER 2
 
 #include "keyboard.h"
+
 
 /* font (see `man fonts-conf` for instructions) */
 static const char *fc_font_pattern =
@@ -23,6 +21,7 @@ enum layout_names {
 	Full = 0,
 	Special,
 	Simple,
+    Cyrillic,
 	ComposeA,
 	ComposeE,
 	ComposeY,
@@ -52,7 +51,7 @@ enum layout_names {
 	NumLayouts,
 };
 
-static struct key keys_full[], keys_special[], keys_simple[],
+static struct key keys_full[], keys_special[], keys_simple[], keys_cyrillic[],
               keys_compose_a[],
               keys_compose_e[],
               keys_compose_y[],
@@ -81,35 +80,36 @@ static struct key keys_full[], keys_special[], keys_simple[],
               keys_compose_m[];
 
 static struct layout layouts[NumLayouts] = {
-  [Full] = {keys_full},
-  [Special] = {keys_special},
-  [Simple] = {keys_simple},
-  [ComposeA] = {keys_compose_a},
-  [ComposeE] = {keys_compose_e},
-  [ComposeY] = {keys_compose_y},
-  [ComposeU] = {keys_compose_u},
-  [ComposeI] = {keys_compose_i},
-  [ComposeO] = {keys_compose_o},
-  [ComposeQ] = {keys_compose_q},
-  [ComposeW] = {keys_compose_w},
-  [ComposeR] = {keys_compose_r},
-  [ComposeT] = {keys_compose_t},
-  [ComposeP] = {keys_compose_p},
-  [ComposeS] = {keys_compose_s},
-  [ComposeD] = {keys_compose_d},
-  [ComposeF] = {keys_compose_f},
-  [ComposeG] = {keys_compose_g},
-  [ComposeH] = {keys_compose_h},
-  [ComposeJ] = {keys_compose_j},
-  [ComposeK] = {keys_compose_k},
-  [ComposeL] = {keys_compose_l},
-  [ComposeZ] = {keys_compose_z},
-  [ComposeX] = {keys_compose_x},
-  [ComposeC] = {keys_compose_c},
-  [ComposeV] = {keys_compose_v},
-  [ComposeB] = {keys_compose_b},
-  [ComposeN] = {keys_compose_n},
-  [ComposeM] = {keys_compose_m},
+  [Full] = {keys_full, 0, "latin"}, //third parameter is the keymap name
+  [Special] = {keys_special, 0, "latin"},
+  [Simple] = {keys_simple, 0, "latin"},
+  [Cyrillic] = {keys_cyrillic,0, "cyrillic"},
+  [ComposeA] = {keys_compose_a, 0, "latin"},
+  [ComposeE] = {keys_compose_e, 0, "latin"},
+  [ComposeY] = {keys_compose_y, 0, "latin"},
+  [ComposeU] = {keys_compose_u, 0, "latin"},
+  [ComposeI] = {keys_compose_i, 0, "latin"},
+  [ComposeO] = {keys_compose_o, 0, "latin"},
+  [ComposeQ] = {keys_compose_q, 0, "latin"},
+  [ComposeW] = {keys_compose_w, 0, "latin"},
+  [ComposeR] = {keys_compose_r, 0, "latin"},
+  [ComposeT] = {keys_compose_t, 0, "latin"},
+  [ComposeP] = {keys_compose_p, 0, "latin"},
+  [ComposeS] = {keys_compose_s, 0, "latin"},
+  [ComposeD] = {keys_compose_d, 0, "latin"},
+  [ComposeF] = {keys_compose_f, 0, "latin"},
+  [ComposeG] = {keys_compose_g, 0, "latin"},
+  [ComposeH] = {keys_compose_h, 0, "latin"},
+  [ComposeJ] = {keys_compose_j, 0, "latin"},
+  [ComposeK] = {keys_compose_k, 0, "latin"},
+  [ComposeL] = {keys_compose_l, 0, "latin"},
+  [ComposeZ] = {keys_compose_z, 0, "latin"},
+  [ComposeX] = {keys_compose_x, 0, "latin"},
+  [ComposeC] = {keys_compose_c, 0, "latin"},
+  [ComposeV] = {keys_compose_v, 0, "latin"},
+  [ComposeB] = {keys_compose_b, 0, "latin"},
+  [ComposeN] = {keys_compose_n, 0, "latin"},
+  [ComposeM] = {keys_compose_m, 0, "latin"},
 };
 
 const enum layout_names DefaultLayout = Full;
@@ -331,11 +331,78 @@ static struct key keys_simple[] = {
   {"⌫", "⌫", 1.5, Code, KEY_BACKSPACE},
   {"", "", 0.0, EndRow},
 
-  {"Abc", "Abc", 1.0, Layout, 0,  &layouts[(DefaultLayout == Simple) ? Special : DefaultLayout] },
+  {"Abc", "Abc", 1.0, Layout, 0,  &layouts[(DefaultLayout == Simple) ? Special : Cyrillic] },
   {"Ctr", "Ctr", 1.0, Mod, Ctrl},
   {",", "'", 1.0, Code, KEY_COMMA},
   {"", "", 4.0, Code, KEY_SPACE},
   {".", "?", 1.0, Code, KEY_DOT},
+  {"Entr", "Entr", 2.0, Code, KEY_ENTER},
+
+
+  /* end of layout */
+  {"", "", 0.0, Last},
+};
+
+static struct key keys_cyrillic[] = {
+  {"1", "!", 1.0, Code, KEY_1},
+  {"2", "@", 1.0, Code, KEY_2},
+  {"3", "#", 1.0, Code, KEY_3},
+  {"4", ";", 1.0, Code, KEY_4},
+  {"5", "%", 1.0, Code, KEY_5},
+  {"6", ":", 1.0, Code, KEY_6},
+  {"7", "&", 1.0, Code, KEY_7},
+  {"8", "*", 1.0, Code, KEY_8},
+  {"9", "(", 1.0, Code, KEY_9},
+  {"0", ")", 1.0, Code, KEY_0},
+  {"ю", "Ю", 1.0, Code, KEY_DOT},
+  {"э", "Э", 1.0, Code, KEY_APOSTROPHE},
+  {"ё", "Ё", 1.0, Code, KEY_GRAVE},
+  {"", "", 0.0, EndRow},
+
+  {"й", "Й", 1.0, Code, KEY_Q},
+  {"ц", "Ц", 1.0, Code, KEY_W},
+  {"у", "У", 1.0, Code, KEY_E},
+  {"к", "К", 1.0, Code, KEY_R},
+  {"е", "Е", 1.0, Code, KEY_T},
+  {"н", "Н", 1.0, Code, KEY_Y},
+  {"г", "Г", 1.0, Code, KEY_U},
+  {"ш", "ш", 1.0, Code, KEY_I},
+  {"щ", "щ", 1.0, Code, KEY_O},
+  {"з", "з", 1.0, Code, KEY_P},
+  {"х", "Х", 1.0, Code, KEY_LEFTBRACE},
+  {"ъ", "Ъ", 0.5, Code, KEY_RIGHTBRACE},
+  {"", "", 0.0, EndRow},
+
+  {"ф", "Ф", 1.0, Code, KEY_A},
+  {"ы", "Ы", 1.0, Code, KEY_S},
+  {"в", "В", 1.0, Code, KEY_D},
+  {"а", "А", 1.0, Code, KEY_F},
+  {"п", "П", 1.0, Code, KEY_G},
+  {"р", "Р", 1.0, Code, KEY_H},
+  {"о", "О", 1.0, Code, KEY_J},
+  {"л", "Л", 1.0, Code, KEY_K},
+  {"д", "Д", 1.0, Code, KEY_L},
+  {"ж", "Ж", 1.0, Code, KEY_SEMICOLON},
+  {"", "", 0.0, EndRow},
+
+  {"⇧", "⇧", 1.5, Mod, Shift},
+  {"я", "Я", 1.0, Code, KEY_Z},
+  {"ч", "Ч", 1.0, Code, KEY_X},
+  {"c", "С", 1.0, Code, KEY_C},
+  {"м", "М", 1.0, Code, KEY_V},
+  {"и", "И", 1.0, Code, KEY_B},
+  {"т", "Т", 1.0, Code, KEY_N},
+  {"ь", "Ь", 1.0, Code, KEY_M},
+  {"б", "Б", 1.0, Code, KEY_COMMA},
+  {"⌫", "⌫", 1.5, Code, KEY_BACKSPACE},
+
+  {"", "", 0.0, EndRow},
+
+  {"Abc", "Abc", 1.0, Layout, 0,  &layouts[(DefaultLayout == Cyrillic) ? Full : DefaultLayout] },
+  {"Ctr", "Ctr", 1.0, Mod, Ctrl},
+  {",", "'", 1.0, Code, KEY_EQUAL},
+  {"", "", 4.0, Code, KEY_SPACE},
+  {".", "?", 1.0, Code, KEY_SLASH},
   {"Entr", "Entr", 2.0, Code, KEY_ENTER},
 
 

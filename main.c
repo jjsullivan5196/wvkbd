@@ -17,7 +17,7 @@
 /* lazy die macro */
 #define die(...)                                                               \
 	fprintf(stderr, __VA_ARGS__);                                                \
-	exit(0)
+	exit(1)
 
 /* client state */
 static const char *namespace = "wlroots";
@@ -94,7 +94,7 @@ static void layer_surface_configure(void *data,
                                     uint32_t serial, uint32_t w, uint32_t h);
 static void layer_surface_closed(void *data,
                                  struct zwlr_layer_surface_v1 *surface);
-static void create_and_upload_keymap(uint32_t comp_unichr, uint32_t comp_shift_unichr);
+static void create_and_upload_keymap(const char * name, uint32_t comp_unichr, uint32_t comp_shift_unichr);
 
 /* event handlers */
 static const struct wl_pointer_listener pointer_listener = {
@@ -277,8 +277,8 @@ layer_surface_closed(void *data, struct zwlr_layer_surface_v1 *surface) {
 }
 
 void
-create_and_upload_keymap(uint32_t comp_unichr, uint32_t comp_shift_unichr) {
-    const char * keymap_str = get_keymap(comp_unichr, comp_shift_unichr);
+create_and_upload_keymap(const char * name, uint32_t comp_unichr, uint32_t comp_shift_unichr) {
+    const char * keymap_str = get_keymap(name, comp_unichr, comp_shift_unichr);
     size_t keymap_size = strlen(keymap_str) + 1;
 	int keymap_fd = os_create_anonymous_file(keymap_size);
 	if (keymap_fd < 0) {
@@ -327,7 +327,7 @@ main(int argc, char **argv) {
 	  zwp_virtual_keyboard_manager_v1_create_virtual_keyboard(vkbd_mgr, seat);
 
 	/* upload keymap */
-    create_and_upload_keymap(0,0);
+    create_and_upload_keymap(layouts[DefaultLayout].keymap_name, 0,0);
 
 	/* assign kbd state */
 	keyboard.surf = &draw_surf;
