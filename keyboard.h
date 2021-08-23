@@ -48,6 +48,7 @@ struct key {
 						   *   XKB keycodes are +8 */
 	struct layout *layout; //pointer back to the parent layout that holds this key
 	const uint32_t code_mod; /* modifier to force when this key is pressed */
+	bool reset_mod; /* reset modifiers when clicked */
 
 	//actual coordinates on the surface (pixels), will be computed automatically for all keys
 	uint32_t x, y, w, h;
@@ -170,7 +171,11 @@ kbd_press_key(struct kbd *kb, struct key *k, uint32_t time) {
 	switch (k->type) {
 	case Code:
 		if (k->code_mod) {
-			zwp_virtual_keyboard_v1_modifiers(kb->vkbd, k->code_mod, 0, 0, 0);
+			if (k->reset_mod) {
+				zwp_virtual_keyboard_v1_modifiers(kb->vkbd, k->code_mod, 0, 0, 0);
+			} else {
+				zwp_virtual_keyboard_v1_modifiers(kb->vkbd, kb->mods ^ k->code_mod, 0, 0, 0);
+			}
 		} else {
 			zwp_virtual_keyboard_v1_modifiers(kb->vkbd, kb->mods, 0, 0, 0);
 		}
