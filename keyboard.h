@@ -180,6 +180,19 @@ kbd_unpress_key(struct kbd *kb, uint32_t time) {
 
 void
 kbd_press_key(struct kbd *kb, struct key *k, uint32_t time) {
+	if ((compose == 1) && (k->type != Compose) && (k->type != Mod) && (k->layout)) {
+		compose++;
+		fprintf(stderr,"showing compose %d\n", compose);
+		if ((!kb->prevlayout) || (strcmp(kb->prevlayout->keymap_name, kb->layout->keymap_name) != 0)) {
+			create_and_upload_keymap(kb->layout->keymap_name, 0, 0);
+		}
+		kb->prevlayout = kb->layout;
+		kb->layout = k->layout;
+		kbd_draw_layout(kb);
+		kb->surf->dirty = true;
+		return;
+	}
+
 	switch (k->type) {
 	case Code:
 		if (k->code_mod) {
@@ -191,28 +204,13 @@ kbd_press_key(struct kbd *kb, struct key *k, uint32_t time) {
 		} else {
 			zwp_virtual_keyboard_v1_modifiers(kb->vkbd, kb->mods, 0, 0, 0);
 		}
-		if (compose == 1) {
-			if (k->layout) {
-				compose++;
-				if (compose) {
-					fprintf(stderr,"showing compose %d\n", compose);
-				}
-				if ((!kb->prevlayout) || (strcmp(kb->prevlayout->keymap_name, kb->layout->keymap_name) != 0)) {
-					create_and_upload_keymap(kb->layout->keymap_name, 0, 0);
-				}
-				kb->prevlayout = kb->layout;
-				kb->layout = k->layout;
-				kbd_draw_layout(kb);
-			}
-		} else {
-			kb->last_press = k;
-			kbd_draw_key(kb, k, true);
-			zwp_virtual_keyboard_v1_key(kb->vkbd, time, kb->last_press->code,
-										WL_KEYBOARD_KEY_STATE_PRESSED);
-			if (compose) {
-				fprintf(stderr,"pressing composed key\n");
-				compose++;
-			}
+		kb->last_press = k;
+		kbd_draw_key(kb, k, true);
+		zwp_virtual_keyboard_v1_key(kb->vkbd, time, kb->last_press->code,
+									WL_KEYBOARD_KEY_STATE_PRESSED);
+		if (compose) {
+			fprintf(stderr,"pressing composed key\n");
+			compose++;
 		}
 		break;
 	case Mod:
