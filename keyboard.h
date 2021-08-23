@@ -167,12 +167,11 @@ kbd_unpress_key(struct kbd *kb, uint32_t time) {
 
 void
 kbd_press_key(struct kbd *kb, struct key *k, uint32_t time) {
-	uint8_t mods_before;
 	switch (k->type) {
 	case Code:
 		if (k->code_mod) {
-			mods_before = kb->mods;
-			kb->mods = k->code_mod;
+			zwp_virtual_keyboard_v1_modifiers(kb->vkbd, k->code_mod, 0, 0, 0);
+		} else {
 			zwp_virtual_keyboard_v1_modifiers(kb->vkbd, kb->mods, 0, 0, 0);
 		}
 		if (compose == 1) {
@@ -194,10 +193,6 @@ kbd_press_key(struct kbd *kb, struct key *k, uint32_t time) {
 				fprintf(stderr,"pressing composed key\n");
 				compose++;
 			}
-		}
-		if (k->code_mod) {
-			kb->mods = mods_before;
-			zwp_virtual_keyboard_v1_modifiers(kb->vkbd, kb->mods, 0, 0, 0);
 		}
 		break;
 	case Mod:
