@@ -57,8 +57,8 @@ struct key {
 
 struct layout {
 	struct key *keys;
-	uint32_t keyheight; //absolute height (pixels)
 	const char * keymap_name;
+	uint32_t keyheight; //absolute height (pixels)
 };
 
 struct kbd {
@@ -167,14 +167,19 @@ kbd_unpress_key(struct kbd *kb, uint32_t time) {
 		}
 		kb->last_press = NULL;
 
+
 		if (compose >= 2) {
 			compose = 0;
 			if ((!kb->prevlayout) || (strcmp(kb->prevlayout->keymap_name, kb->layout->keymap_name) != 0)) {
 				create_and_upload_keymap(kb->layout->keymap_name, 0, 0);
 			}
 			kb->layout = kb->prevlayout;
+            if (kb->mods & Shift == Shift) kb->mods ^= Shift;
+            kbd_draw_layout(kb);
+		} else if (kb->mods & Shift == Shift) {
+            kb->mods ^= Shift;
 			kbd_draw_layout(kb);
-		}
+        }
 	}
 }
 
