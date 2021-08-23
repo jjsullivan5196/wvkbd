@@ -296,8 +296,6 @@ create_and_upload_keymap(const char * name, uint32_t comp_unichr, uint32_t comp_
 
 int
 main(int argc, char **argv) {
-	uint8_t i;
-
 	/* connect to compositor */
 	display = wl_display_connect(NULL);
 	if (display == NULL) {
