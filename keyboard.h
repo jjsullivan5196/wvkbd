@@ -48,6 +48,7 @@ struct key {
 						   *   XKB keycodes are +8 */
 	struct layout *layout; //pointer back to the parent layout that holds this key
 	const uint32_t code_mod; /* modifier to force when this key is pressed */
+	uint8_t scheme; //index of the scheme to use
 	bool reset_mod; /* reset modifiers when clicked */
 
 	//actual coordinates on the surface (pixels), will be computed automatically for all keys
@@ -64,6 +65,7 @@ struct kbd {
 	struct layout *layout;
 	struct layout *prevlayout;
 	struct clr_scheme scheme;
+	struct clr_scheme scheme1;
 
 	uint32_t w, h;
 	uint8_t mods;
@@ -258,11 +260,12 @@ kbd_draw_key(struct kbd *kb, struct key *k, bool pressed) {
 	struct drwsurf *d = kb->surf;
 	const char *label = (kb->mods & Shift) ? k->shift_label : k->label;
     fprintf(stderr, "Draw key +%d+%d %dx%d -> %s\n", k->x, k->y, k->w, k->h, k->label);
-	Color *fill = pressed ? &kb->scheme.high : &kb->scheme.fg;
+	struct clr_scheme  * scheme = (k->scheme == 0) ? &(kb->scheme) : &(kb->scheme1);
+	Color *fill = pressed ? &scheme->high : &scheme->fg;
 	draw_inset(d, k->x, k->y, k->w, k->h, KBD_KEY_BORDER, fill->color);
 	uint32_t xoffset = k->w /  (strlen(label) + 2);
     fprintf(stderr, "  xoffset=%d\n", xoffset);
-	wld_draw_text(d->render, d->ctx->font, kb->scheme.text.color,
+	wld_draw_text(d->render, d->ctx->font, scheme->text.color,
 	              k->x + xoffset, k->y + (k->h / 2), label, -1, NULL);
 }
 
