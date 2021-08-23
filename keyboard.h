@@ -163,6 +163,12 @@ kbd_unpress_key(struct kbd *kb, uint32_t time) {
 										WL_KEYBOARD_KEY_STATE_RELEASED);
 		}
 		kb->last_press = NULL;
+
+		if (compose >= 2) {
+			compose = 0;
+			kb->layout = kb->prevlayout;
+			kbd_draw_layout(kb);
+		}
 	}
 }
 
@@ -230,12 +236,6 @@ kbd_press_key(struct kbd *kb, struct key *k, uint32_t time) {
 		break;
 	default:
 		break;
-	}
-
-	if (compose == 3) {
-		compose = 0;
-		kb->layout = kb->prevlayout;
-		kbd_draw_layout(kb);
 	}
 
 	kb->surf->dirty = true;
