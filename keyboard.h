@@ -57,6 +57,7 @@ struct key {
 struct layout {
 	struct key *keys;
 	uint32_t keyheight; //absolute height (pixels)
+	const char * keymap_name;
 };
 
 struct kbd {
@@ -166,6 +167,9 @@ kbd_unpress_key(struct kbd *kb, uint32_t time) {
 
 		if (compose >= 2) {
 			compose = 0;
+			if ((!kb->prevlayout) || (strcmp(kb->prevlayout->keymap_name, kb->layout->keymap_name) != 0)) {
+				create_and_upload_keymap(kb->layout->keymap_name, 0, 0);
+			}
 			kb->layout = kb->prevlayout;
 			kbd_draw_layout(kb);
 		}
@@ -190,6 +194,9 @@ kbd_press_key(struct kbd *kb, struct key *k, uint32_t time) {
 				compose++;
 				if (compose) {
 					fprintf(stderr,"showing compose %d\n", compose);
+				}
+				if ((!kb->prevlayout) || (strcmp(kb->prevlayout->keymap_name, kb->layout->keymap_name) != 0)) {
+					create_and_upload_keymap(kb->layout->keymap_name, 0, 0);
 				}
 				kb->prevlayout = kb->layout;
 				kb->layout = k->layout;
@@ -224,12 +231,17 @@ kbd_press_key(struct kbd *kb, struct key *k, uint32_t time) {
 		break;
 	case Layout:
 		kb->layout = k->layout;
+		if ((!kb->prevlayout) || (strcmp(kb->prevlayout->keymap_name, kb->layout->keymap_name) != 0)) {
+			fprintf(stderr, "Switching to keymap %s\n", kb->layout->keymap_name);
+			create_and_upload_keymap(kb->layout->keymap_name, 0, 0);
+		}
+		kb->prevlayout = kb->layout;
 		kbd_draw_layout(kb);
 	case Copy:
 		kb->last_press = k;
 		kbd_draw_key(kb, k, true);
 		fprintf(stderr,"pressing copy key\n");
-		create_and_upload_keymap(k->code, k->code_mod);
+		create_and_upload_keymap(kb->layout->keymap_name, k->code, k->code_mod);
 		zwp_virtual_keyboard_v1_modifiers(kb->vkbd, kb->mods, 0, 0, 0);
 		zwp_virtual_keyboard_v1_key(kb->vkbd, time, 127, //COMP key
 									WL_KEYBOARD_KEY_STATE_PRESSED);
