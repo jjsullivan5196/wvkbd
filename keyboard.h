@@ -13,7 +13,6 @@ enum key_type {
 	EndRow,
 	Last,
 	Compose,
-	CodeMod,
 	Copy,
 };
 
@@ -170,20 +169,12 @@ void
 kbd_press_key(struct kbd *kb, struct key *k, uint32_t time) {
 	uint8_t mods_before;
 	switch (k->type) {
-	case CodeMod:
-		mods_before = kb->mods;
-
-		kb->mods ^= k->code_mod;
-		kb->last_press = k;
-		kbd_draw_key(kb, k, true);
-		zwp_virtual_keyboard_v1_modifiers(kb->vkbd, kb->mods, 0, 0, 0);
-		zwp_virtual_keyboard_v1_key(kb->vkbd, time, kb->last_press->code,
-		                            WL_KEYBOARD_KEY_STATE_PRESSED);
-
-		kb->mods = mods_before;
-		zwp_virtual_keyboard_v1_modifiers(kb->vkbd, kb->mods, 0, 0, 0);
-		break;
 	case Code:
+		if (k->code_mod) {
+			mods_before = kb->mods;
+			kb->mods = k->code_mod;
+			zwp_virtual_keyboard_v1_modifiers(kb->vkbd, kb->mods, 0, 0, 0);
+		}
 		if (compose == 1) {
 			if (k->layout) {
 				compose++;
@@ -203,6 +194,10 @@ kbd_press_key(struct kbd *kb, struct key *k, uint32_t time) {
 				fprintf(stderr,"pressing composed key\n");
 				compose++;
 			}
+		}
+		if (k->code_mod) {
+			kb->mods = mods_before;
+			zwp_virtual_keyboard_v1_modifiers(kb->vkbd, kb->mods, 0, 0, 0);
 		}
 		break;
 	case Mod:
