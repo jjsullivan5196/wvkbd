@@ -9,6 +9,7 @@
 /* spacing between keys */
 #define KBD_KEY_BORDER 2
 
+#include "keymap.mobintl.h"
 #include "keyboard.h"
 
 /* font (see `man fonts-conf` for instructions) */
