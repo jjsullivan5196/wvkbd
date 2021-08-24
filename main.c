@@ -312,7 +312,7 @@ create_and_upload_keymap(const char *name, uint32_t comp_unichr,
 void
 usage(char *argv0)
 {
-	fprintf(stderr, "usage: %s [-hov] [-H height] [-fn font] [-l layers] [-s initial_layer]\n", argv0);
+	fprintf(stderr, "usage: %s [-hov] [-H height] [-fn font] [-l layers]\n", argv0);
 	fprintf(stderr, "Options:\n");
 	fprintf(stderr, "  -D         - Enable debug\n");
 	fprintf(stderr, "  -o         - Print press keys to standard output\n");
@@ -393,7 +393,7 @@ main(int argc, char **argv) {
 	keyboard.vkbd =
 	  zwp_virtual_keyboard_manager_v1_create_virtual_keyboard(vkbd_mgr, seat);
 
-	kbd_init(&keyboard);
+	kbd_init(&keyboard, &layouts, layer_names_list);
 
 	/* assign kbd state */
 	keyboard.surf = &draw_surf;
