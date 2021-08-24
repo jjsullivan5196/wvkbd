@@ -347,7 +347,7 @@ usage(char *argv0)
 	fprintf(stderr, "  -o         - Print press keys to standard output\n");
 	fprintf(stderr, "  -l         - Comma separated list of layers\n");
 	fprintf(stderr, "  -H [int]   - Height in pixels\n");
-	fprintf(stderr, "  -fn [font] - Set font (Xft, e.g: DejaVu Sans:bold:size=20)\n");
+	fprintf(stderr, "  -fn [font] - Set font (e.g: DejaVu Sans 20)\n");
 }
 
 int
@@ -355,6 +355,7 @@ main(int argc, char **argv) {
 	/* parse command line arguments */
 	int i;
 	char *layer_names_list = NULL;
+	const char *fc_font_pattern = NULL;
 	char *tmp;
 	uint32_t height = KBD_PIXEL_HEIGHT;
 
@@ -365,10 +366,10 @@ main(int argc, char **argv) {
 
 
 	for (i = 1; argv[i]; i++) {
-		if (!strcmp(argv[i], "-v")) {
+		if ((!strcmp(argv[i], "-v")) || (!strcmp(argv[i], "--version"))) {
 			printf("wvkbd-%s", VERSION);
 			exit(0);
-		} else if (!strcmp(argv[i], "-h")) {
+		} else if ((!strcmp(argv[i], "-h")) || (!strcmp(argv[i], "--help"))) {
 			usage(argv[0]);
 			exit(0);
 		} else if (!strcmp(argv[i], "-l")) {
@@ -387,6 +388,8 @@ main(int argc, char **argv) {
 			height = atoi(argv[++i]);
 		} else if (!strcmp(argv[i], "-D")) {
 			debug = true;
+		} else if ((!strcmp(argv[i], "-fn")) || (!strcmp(argv[i], "--fn"))) {
+			fc_font_pattern = estrdup(argv[++i]);
 		} else if (!strcmp(argv[i], "-o")) {
 			keyboard.print = true;
 		} else {
@@ -394,6 +397,10 @@ main(int argc, char **argv) {
 			usage(argv[0]);
 			exit(1);
 		}
+	}
+
+	if (!fc_font_pattern) {
+		fc_font_pattern = default_font;
 	}
 
 	/* connect to compositor */
@@ -450,6 +457,10 @@ main(int argc, char **argv) {
 	drwsurf_flip(&draw_surf);
 
 	while (wl_display_dispatch(display) != -1 && run_display) {
+	}
+
+	if (fc_font_pattern != default_font) {
+		free((void*) fc_font_pattern);
 	}
 
 	return 0;
