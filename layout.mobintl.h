@@ -15,6 +15,7 @@ enum layout_id {
 	Special,
 	Simple,
 	Cyrillic,
+	Arabic,
 	ComposeA,
 	ComposeE,
 	ComposeY,
@@ -63,6 +64,7 @@ static enum layout_id layers[] = {
 	Special,
 	Simple,
 	Cyrillic,
+	Arabic,
 	NumLayouts //signals the last item, may not be omitted
 };
 
@@ -75,6 +77,7 @@ static const char *fc_font_pattern =
 
 
 static struct key keys_full[], keys_special[], keys_simple[], keys_cyrillic[],
+  keys_arabic[],
   keys_compose_a[], keys_compose_e[], keys_compose_y[], keys_compose_u[],
   keys_compose_i[], keys_compose_o[], keys_compose_q[], keys_compose_w[],
   keys_compose_r[], keys_compose_t[], keys_compose_p[], keys_compose_s[],
@@ -93,6 +96,7 @@ static struct layout layouts[NumLayouts] = {
   [Special] = {keys_special, "latin", "special"},
   [Simple] = {keys_simple, "latin", "simple"},
   [Cyrillic] = {keys_cyrillic, "cyrillic", "cyrillic"},
+  [Arabic] = {keys_arabic, "arabic", "arabic"},
   [ComposeA] = {keys_compose_a, "latin"},
   [ComposeE] = {keys_compose_e, "latin"},
   [ComposeY] = {keys_compose_y, "latin"},
@@ -430,6 +434,69 @@ static struct key keys_cyrillic[] = {
   {",", "'", 1.0, Code, KEY_EQUAL},
   {"", "", 4.0, Code, KEY_SPACE},
   {".", "?", 1.0, Code, KEY_SLASH},
+  {"Enter", "Enter", 2.0, Code, KEY_ENTER, .scheme = 1},
+
+  /* end of layout */
+  {"", "", 0.0, Last},
+};
+
+static struct key keys_arabic[] = {
+  {"١", "!", 1.0, Code, KEY_1},
+  {"٢", "@", 1.0, Code, KEY_2},
+  {"٣", "#", 1.0, Code, KEY_3},
+  {"٤", ";", 1.0, Code, KEY_4},
+  {"٥", "%", 1.0, Code, KEY_5},
+  {"٦", ":", 1.0, Code, KEY_6},
+  {"٧", "&", 1.0, Code, KEY_7},
+  {"٨", "*", 1.0, Code, KEY_8},
+  {"٩", "(", 1.0, Code, KEY_9},
+  {"٠", ")", 1.0, Code, KEY_0},
+  {"", "", 0.0, EndRow},
+
+  {"ض", "ـَ", 1.0, Code, KEY_Q},
+  {"ص", "ـً", 1.0, Code, KEY_W},
+  {"ث", "ـُ", 1.0, Code, KEY_E},
+  {"ق", "ـٌ", 1.0, Code, KEY_R},
+  {"ف", "ﻹ", 1.0, Code, KEY_T},
+  {"غ", "إ", 1.0, Code, KEY_Y},
+  {"ع", "`", 1.0, Code, KEY_U},
+  {"ه", "", 1.0, Code, KEY_I},
+  {"ج", ";", 1.0, Code, KEY_O},
+  {"ح", "", 1.0, Code, KEY_P},
+  {"خ", "<", 1.0, Code, KEY_LEFTBRACE},
+  {"", "", 0.0, EndRow},
+
+  {"ش", "ـِ", 0.0, Code, KEY_A},
+  {"س", "ـٍ", 1.0, Code, KEY_S},
+  {"ي", "]", 1.0, Code, KEY_D},
+  {"ب", "[", 1.0, Code, KEY_F},
+  {"ل", "ﻷ", 1.0, Code, KEY_G},
+  {"ا", "أ", 1.0, Code, KEY_H},
+  {"ت", "ـ", 1.0, Code, KEY_J},
+  {"ن", "،", 1.0, Code, KEY_K},
+  {"م", "/", 1.0, Code, KEY_L},
+  {"ك", ":", 1.0, Code, KEY_SEMICOLON},
+  {"ط", "\"", 1.0, Code, KEY_APOSTROPHE},
+  {"", "", 0.0, EndRow},
+
+  {"ذ", "~", 1.0, Code, KEY_Z},
+  {"ء", "ـْ", 1.0, Code, KEY_X},
+  {"ؤ", "}", 1.0, Code, KEY_C},
+  {"ر", "{", 1.0, Code, KEY_V},
+  {"ى", "ﻵ", 1.0, Code, KEY_B},
+  {"ة", "'", 1.0, Code, KEY_N},
+  {"و", ",", 1.0, Code, KEY_M},
+  {"ز", "؟", 1.0, Code, KEY_COMMA},
+  {"ظ", ".", 1.0, Code, KEY_DOT},
+  {"د", ">", 1.0, Code, KEY_RIGHTBRACE},
+  {"⌫", "⌫", 1.0, Code, KEY_BACKSPACE, .scheme = 1},
+
+  {"", "", 0.0, EndRow},
+
+  {"Abc", "Abc", 1.0, NextLayer, .scheme = 1},
+  {"⇧", "⇧", 1.0, Mod, Shift, .scheme = 1},
+  {"Cmp", "Cmp", 1.0, Compose, .scheme = 1},
+  {"", "", 5.0, Code, KEY_SPACE},
   {"Enter", "Enter", 2.0, Code, KEY_ENTER, .scheme = 1},
 
   /* end of layout */
