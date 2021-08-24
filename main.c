@@ -129,6 +129,8 @@ static const struct zwlr_layer_surface_v1_listener layer_surface_listener = {
   .closed = layer_surface_closed,
 };
 
+bool debug = false;
+
 /* configuration, allows nested code to access above variables */
 #ifndef LAYOUT
 #error "make sure to define LAYOUT"
@@ -356,6 +358,8 @@ main(int argc, char **argv) {
 				exit(1);
 			}
 			height = atoi(argv[++i]);
+		} else if (!strcmp(argv[i], "-D")) {
+			debug = true;
 		} else if (!strcmp(argv[i], "-o")) {
 			keyboard.print = true;
 		} else {
@@ -393,7 +397,7 @@ main(int argc, char **argv) {
 	keyboard.vkbd =
 	  zwp_virtual_keyboard_manager_v1_create_virtual_keyboard(vkbd_mgr, seat);
 
-	kbd_init(&keyboard, &layouts, layer_names_list);
+	kbd_init(&keyboard, (struct layout *) &layouts, layer_names_list);
 
 	/* assign kbd state */
 	keyboard.surf = &draw_surf;
