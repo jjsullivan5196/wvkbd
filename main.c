@@ -11,7 +11,6 @@
 #include <wchar.h>
 
 #include "drw.h"
-#include "keymap.h"
 #include "os-compatibility.h"
 
 /* lazy die macro */
