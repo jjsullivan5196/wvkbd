@@ -96,6 +96,7 @@ static void kbd_init_layout(struct layout *l, uint32_t width, uint32_t height);
 static struct key *kbd_get_key(struct kbd *kb, uint32_t x, uint32_t y);
 static void kbd_unpress_key(struct kbd *kb, uint32_t time);
 static void kbd_press_key(struct kbd *kb, struct key *k, uint32_t time);
+static void kbd_print_key_stdout(struct kbd *kb, struct key *k);
 static void kbd_draw_key(struct kbd *kb, struct key *k, bool pressed);
 static void kbd_draw_layout(struct kbd *kb);
 static void kbd_resize(struct kbd *kb, uint32_t w, uint32_t h,
@@ -256,6 +257,8 @@ kbd_press_key(struct kbd *kb, struct key *k, uint32_t time) {
 		kbd_draw_key(kb, k, true);
 		zwp_virtual_keyboard_v1_key(kb->vkbd, time, kb->last_press->code,
 		                            WL_KEYBOARD_KEY_STATE_PRESSED);
+		if (kb->print)
+			kbd_print_key_stdout(kb, k);
 		if (compose) {
 			fprintf(stderr, "pressing composed key\n");
 			compose++;
@@ -304,12 +307,54 @@ kbd_press_key(struct kbd *kb, struct key *k, uint32_t time) {
 		zwp_virtual_keyboard_v1_modifiers(kb->vkbd, kb->mods, 0, 0, 0);
 		zwp_virtual_keyboard_v1_key(kb->vkbd, time, 127, // COMP key
 		                            WL_KEYBOARD_KEY_STATE_PRESSED);
+		if (kb->print)
+			kbd_print_key_stdout(kb, k);
 		break;
 	default:
 		break;
 	}
 
 	kb->surf->dirty = true;
+}
+
+
+void
+kbd_print_key_stdout(struct kbd *kb, struct key *k) {
+	/* printed keys may slightly differ from the actual output
+	 * we generally print what is on the key LABEL and only support the normal
+	 * and shift layers. Other modifiers produce no output (Ctrl,Alt)
+	 * */
+
+	bool handled = true;
+	if (k->type == Code) {
+		switch (k->code) {
+			case KEY_SPACE:
+				printf(" ");
+				break;
+			case KEY_ENTER:
+				printf("\n");
+				break;
+			case KEY_BACKSPACE:
+				printf("\b");
+				break;
+			case KEY_TAB:
+				printf("\t");
+				break;
+			default:
+				handled = false;
+				break;
+		}
+	} else if (k->type != Copy) {
+		return;
+	}
+
+	if (!handled) {
+		if ((kb->mods & Shift) || (kb->mods & CapsLock))
+			printf("%s", k->shift_label);
+		else if (!(kb->mods & Ctrl) && !(kb->mods & Alt) && (!kb->mods & Super))
+			printf("%s", k->label);
+	}
+	fflush(stdout);
 }
 
 void
