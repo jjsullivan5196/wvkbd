@@ -1,6 +1,6 @@
 /* constants */
 
-/* how tall the keyboard should be */
+/* how tall the keyboard should be by default (can be overriden) */
 #define KBD_PIXEL_HEIGHT 240
 
 /* if your layout leaves an empty margin, increase this to fix it */
@@ -138,7 +138,7 @@ static struct layout layouts[NumLayouts] = {
 /* keyboard settings */
 static struct kbd keyboard = {
   /* default layout */
-  .layers = &layers,
+  .layers = (enum layout_id *) &layers,
   .layer_index = 0,
   .scheme =
     {
