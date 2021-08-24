@@ -10,7 +10,7 @@
 #define KBD_KEY_BORDER 2
 
 /* layout declarations */
-enum layout_ids {
+enum layout_id {
 	Full = 0,
 	Special,
 	Simple,
@@ -58,7 +58,7 @@ enum layout_ids {
 };
 
 /* layers is an ordered list of layouts, used to cycle through */
-enum layout_ids layers[] = {
+static enum layout_id layers[] = {
 	Full, //First layout is the default layout on startup
 	Special,
 	Simple,
@@ -138,7 +138,6 @@ static struct layout layouts[NumLayouts] = {
 /* keyboard settings */
 static struct kbd keyboard = {
   /* default layout */
-  .layouts = &layouts,
   .layers = &layers,
   .layer_index = 0,
   .scheme =
@@ -256,7 +255,7 @@ static struct key keys_full[] = {
   {",", "'", 1.0, Code, KEY_COMMA},
   {"", "", 4.0, Code, KEY_SPACE},
   {".", "?", 1.0, Code, KEY_DOT},
-  {"Entr", "Entr", 2.0, Code, KEY_ENTER, .scheme = 1},
+  {"Enter", "Enter", 2.0, Code, KEY_ENTER, .scheme = 1},
 
   /* end of layout */
   {"", "", 0.0, Last},
@@ -316,7 +315,7 @@ static struct key keys_special[] = {
   {",", "'", 1.0, Code, KEY_COMMA},
   {"", "", 4.0, Code, KEY_SPACE},
   {".", "?", 1.0, Code, KEY_DOT},
-  {"Entr", "Entr", 2.0, Code, KEY_ENTER, .scheme = 1},
+  {"Enter", "Enter", 2.0, Code, KEY_ENTER, .scheme = 1},
 
   /* end of layout */
   {"", "", 0.0, Last},
@@ -431,7 +430,7 @@ static struct key keys_cyrillic[] = {
   {",", "'", 1.0, Code, KEY_EQUAL},
   {"", "", 4.0, Code, KEY_SPACE},
   {".", "?", 1.0, Code, KEY_SLASH},
-  {"Entr", "Entr", 2.0, Code, KEY_ENTER, .scheme = 1},
+  {"Enter", "Enter", 2.0, Code, KEY_ENTER, .scheme = 1},
 
   /* end of layout */
   {"", "", 0.0, Last},
