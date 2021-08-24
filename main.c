@@ -135,6 +135,19 @@ static const struct zwlr_layer_surface_v1_listener layer_surface_listener = {
 #endif
 #include LAYOUT
 
+char *
+estrdup(const char *s)
+{
+	char *p;
+
+	if (!(p = strdup(s))) {
+		fprintf(stderr, "strdup:");
+		exit(6);
+	}
+
+	return p;
+}
+
 void
 wl_touch_down(void *data, struct wl_touch *wl_touch, uint32_t serial,
               uint32_t time, struct wl_surface *surface, int32_t id,
@@ -296,8 +309,62 @@ create_and_upload_keymap(const char *name, uint32_t comp_unichr,
 	free((void *)keymap_str);
 }
 
+void
+usage(char *argv0)
+{
+	fprintf(stderr, "usage: %s [-hov] [-H height] [-fn font] [-l layers] [-s initial_layer]\n", argv0);
+	fprintf(stderr, "Options:\n");
+	fprintf(stderr, "  -D         - Enable debug\n");
+	fprintf(stderr, "  -o         - Print press keys to standard output\n");
+	fprintf(stderr, "  -l         - Comma separated list of layers\n");
+	fprintf(stderr, "  -H [int]   - Height in pixels\n");
+	fprintf(stderr, "  -fn [font] - Set font (Xft, e.g: DejaVu Sans:bold:size=20)\n");
+}
+
 int
 main(int argc, char **argv) {
+	/* parse command line arguments */
+	int i;
+	char *layer_names_list = NULL;
+	char *tmp;
+	uint32_t height = KBD_PIXEL_HEIGHT;
+
+	if ((tmp = getenv("WVKBD_LAYERS")))
+		layer_names_list = estrdup(tmp);
+	if ((tmp = getenv("WVKBD_HEIGHT")))
+		height = atoi(tmp);
+
+
+	for (i = 1; argv[i]; i++) {
+		if (!strcmp(argv[i], "-v")) {
+			printf("wvkbd-%s", VERSION);
+			exit(0);
+		} else if (!strcmp(argv[i], "-h")) {
+			usage(argv[0]);
+			exit(0);
+		} else if (!strcmp(argv[i], "-l")) {
+			if (i >= argc - 1) {
+				usage(argv[0]);
+				exit(1);
+			}
+			if (layer_names_list)
+				free(layer_names_list);
+			layer_names_list = estrdup(argv[++i]);
+		} else if (!strcmp(argv[i], "-H")) {
+			if (i >= argc - 1) {
+				usage(argv[0]);
+				exit(1);
+			}
+			height = atoi(argv[++i]);
+		} else if (!strcmp(argv[i], "-o")) {
+			keyboard.print = true;
+		} else {
+			fprintf(stderr, "Invalid argument: %s\n", argv[i]);
+			usage(argv[0]);
+			exit(1);
+		}
+	}
+
 	/* connect to compositor */
 	display = wl_display_connect(NULL);
 	if (display == NULL) {
@@ -326,8 +393,7 @@ main(int argc, char **argv) {
 	keyboard.vkbd =
 	  zwp_virtual_keyboard_manager_v1_create_virtual_keyboard(vkbd_mgr, seat);
 
-	/* upload keymap */
-	create_and_upload_keymap(layouts[DefaultLayout].keymap_name, 0, 0);
+	kbd_init(&keyboard);
 
 	/* assign kbd state */
 	keyboard.surf = &draw_surf;
@@ -340,9 +406,9 @@ main(int argc, char **argv) {
 	layer_surface = zwlr_layer_shell_v1_get_layer_surface(
 	  layer_shell, draw_surf.surf, wl_output, layer, namespace);
 
-	zwlr_layer_surface_v1_set_size(layer_surface, 0, KBD_PIXEL_HEIGHT);
+	zwlr_layer_surface_v1_set_size(layer_surface, 0, height);
 	zwlr_layer_surface_v1_set_anchor(layer_surface, anchor);
-	zwlr_layer_surface_v1_set_exclusive_zone(layer_surface, KBD_PIXEL_HEIGHT);
+	zwlr_layer_surface_v1_set_exclusive_zone(layer_surface, height);
 	zwlr_layer_surface_v1_set_keyboard_interactivity(layer_surface, false);
 	zwlr_layer_surface_v1_add_listener(layer_surface, &layer_surface_listener,
 	                                   NULL);

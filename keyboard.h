@@ -6,14 +6,17 @@ struct layout;
 struct kbd;
 
 enum key_type {
-	Pad = 0,
-	Code,
-	Mod,
-	Layout,
-	EndRow,
-	Last,
-	Compose,
-	Copy,
+	Pad = 0,    //Padding, not a pressable key
+	Code,       //A normal key emitting a keycode
+	Mod,        //A modifier key
+	Copy,       //Copy key, copies the unicode value specified in code (creates and activates temporary keymap)
+	            // used for keys that are not part of the keymap
+	Layout,     //Layout switch to a specific layout
+	BackLayer,  //Layout switch to the layout that was previously active
+	NextLayer,  //Layout switch to the next layout in the layers sequence
+	Compose,    //Compose modifier key, switches to a specific associated layout upon next keypress
+	EndRow,     //Incidates the end of a key row
+	Last,       //Indicated the end of a layout
 };
 
 /* Modifiers passed to the virtual_keyboard protocol. They are based on
@@ -61,18 +64,24 @@ struct key {
 struct layout {
 	struct key *keys;
 	const char *keymap_name;
+	const char *name;
 	uint32_t keyheight; // absolute height (pixels)
 };
 
 struct kbd {
 	struct layout *layout;
-	struct layout *prevlayout;
 	struct clr_scheme scheme;
 	struct clr_scheme scheme1;
 
+	bool print;
 	uint32_t w, h;
 	uint8_t mods;
 	struct key *last_press;
+	struct layout *prevlayout;
+	size_t layer_index;
+
+	enum layout_ids *layers;
+	struct layout **layouts;
 
 	struct drwsurf *surf;
 	struct zwp_virtual_keyboard_v1 *vkbd;
@@ -82,6 +91,7 @@ static inline void draw_inset(struct drwsurf *d, uint32_t x, uint32_t y,
                               uint32_t width, uint32_t height, uint32_t border,
                               uint32_t color);
 
+static void kbd_init(struct kbd *kb);
 static void kbd_init_layout(struct layout *l, uint32_t width, uint32_t height);
 static struct key *kbd_get_key(struct kbd *kb, uint32_t x, uint32_t y);
 static void kbd_unpress_key(struct kbd *kb, uint32_t time);
@@ -92,6 +102,20 @@ static void kbd_resize(struct kbd *kb, uint32_t w, uint32_t h,
                        struct layout *layouts, uint8_t layoutcount);
 static uint8_t kbd_get_rows(struct layout *l);
 static double kbd_get_row_length(struct key *k);
+static void kbd_switch_layout(struct kbd *kb, struct layout *l);
+
+void
+kbd_switch_layout(struct kbd *kb, struct layout *l) {
+	const struct layout * prevlayout = kb->prevlayout;
+	kb->prevlayout = kb->layout;
+	kb->layout = l;
+	if ((!prevlayout) ||
+		(strcmp(prevlayout->keymap_name, kb->layout->keymap_name) != 0)) {
+		fprintf(stderr, "Switching to keymap %s\n", kb->layout->keymap_name);
+		create_and_upload_keymap(kb->layout->keymap_name, 0, 0);
+	}
+	kbd_draw_layout(kb);
+}
 
 uint8_t
 kbd_get_rows(struct layout *l) {
@@ -104,6 +128,14 @@ kbd_get_rows(struct layout *l) {
 		k++;
 	}
 	return rows + 1;
+}
+
+
+void kbd_init(struct kbd *kb) {
+	kb->layout = kb->layouts[kb->layer_index];
+
+	/* upload keymap */
+	create_and_upload_keymap(kb->layout->keymap_name, 0, 0);
 }
 
 void
@@ -237,7 +269,12 @@ kbd_press_key(struct kbd *kb, struct key *k, uint32_t time) {
 		kbd_draw_key(kb, k, kb->mods & k->code);
 		zwp_virtual_keyboard_v1_modifiers(kb->vkbd, kb->mods, 0, 0, 0);
 		break;
+	case Layout:
+		//switch to the layout determined by the key
+		kbd_switch_layout(kb, k->layout);
+		break;
 	case Compose:
+		//switch to the associated layout determined by the *next* keypress
 		if (compose == 0) {
 			compose = 1;
 		} else {
@@ -245,16 +282,21 @@ kbd_press_key(struct kbd *kb, struct key *k, uint32_t time) {
 		}
 		kbd_draw_key(kb, k, (bool)compose);
 		break;
-	case Layout:
-		kb->layout = k->layout;
-		if ((!kb->prevlayout) ||
-		    (strcmp(kb->prevlayout->keymap_name, kb->layout->keymap_name) != 0)) {
-			fprintf(stderr, "Switching to keymap %s\n", kb->layout->keymap_name);
-			create_and_upload_keymap(kb->layout->keymap_name, 0, 0);
+	case NextLayer:
+		//switch to the next layout in the layer sequence
+		kb->layer_index++;
+		if (kb->layers[kb->layer_index] == NumLayouts) {
+			kb->layer_index = 0;
 		}
-		kb->prevlayout = kb->layout;
-		kbd_draw_layout(kb);
+		kbd_switch_layout(kb, kb->layouts[kb->layer_index]);
+		break;
+	case BackLayer:
+		//switch to the previously active layout
+		if (kb->prevlayout)
+			kbd_switch_layout(kb, kb->prevlayout);
+		break;
 	case Copy:
+		//copy code as unicode chr by setting a temporary keymap
 		kb->last_press = k;
 		kbd_draw_key(kb, k, true);
 		fprintf(stderr, "pressing copy key\n");
@@ -317,7 +359,6 @@ kbd_resize(struct kbd *kb, uint32_t w, uint32_t h, struct layout *layouts,
 
 	drwsurf_resize(d, w, h);
 	for (int i = 0; i < layoutcount; i++) {
-		fprintf(stderr, "i=%d\n", i);
 		kbd_init_layout(&layouts[i], w, h);
 	}
 	kbd_draw_layout(kb);
