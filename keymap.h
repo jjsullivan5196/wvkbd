@@ -1,7 +1,8 @@
-static const char * get_keymap(const char * name, uint32_t comp_unichr, uint32_t comp_shift_unichr) {
-    char * keymap = malloc(65000);
-	if (strcmp(name,"latin") == 0) {
-			sprintf(keymap, "xkb_keymap {\
+static const char *
+get_keymap(const char *name, uint32_t comp_unichr, uint32_t comp_shift_unichr) {
+	char *keymap = malloc(65000);
+	if (strcmp(name, "latin") == 0) {
+		sprintf(keymap, "xkb_keymap {\
 xkb_keycodes \"(unnamed)\" {\
         minimum = 8;\
         maximum = 255;\
@@ -1463,10 +1464,11 @@ xkb_symbols \"(unnamed)\" {\
 };\
 \
 };\
-", comp_unichr, comp_shift_unichr);
+",
+		        comp_unichr, comp_shift_unichr);
 		return keymap;
-	} else if (strcmp("name","cyrillic")) {
-			sprintf(keymap, "xkb_keymap {\
+	} else if (strcmp("name", "cyrillic")) {
+		sprintf(keymap, "xkb_keymap {\
 xkb_keycodes \"(unnamed)\" {\
         minimum = 8;\
         maximum = 255;\
@@ -2927,10 +2929,11 @@ xkb_symbols \"(unnamed)\" {\
 };\
 \
 };\
-", comp_unichr, comp_shift_unichr);
+",
+		        comp_unichr, comp_shift_unichr);
 		return keymap;
 	} else {
-		fprintf(stderr,"No such keymap: %s", name);
+		fprintf(stderr, "No such keymap: %s", name);
 		exit(2);
 	}
 }
