@@ -3,16 +3,15 @@ include config.mk
 NAME=wvkbd
 BIN=${NAME}-${LAYOUT}
 SRC=.
-WLDSRC=wld
 
-PKGS = fontconfig wayland-client xkbcommon pixman-1
+PKGS = wayland-client xkbcommon pangocairo
 
 WVKBD_SOURCES += $(wildcard $(SRC)/*.c)
 WVKBD_HEADERS += $(wildcard $(SRC)/*.h)
 
 CFLAGS += -std=gnu99 -Wall -g -DWITH_WAYLAND_SHM -DLAYOUT=\"layout.${LAYOUT}.h\"
 CFLAGS += $(shell pkg-config --cflags $(PKGS))
-LDFLAGS =wld/libwld.a $(shell pkg-config --libs $(PKGS)) -lm -lutil
+LDFLAGS =$(shell pkg-config --libs $(PKGS)) -lm -lutil -lrt
 
 WAYLAND_HEADERS = $(wildcard proto/*.xml)
 
@@ -22,7 +21,7 @@ SOURCES = $(WVKBD_SOURCES) $(WAYLAND_SRC)
 
 OBJECTS = $(SOURCES:.c=.o)
 
-all: wld ${BIN}
+all: ${BIN}
 
 proto/%-client-protocol.c: proto/%.xml
 	wayland-scanner code < $? > $@
@@ -35,14 +34,8 @@ $(OBJECTS): $(HDRS) $(WVKBD_HEADERS)
 wvkbd-${LAYOUT}: $(OBJECTS) layout.${LAYOUT}.h
 	$(CC) -o wvkbd-${LAYOUT} $(OBJECTS) $(LDFLAGS)
 
-wld: wld/libwld.a
-
-wld/libwld.a:
-	$(MAKE) -C wld ENABLE_DRM=0
-
 clean:
 	rm -f $(OBJECTS) $(HDRS) $(WAYLAND_SRC) ${BIN}
-	$(MAKE) -C wld clean
 
 format:
 	clang-format -i $(WVKBD_SOURCES) $(WVKBD_HEADERS)
