@@ -1173,18 +1173,18 @@ xkb_symbols \"(unnamed)\" {\
         name[group1]=\"wvkbd\";\
 \
         key <ESC>                {	[          Escape ] };\
-        key <AE01>               {	[               1,          exclam ] };\
-        key <AE02>               {	[               2,              at ] };\
-        key <AE03>               {	[               3,      numbersign ] };\
-        key <AE04>               {	[               4,          dollar ] };\
-        key <AE05>               {	[               5,         percent ] };\
-        key <AE06>               {	[               6,     asciicircum ] };\
-        key <AE07>               {	[               7,       ampersand ] };\
-        key <AE08>               {	[               8,        asterisk ] };\
-        key <AE09>               {	[               9,       parenleft ] };\
-        key <AE10>               {	[               0,      parenright ] };\
-        key <AE11>               {	[           minus,      underscore ] };\
-        key <AE12>               {	[           equal,            plus ] };\
+        key <AE01>               {	[               1,          exclam, F1 ] };\
+        key <AE02>               {	[               2,              at, F2 ] };\
+        key <AE03>               {	[               3,      numbersign, F3 ] };\
+        key <AE04>               {	[               4,          dollar, F4 ] };\
+        key <AE05>               {	[               5,         percent, F5 ] };\
+        key <AE06>               {	[               6,     asciicircum, F6 ] };\
+        key <AE07>               {	[               7,       ampersand, F7 ] };\
+        key <AE08>               {	[               8,        asterisk, F8 ] };\
+        key <AE09>               {	[               9,       parenleft, F9 ] };\
+        key <AE10>               {	[               0,      parenright, F10 ] };\
+        key <AE11>               {	[           minus,      underscore, EuroSign ] };\
+        key <AE12>               {	[           equal,            plus, sterling ] };\
         key <BKSP>               {	[       BackSpace,       BackSpace ] };\
         key <TAB>                {	[             Tab,    ISO_Left_Tab ] };\
         key <AD01>               {	[               q,               Q, 1 ] };\
