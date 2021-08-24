@@ -91,7 +91,7 @@ struct kbd {
 
 static inline void draw_inset(struct drwsurf *d, uint32_t x, uint32_t y,
                               uint32_t width, uint32_t height, uint32_t border,
-                              uint32_t color);
+                              Color color);
 
 static void kbd_init(struct kbd *kb, struct layout * layouts, char * layer_names_list);
 static void kbd_init_layout(struct layout *l, uint32_t width, uint32_t height);
@@ -406,10 +406,8 @@ kbd_draw_key(struct kbd *kb, struct key *k, bool pressed) {
 	        label);
 	struct clr_scheme *scheme = (k->scheme == 0) ? &(kb->scheme) : &(kb->scheme1);
 	Color *fill = pressed ? &scheme->high : &scheme->fg;
-	draw_inset(d, k->x, k->y, k->w, k->h, KBD_KEY_BORDER, fill->color);
-	uint32_t xoffset = k->w / (strlen(label) + 2);
-	wld_draw_text(d->render, d->ctx->font, scheme->text.color, k->x + xoffset,
-	              k->y + (k->h / 2), label, -1, NULL);
+	draw_inset(d, k->x, k->y, k->w, k->h, KBD_KEY_BORDER, *fill);
+	drw_draw_text(d, scheme->text, k->x, k->y, k->w, k->h, label);
 }
 
 void
@@ -419,7 +417,7 @@ kbd_draw_layout(struct kbd *kb) {
 	bool pressed = false;
 	if (debug) fprintf(stderr, "Draw layout");
 
-	wld_fill_rectangle(d->render, kb->scheme.bg.color, 0, 0, kb->w, kb->h);
+	drw_fill_rectangle(d, kb->scheme.bg, 0, 0, kb->w, kb->h);
 
 	while (next_key->type != Last) {
 		if ((next_key->type == Pad) || (next_key->type == EndRow)) {
@@ -452,7 +450,7 @@ kbd_resize(struct kbd *kb, uint32_t w, uint32_t h, struct layout *layouts,
 
 void
 draw_inset(struct drwsurf *d, uint32_t x, uint32_t y, uint32_t width,
-           uint32_t height, uint32_t border, uint32_t color) {
-	wld_fill_rectangle(d->render, color, x + border, y + border, width - border,
+           uint32_t height, uint32_t border, Color color) {
+	drw_fill_rectangle(d, color, x + border, y + border, width - border,
 	                   height - border);
 }

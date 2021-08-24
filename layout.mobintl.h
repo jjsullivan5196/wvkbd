@@ -71,10 +71,7 @@ static enum layout_id layers[] = {
 #include "keymap.mobintl.h"
 #include "keyboard.h"
 
-/* font (see `man fonts-conf` for instructions) */
-static const char *fc_font_pattern =
-  "Monospace:size=16:antialias=true:hinting=true";
-
+static const char *fc_font_pattern = "Monospace  16";
 
 static struct key keys_full[], keys_special[], keys_simple[], keys_cyrillic[],
   keys_arabic[],

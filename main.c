@@ -1,7 +1,5 @@
 #include "proto/virtual-keyboard-unstable-v1-client-protocol.h"
 #include "proto/wlr-layer-shell-unstable-v1-client-protocol.h"
-#include "wld/wayland.h"
-#include "wld/wld.h"
 #include <linux/input-event-codes.h>
 #include <stdio.h>
 #include <stdlib.h>
