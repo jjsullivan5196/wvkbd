@@ -8,10 +8,9 @@ struct drw;
 struct drwsurf;
 struct kbd;
 
-void drw_init(struct drw *d, const char *fc_pattern, struct wl_display *dpy,
-	void *iface);
+void drw_init(struct drw *d, const char *fc_pattern, void *iface);
 void drwsurf_init(struct drw *d, struct drwsurf *ds, struct wl_surface *surf);
-void drwsurf_resize(struct drwsurf *ds, uint32_t w, uint32_t h);
+void drwsurf_resize(struct drwsurf *ds, uint32_t w, uint32_t h, uint32_t s);
 void drwsurf_flip(struct drwsurf *ds);
 
 typedef union {
@@ -38,7 +37,7 @@ struct drw {
 };
 
 struct drwsurf {
-	uint32_t w, h, s;
+	uint32_t width, height, scale, size;
 	bool dirty;
 
 	struct drw *ctx;

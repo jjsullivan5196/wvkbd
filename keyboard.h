@@ -76,7 +76,7 @@ struct kbd {
 	struct clr_scheme scheme1;
 
 	bool print;
-	uint32_t w, h;
+	uint32_t w, h, s;
 	uint8_t mods;
 	struct key *last_press;
 	struct layout *prevlayout;
@@ -101,8 +101,7 @@ static void kbd_press_key(struct kbd *kb, struct key *k, uint32_t time);
 static void kbd_print_key_stdout(struct kbd *kb, struct key *k);
 static void kbd_draw_key(struct kbd *kb, struct key *k, bool pressed);
 static void kbd_draw_layout(struct kbd *kb);
-static void kbd_resize(struct kbd *kb, uint32_t w, uint32_t h,
-                       struct layout *layouts, uint8_t layoutcount);
+static void kbd_resize(struct kbd *kb, struct layout *layouts, uint8_t layoutcount);
 static uint8_t kbd_get_rows(struct layout *l);
 static double kbd_get_row_length(struct key *k);
 static void kbd_switch_layout(struct kbd *kb, struct layout *l);
@@ -431,18 +430,14 @@ kbd_draw_layout(struct kbd *kb) {
 }
 
 void
-kbd_resize(struct kbd *kb, uint32_t w, uint32_t h, struct layout *layouts,
-           uint8_t layoutcount) {
+kbd_resize(struct kbd *kb, struct layout *layouts, uint8_t layoutcount) {
 	struct drwsurf *d = kb->surf;
 
-	kb->w = w;
-	kb->h = h;
+	fprintf(stderr, "Resize %dx%d %d, %d layouts\n", kb->w, kb->h, kb->s, layoutcount);
 
-	fprintf(stderr, "Resize %dx%d, %d layouts\n", w, h, layoutcount);
-
-	drwsurf_resize(d, w, h);
+	drwsurf_resize(d, kb->w, kb->h, kb->s);
 	for (int i = 0; i < layoutcount; i++) {
-		kbd_init_layout(&layouts[i], w, h);
+		kbd_init_layout(&layouts[i], kb->w, kb->h);
 	}
 	kbd_draw_layout(kb);
 	d->dirty = true;

@@ -29,7 +29,6 @@ static struct wl_surface *wl_surface;
 static struct zwlr_layer_shell_v1 *layer_shell;
 static struct zwlr_layer_surface_v1 *layer_surface;
 static struct zwp_virtual_keyboard_manager_v1 *vkbd_mgr;
-static uint32_t output = UINT32_MAX;
 
 /* drawing */
 static struct drw draw_ctx;
@@ -244,20 +243,47 @@ seat_handle_capabilities(void *data, struct wl_seat *wl_seat,
 void
 seat_handle_name(void *data, struct wl_seat *wl_seat, const char *name) {}
 
+static void
+display_handle_geometry(void *data, struct wl_output *wl_output, int x, int y, int physical_width, int physical_height, int subpixel, const char *make, const char *model, int transform)
+{
+}
+
+static void
+display_handle_done(void *data, struct wl_output *wl_output)
+{
+}
+
+static void
+display_handle_scale(void *data, struct wl_output *wl_output, int32_t scale)
+{
+	keyboard.s = scale;
+
+}
+
+static void
+display_handle_mode(void *data, struct wl_output *wl_output, uint32_t flags, int width, int height, int refresh)
+{
+}
+
+static const struct wl_output_listener output_listener = {
+	.geometry = display_handle_geometry,
+	.mode = display_handle_mode,
+	.done = display_handle_done,
+	.scale = display_handle_scale
+};
+
 void
 handle_global(void *data, struct wl_registry *registry, uint32_t name,
               const char *interface, uint32_t version) {
 	if (strcmp(interface, wl_compositor_interface.name) == 0) {
-		compositor = wl_registry_bind(registry, name, &wl_compositor_interface, 1);
+		compositor = wl_registry_bind(registry, name, &wl_compositor_interface, 3);
 	} else if (strcmp(interface, wl_shm_interface.name) == 0) {
 		shm = wl_registry_bind(registry, name, &wl_shm_interface, 1);
 	} else if (strcmp(interface, "wl_output") == 0) {
-		if (output != UINT32_MAX) {
-			if (!wl_output) {
-				wl_output = wl_registry_bind(registry, name, &wl_output_interface, 1);
-			} else {
-				output--;
-			}
+		if (!wl_output) {
+			wl_output = wl_registry_bind(registry, name, &wl_output_interface, 2);
+			keyboard.s = 1;
+			wl_output_add_listener(wl_output, &output_listener, NULL);
 		}
 	} else if (strcmp(interface, wl_seat_interface.name) == 0) {
 		seat = wl_registry_bind(registry, name, &wl_seat_interface, 1);
@@ -278,7 +304,10 @@ handle_global_remove(void *data, struct wl_registry *registry, uint32_t name) {}
 void
 layer_surface_configure(void *data, struct zwlr_layer_surface_v1 *surface,
                         uint32_t serial, uint32_t w, uint32_t h) {
-	kbd_resize(&keyboard, w + KBD_PIXEL_OVERSCAN_WIDTH, h, layouts, NumLayouts);
+	keyboard.w = w + KBD_PIXEL_OVERSCAN_WIDTH;
+	keyboard.h = h;
+	kbd_resize(&keyboard, layouts, NumLayouts);
+
 	zwlr_layer_surface_v1_ack_configure(surface, serial);
 }
 
@@ -402,7 +431,7 @@ main(int argc, char **argv) {
 
 	/* create surface */
 	wl_surface = wl_compositor_create_surface(compositor);
-	drw_init(&draw_ctx, fc_font_pattern, display, shm);
+	drw_init(&draw_ctx, fc_font_pattern, shm);
 	drwsurf_init(&draw_ctx, &draw_surf, wl_surface);
 
 	layer_surface = zwlr_layer_shell_v1_get_layer_surface(
