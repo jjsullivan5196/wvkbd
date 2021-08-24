@@ -174,9 +174,9 @@ kbd_unpress_key(struct kbd *kb, uint32_t time) {
 				create_and_upload_keymap(kb->layout->keymap_name, 0, 0);
 			}
 			kb->layout = kb->prevlayout;
-            if (kb->mods & Shift == Shift) kb->mods ^= Shift;
+            if ((kb->mods & Shift) == Shift) kb->mods ^= Shift;
             kbd_draw_layout(kb);
-		} else if (kb->mods & Shift == Shift) {
+		} else if ((kb->mods & Shift) == Shift) {
             kb->mods ^= Shift;
 			kbd_draw_layout(kb);
         }
