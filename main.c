@@ -292,6 +292,7 @@ create_and_upload_keymap(const char * name, uint32_t comp_unichr, uint32_t comp_
 	strcpy(ptr, keymap_str);
 	zwp_virtual_keyboard_v1_keymap(
 	  keyboard.vkbd, WL_KEYBOARD_KEYMAP_FORMAT_XKB_V1, keymap_fd, keymap_size);
+    free((void*) keymap_str);
 }
 
 int
