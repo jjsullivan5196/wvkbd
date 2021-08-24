@@ -37,28 +37,31 @@ struct clr_scheme {
 };
 
 struct key {
-	const char *label;              //primary label
-	const char *shift_label;        //secondary label
-	const double width;             //relative width (1.0)
+	const char *label;       // primary label
+	const char *shift_label; // secondary label
+	const double width;      // relative width (1.0)
 	const enum key_type type;
 
-	const uint32_t code;  /* code: key scancode or modifier name (see
-						   *   `/usr/include/linux/input-event-codes.h` for scancode names, and
-						   *   `keyboard.h` for modifiers)
-						   *   XKB keycodes are +8 */
-	struct layout *layout; //pointer back to the parent layout that holds this key
+	const uint32_t
+	  code;                /* code: key scancode or modifier name (see
+	                        *   `/usr/include/linux/input-event-codes.h` for scancode names, and
+	                        *   `keyboard.h` for modifiers)
+	                        *   XKB keycodes are +8 */
+	struct layout *layout; // pointer back to the parent layout that holds this
+	                       // key
 	const uint32_t code_mod; /* modifier to force when this key is pressed */
-	uint8_t scheme; //index of the scheme to use
-	bool reset_mod; /* reset modifiers when clicked */
+	uint8_t scheme;          // index of the scheme to use
+	bool reset_mod;          /* reset modifiers when clicked */
 
-	//actual coordinates on the surface (pixels), will be computed automatically for all keys
+	// actual coordinates on the surface (pixels), will be computed automatically
+	// for all keys
 	uint32_t x, y, w, h;
 };
 
 struct layout {
 	struct key *keys;
-	const char * keymap_name;
-	uint32_t keyheight; //absolute height (pixels)
+	const char *keymap_name;
+	uint32_t keyheight; // absolute height (pixels)
 };
 
 struct kbd {
@@ -85,11 +88,13 @@ static void kbd_unpress_key(struct kbd *kb, uint32_t time);
 static void kbd_press_key(struct kbd *kb, struct key *k, uint32_t time);
 static void kbd_draw_key(struct kbd *kb, struct key *k, bool pressed);
 static void kbd_draw_layout(struct kbd *kb);
-static void kbd_resize(struct kbd *kb, uint32_t w, uint32_t h, struct layout * layouts, uint8_t layoutcount);
+static void kbd_resize(struct kbd *kb, uint32_t w, uint32_t h,
+                       struct layout *layouts, uint8_t layoutcount);
 static uint8_t kbd_get_rows(struct layout *l);
 static double kbd_get_row_length(struct key *k);
 
-uint8_t kbd_get_rows(struct layout *l) {
+uint8_t
+kbd_get_rows(struct layout *l) {
 	uint8_t rows = 0;
 	struct key *k = l->keys;
 	while (k->type != Last) {
@@ -115,12 +120,13 @@ kbd_init_layout(struct layout *l, uint32_t width, uint32_t height) {
 		if (k->type == EndRow) {
 			y += l->keyheight;
 			x = 0;
-			rowlength = kbd_get_row_length(k+1);
+			rowlength = kbd_get_row_length(k + 1);
 		} else if (k->width > 0) {
 			k->x = x;
 			k->y = y;
-			fprintf(stderr, "(%d/%f)*%f -> %s\n",width,rowlength,k->width, k->label);
-			k->w = ((double) width / rowlength) * k->width;
+			fprintf(stderr, "(%d/%f)*%f -> %s\n", width, rowlength, k->width,
+			        k->label);
+			k->w = ((double)width / rowlength) * k->width;
 			x += k->w;
 		}
 		k->h = l->keyheight;
@@ -142,9 +148,10 @@ struct key *
 kbd_get_key(struct kbd *kb, uint32_t x, uint32_t y) {
 	struct layout *l = kb->layout;
 	struct key *k = l->keys;
-	fprintf(stderr,"get key: +%d+%d\n",x,y);
+	fprintf(stderr, "get key: +%d+%d\n", x, y);
 	while (k->type != Last) {
-		if ((k->type != EndRow) && (k->type != Pad) && (k->type != Pad) && (x >= k->x) && (y >= k->y) && (x < k->x + k->w) && (y < k->y + k->h)) {
+		if ((k->type != EndRow) && (k->type != Pad) && (k->type != Pad) &&
+		    (x >= k->x) && (y >= k->y) && (x < k->x + k->w) && (y < k->y + k->h)) {
 			return k;
 		}
 		k++;
@@ -159,22 +166,23 @@ kbd_unpress_key(struct kbd *kb, uint32_t time) {
 		kb->surf->dirty = true;
 
 		if (kb->last_press->type == Copy) {
-			zwp_virtual_keyboard_v1_key(kb->vkbd, time, 127, //COMP key
-										WL_KEYBOARD_KEY_STATE_RELEASED);
+			zwp_virtual_keyboard_v1_key(kb->vkbd, time, 127, // COMP key
+			                            WL_KEYBOARD_KEY_STATE_RELEASED);
 		} else {
 			zwp_virtual_keyboard_v1_key(kb->vkbd, time, kb->last_press->code,
-										WL_KEYBOARD_KEY_STATE_RELEASED);
+			                            WL_KEYBOARD_KEY_STATE_RELEASED);
 		}
 		kb->last_press = NULL;
 
-
 		if (compose >= 2) {
 			compose = 0;
-			if ((!kb->prevlayout) || (strcmp(kb->prevlayout->keymap_name, kb->layout->keymap_name) != 0)) {
+			if ((!kb->prevlayout) ||
+			    (strcmp(kb->prevlayout->keymap_name, kb->layout->keymap_name) != 0)) {
 				create_and_upload_keymap(kb->layout->keymap_name, 0, 0);
 			}
 			kb->layout = kb->prevlayout;
-			if ((kb->mods & Shift) == Shift) kb->mods ^= Shift;
+			if ((kb->mods & Shift) == Shift)
+				kb->mods ^= Shift;
 			kbd_draw_layout(kb);
 		} else if ((kb->mods & Shift) == Shift) {
 			kb->mods ^= Shift;
@@ -185,10 +193,12 @@ kbd_unpress_key(struct kbd *kb, uint32_t time) {
 
 void
 kbd_press_key(struct kbd *kb, struct key *k, uint32_t time) {
-	if ((compose == 1) && (k->type != Compose) && (k->type != Mod) && (k->layout)) {
+	if ((compose == 1) && (k->type != Compose) && (k->type != Mod) &&
+	    (k->layout)) {
 		compose++;
-		fprintf(stderr,"showing compose %d\n", compose);
-		if ((!kb->prevlayout) || (strcmp(kb->prevlayout->keymap_name, kb->layout->keymap_name) != 0)) {
+		fprintf(stderr, "showing compose %d\n", compose);
+		if ((!kb->prevlayout) ||
+		    (strcmp(kb->prevlayout->keymap_name, kb->layout->keymap_name) != 0)) {
 			create_and_upload_keymap(kb->layout->keymap_name, 0, 0);
 		}
 		kb->prevlayout = kb->layout;
@@ -204,7 +214,8 @@ kbd_press_key(struct kbd *kb, struct key *k, uint32_t time) {
 			if (k->reset_mod) {
 				zwp_virtual_keyboard_v1_modifiers(kb->vkbd, k->code_mod, 0, 0, 0);
 			} else {
-				zwp_virtual_keyboard_v1_modifiers(kb->vkbd, kb->mods ^ k->code_mod, 0, 0, 0);
+				zwp_virtual_keyboard_v1_modifiers(kb->vkbd, kb->mods ^ k->code_mod, 0,
+				                                  0, 0);
 			}
 		} else {
 			zwp_virtual_keyboard_v1_modifiers(kb->vkbd, kb->mods, 0, 0, 0);
@@ -212,9 +223,9 @@ kbd_press_key(struct kbd *kb, struct key *k, uint32_t time) {
 		kb->last_press = k;
 		kbd_draw_key(kb, k, true);
 		zwp_virtual_keyboard_v1_key(kb->vkbd, time, kb->last_press->code,
-									WL_KEYBOARD_KEY_STATE_PRESSED);
+		                            WL_KEYBOARD_KEY_STATE_PRESSED);
 		if (compose) {
-			fprintf(stderr,"pressing composed key\n");
+			fprintf(stderr, "pressing composed key\n");
 			compose++;
 		}
 		break;
@@ -232,11 +243,12 @@ kbd_press_key(struct kbd *kb, struct key *k, uint32_t time) {
 		} else {
 			compose = 0;
 		}
-		kbd_draw_key(kb, k, (bool) compose);
+		kbd_draw_key(kb, k, (bool)compose);
 		break;
 	case Layout:
 		kb->layout = k->layout;
-		if ((!kb->prevlayout) || (strcmp(kb->prevlayout->keymap_name, kb->layout->keymap_name) != 0)) {
+		if ((!kb->prevlayout) ||
+		    (strcmp(kb->prevlayout->keymap_name, kb->layout->keymap_name) != 0)) {
 			fprintf(stderr, "Switching to keymap %s\n", kb->layout->keymap_name);
 			create_and_upload_keymap(kb->layout->keymap_name, 0, 0);
 		}
@@ -245,11 +257,11 @@ kbd_press_key(struct kbd *kb, struct key *k, uint32_t time) {
 	case Copy:
 		kb->last_press = k;
 		kbd_draw_key(kb, k, true);
-		fprintf(stderr,"pressing copy key\n");
+		fprintf(stderr, "pressing copy key\n");
 		create_and_upload_keymap(kb->layout->keymap_name, k->code, k->code_mod);
 		zwp_virtual_keyboard_v1_modifiers(kb->vkbd, kb->mods, 0, 0, 0);
-		zwp_virtual_keyboard_v1_key(kb->vkbd, time, 127, //COMP key
-									WL_KEYBOARD_KEY_STATE_PRESSED);
+		zwp_virtual_keyboard_v1_key(kb->vkbd, time, 127, // COMP key
+		                            WL_KEYBOARD_KEY_STATE_PRESSED);
 		break;
 	default:
 		break;
@@ -262,14 +274,15 @@ void
 kbd_draw_key(struct kbd *kb, struct key *k, bool pressed) {
 	struct drwsurf *d = kb->surf;
 	const char *label = (kb->mods & Shift) ? k->shift_label : k->label;
-	fprintf(stderr, "Draw key +%d+%d %dx%d -> %s\n", k->x, k->y, k->w, k->h, k->label);
-	struct clr_scheme  * scheme = (k->scheme == 0) ? &(kb->scheme) : &(kb->scheme1);
+	fprintf(stderr, "Draw key +%d+%d %dx%d -> %s\n", k->x, k->y, k->w, k->h,
+	        k->label);
+	struct clr_scheme *scheme = (k->scheme == 0) ? &(kb->scheme) : &(kb->scheme1);
 	Color *fill = pressed ? &scheme->high : &scheme->fg;
 	draw_inset(d, k->x, k->y, k->w, k->h, KBD_KEY_BORDER, fill->color);
-	uint32_t xoffset = k->w /  (strlen(label) + 2);
+	uint32_t xoffset = k->w / (strlen(label) + 2);
 	fprintf(stderr, "  xoffset=%d\n", xoffset);
-	wld_draw_text(d->render, d->ctx->font, scheme->text.color,
-	              k->x + xoffset, k->y + (k->h / 2), label, -1, NULL);
+	wld_draw_text(d->render, d->ctx->font, scheme->text.color, k->x + xoffset,
+	              k->y + (k->h / 2), label, -1, NULL);
 }
 
 void
@@ -293,17 +306,18 @@ kbd_draw_layout(struct kbd *kb) {
 }
 
 void
-kbd_resize(struct kbd *kb, uint32_t w, uint32_t h, struct layout * layouts, uint8_t layoutcount) {
-           struct drwsurf *d = kb->surf;
+kbd_resize(struct kbd *kb, uint32_t w, uint32_t h, struct layout *layouts,
+           uint8_t layoutcount) {
+	struct drwsurf *d = kb->surf;
 
 	kb->w = w;
 	kb->h = h;
 
-	fprintf(stderr, "Resize %dx%d, %d layouts\n",w,h,layoutcount);
+	fprintf(stderr, "Resize %dx%d, %d layouts\n", w, h, layoutcount);
 
 	drwsurf_resize(d, w, h);
 	for (int i = 0; i < layoutcount; i++) {
-		fprintf(stderr,"i=%d\n",i );
+		fprintf(stderr, "i=%d\n", i);
 		kbd_init_layout(&layouts[i], w, h);
 	}
 	kbd_draw_layout(kb);
@@ -316,5 +330,3 @@ draw_inset(struct drwsurf *d, uint32_t x, uint32_t y, uint32_t width,
 	wld_fill_rectangle(d->render, color, x + border, y + border, width - border,
 	                   height - border);
 }
-
-
