@@ -6,8 +6,7 @@
 #include "shm_open.h"
 
 void
-drw_init(struct drw *d, const char *fc_pattern, struct wl_display *dpy,
-         void *shm) {
+drw_init(struct drw *d, const char *fc_pattern, void *shm) {
 	d->shm = shm;
 	d->font_description = pango_font_description_from_string(fc_pattern);
 }
@@ -19,15 +18,16 @@ drwsurf_init(struct drw *d, struct drwsurf *ds, struct wl_surface *surf) {
 }
 
 void
-drwsurf_resize(struct drwsurf *ds, uint32_t w, uint32_t h) {
+drwsurf_resize(struct drwsurf *ds, uint32_t w, uint32_t h, uint32_t s) {
 	if (ds->buf) {
-		munmap(ds->pool_data, ds->s);
+		munmap(ds->pool_data, ds->size);
 		wl_buffer_destroy(ds->buf);
 		ds->buf = NULL;
 	}
 
-	ds->w = w;
-	ds->h = h;
+	ds->scale = s;
+	ds->width = w * s;
+	ds->height = h * s;
 
 	setup_buffer(ds);
 }
@@ -45,11 +45,12 @@ drwsurf_flip(struct drwsurf *ds) {
 	wl_callback_add_listener(ds->cb, &frame_listener, (void *)ds);
 
 	if (ds->dirty) {
-		wl_surface_damage(ds->surf, 0, 0, ds->w, ds->h);
+		wl_surface_damage(ds->surf, 0, 0, ds->width, ds->height);
 		ds->dirty = false;
 	}
 
 	wl_surface_attach(ds->surf, ds->buf, 0, 0);
+	wl_surface_set_buffer_scale(ds->surf, ds->scale);
 	wl_surface_commit(ds->surf);
 }
 
@@ -112,32 +113,33 @@ drw_fill_rectangle(struct drwsurf *d, Color color, uint32_t x, uint32_t y,
 uint32_t
 setup_buffer(struct drwsurf *drwsurf)
 {
-	int stride = drwsurf->w * 4;
-	drwsurf->s = stride * drwsurf->h;
+	int stride = drwsurf->width * 4;
+	drwsurf->size = stride * drwsurf->height;
 
-	int fd = allocate_shm_file(drwsurf->s);
+	int fd = allocate_shm_file(drwsurf->size);
 	if (fd == -1) {
 		return 1;
 	}
 
-	drwsurf->pool_data = mmap(NULL, drwsurf->s,
+	drwsurf->pool_data = mmap(NULL, drwsurf->size,
 	PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
 	if (drwsurf->pool_data == MAP_FAILED) {
 		close(fd);
 		return 1;
 	}
 
-	struct wl_shm_pool *pool = wl_shm_create_pool(drwsurf->ctx->shm, fd, drwsurf->s);
+	struct wl_shm_pool *pool = wl_shm_create_pool(drwsurf->ctx->shm, fd, drwsurf->size);
 	drwsurf->buf = wl_shm_pool_create_buffer(pool, 0,
-		drwsurf->w, drwsurf->h, stride, WL_SHM_FORMAT_ARGB8888);
+		drwsurf->width, drwsurf->height, stride, WL_SHM_FORMAT_ARGB8888);
 	wl_shm_pool_destroy(pool);
 	close(fd);
 
 	cairo_surface_t *s = cairo_image_surface_create_for_data(drwsurf->pool_data,
 		CAIRO_FORMAT_ARGB32,
-	drwsurf->w, drwsurf->h, stride);
+	drwsurf->width, drwsurf->height, stride);
 
 	drwsurf->cairo = cairo_create(s);
+	cairo_scale(drwsurf->cairo, drwsurf->scale, drwsurf->scale);
 	drwsurf->layout = pango_cairo_create_layout(drwsurf->cairo);
 	pango_layout_set_font_description(drwsurf->layout, drwsurf->ctx->font_description);
 	cairo_save(drwsurf->cairo);
