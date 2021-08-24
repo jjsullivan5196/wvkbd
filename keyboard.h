@@ -104,7 +104,7 @@ uint8_t kbd_get_rows(struct layout *l) {
 void
 kbd_init_layout(struct layout *l, uint32_t width, uint32_t height) {
 	uint32_t x = 0, y = 0;
-    fprintf(stderr, "Init layout\n");
+	fprintf(stderr, "Init layout\n");
 	uint8_t rows = kbd_get_rows(l);
 
 	l->keyheight = height / rows;
@@ -174,12 +174,12 @@ kbd_unpress_key(struct kbd *kb, uint32_t time) {
 				create_and_upload_keymap(kb->layout->keymap_name, 0, 0);
 			}
 			kb->layout = kb->prevlayout;
-            if ((kb->mods & Shift) == Shift) kb->mods ^= Shift;
-            kbd_draw_layout(kb);
-		} else if ((kb->mods & Shift) == Shift) {
-            kb->mods ^= Shift;
+			if ((kb->mods & Shift) == Shift) kb->mods ^= Shift;
 			kbd_draw_layout(kb);
-        }
+		} else if ((kb->mods & Shift) == Shift) {
+			kb->mods ^= Shift;
+			kbd_draw_layout(kb);
+		}
 	}
 }
 
@@ -262,12 +262,12 @@ void
 kbd_draw_key(struct kbd *kb, struct key *k, bool pressed) {
 	struct drwsurf *d = kb->surf;
 	const char *label = (kb->mods & Shift) ? k->shift_label : k->label;
-    fprintf(stderr, "Draw key +%d+%d %dx%d -> %s\n", k->x, k->y, k->w, k->h, k->label);
+	fprintf(stderr, "Draw key +%d+%d %dx%d -> %s\n", k->x, k->y, k->w, k->h, k->label);
 	struct clr_scheme  * scheme = (k->scheme == 0) ? &(kb->scheme) : &(kb->scheme1);
 	Color *fill = pressed ? &scheme->high : &scheme->fg;
 	draw_inset(d, k->x, k->y, k->w, k->h, KBD_KEY_BORDER, fill->color);
 	uint32_t xoffset = k->w /  (strlen(label) + 2);
-    fprintf(stderr, "  xoffset=%d\n", xoffset);
+	fprintf(stderr, "  xoffset=%d\n", xoffset);
 	wld_draw_text(d->render, d->ctx->font, scheme->text.color,
 	              k->x + xoffset, k->y + (k->h / 2), label, -1, NULL);
 }
@@ -277,7 +277,7 @@ kbd_draw_layout(struct kbd *kb) {
 	struct drwsurf *d = kb->surf;
 	struct key *next_key = kb->layout->keys;
 	bool pressed = false;
-    fprintf(stderr, "Draw layout");
+	fprintf(stderr, "Draw layout");
 
 	wld_fill_rectangle(d->render, kb->scheme.bg.color, 0, 0, kb->w, kb->h);
 
@@ -294,7 +294,7 @@ kbd_draw_layout(struct kbd *kb) {
 
 void
 kbd_resize(struct kbd *kb, uint32_t w, uint32_t h, struct layout * layouts, uint8_t layoutcount) {
-	struct drwsurf *d = kb->surf;
+           struct drwsurf *d = kb->surf;
 
 	kb->w = w;
 	kb->h = h;

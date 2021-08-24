@@ -98,35 +98,35 @@ static void create_and_upload_keymap(const char * name, uint32_t comp_unichr, ui
 
 /* event handlers */
 static const struct wl_pointer_listener pointer_listener = {
-  .enter = wl_pointer_enter,
-  .leave = wl_pointer_leave,
-  .motion = wl_pointer_motion,
-  .button = wl_pointer_button,
+	.enter = wl_pointer_enter,
+	.leave = wl_pointer_leave,
+	.motion = wl_pointer_motion,
+	.button = wl_pointer_button,
 };
 
 static const struct wl_touch_listener touch_listener = {
-  .down = wl_touch_down,
-  .up = wl_touch_up,
-  .motion = wl_touch_motion,
-  .frame = wl_touch_frame,
-  .cancel = wl_touch_cancel,
-  .shape = wl_touch_shape,
-  .orientation = wl_touch_orientation,
+	.down = wl_touch_down,
+	.up = wl_touch_up,
+	.motion = wl_touch_motion,
+	.frame = wl_touch_frame,
+	.cancel = wl_touch_cancel,
+	.shape = wl_touch_shape,
+	.orientation = wl_touch_orientation,
 };
 
 static const struct wl_seat_listener seat_listener = {
-  .capabilities = seat_handle_capabilities,
-  .name = seat_handle_name,
+	.capabilities = seat_handle_capabilities,
+	.name = seat_handle_name,
 };
 
 static const struct wl_registry_listener registry_listener = {
-  .global = handle_global,
-  .global_remove = handle_global_remove,
+	.global = handle_global,
+	.global_remove = handle_global_remove,
 };
 
 static const struct zwlr_layer_surface_v1_listener layer_surface_listener = {
-  .configure = layer_surface_configure,
-  .closed = layer_surface_closed,
+	.configure = layer_surface_configure,
+	.closed = layer_surface_closed,
 };
 
 /* configuration, allows nested code to access above variables */
@@ -278,8 +278,8 @@ layer_surface_closed(void *data, struct zwlr_layer_surface_v1 *surface) {
 
 void
 create_and_upload_keymap(const char * name, uint32_t comp_unichr, uint32_t comp_shift_unichr) {
-    const char * keymap_str = get_keymap(name, comp_unichr, comp_shift_unichr);
-    size_t keymap_size = strlen(keymap_str) + 1;
+	const char * keymap_str = get_keymap(name, comp_unichr, comp_shift_unichr);
+	size_t keymap_size = strlen(keymap_str) + 1;
 	int keymap_fd = os_create_anonymous_file(keymap_size);
 	if (keymap_fd < 0) {
 		die("could not create keymap fd\n");
@@ -292,7 +292,7 @@ create_and_upload_keymap(const char * name, uint32_t comp_unichr, uint32_t comp_
 	strcpy(ptr, keymap_str);
 	zwp_virtual_keyboard_v1_keymap(
 	  keyboard.vkbd, WL_KEYBOARD_KEYMAP_FORMAT_XKB_V1, keymap_fd, keymap_size);
-    free((void*) keymap_str);
+	free((void*) keymap_str);
 }
 
 int
