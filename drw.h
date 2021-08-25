@@ -4,8 +4,23 @@
 #include <pango/pangocairo.h>
 #include <stdbool.h>
 
-struct drw;
-struct drwsurf;
+struct drw {
+	struct wl_shm *shm;
+	PangoFontDescription *font_description;
+};
+struct drwsurf {
+	uint32_t width, height, scale, size;
+	bool dirty;
+
+	struct drw *ctx;
+	struct wl_surface *surf;
+	struct wl_buffer *buf;
+	struct wl_shm *shm;
+	unsigned char *pool_data;
+
+	cairo_t *cairo;
+	PangoLayout *layout;
+};
 struct kbd;
 
 void drwsurf_resize(struct drwsurf *ds, uint32_t w, uint32_t h, uint32_t s);
@@ -28,24 +43,5 @@ drw_draw_text(struct drwsurf *d, Color color,
 
 uint32_t
 setup_buffer(struct drwsurf *drwsurf);
-
-struct drw {
-	struct wl_shm *shm;
-	PangoFontDescription *font_description;
-};
-
-struct drwsurf {
-	uint32_t width, height, scale, size;
-	bool dirty;
-
-	struct drw *ctx;
-	struct wl_surface *surf;
-	struct wl_buffer *buf;
-	struct wl_shm *shm;
-	unsigned char *pool_data;
-
-	cairo_t *cairo;
-	PangoLayout *layout;
-};
 
 #endif
