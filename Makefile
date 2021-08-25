@@ -23,6 +23,9 @@ OBJECTS = $(SOURCES:.c=.o)
 
 all: ${BIN}
 
+config.h: config.def.h
+	cp config.def.h config.h
+
 proto/%-client-protocol.c: proto/%.xml
 	wayland-scanner code < $? > $@
 
@@ -31,7 +34,7 @@ proto/%-client-protocol.h: proto/%.xml
 
 $(OBJECTS): $(HDRS) $(WVKBD_HEADERS)
 
-wvkbd-${LAYOUT}: $(OBJECTS) layout.${LAYOUT}.h
+wvkbd-${LAYOUT}: config.h $(OBJECTS) layout.${LAYOUT}.h
 	$(CC) -o wvkbd-${LAYOUT} $(OBJECTS) $(LDFLAGS)
 
 clean:

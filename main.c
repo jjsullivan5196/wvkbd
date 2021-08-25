@@ -9,7 +9,8 @@
 #include <wchar.h>
 
 #include "drw.h"
-#include "os-compatibility.h"
+#include "keyboard.h"
+#include "config.h"
 
 /* lazy die macro */
 #define die(...)                                                               \
@@ -41,7 +42,6 @@ static uint32_t anchor = ZWLR_LAYER_SURFACE_V1_ANCHOR_BOTTOM |
 /* application state */
 static bool run_display = true;
 static int cur_x = -1, cur_y = -1;
-static int compose = 0;
 
 /* event handler prototypes */
 static void wl_pointer_enter(void *data, struct wl_pointer *wl_pointer,
@@ -88,8 +88,6 @@ static void layer_surface_configure(void *data,
                                     uint32_t serial, uint32_t w, uint32_t h);
 static void layer_surface_closed(void *data,
                                  struct zwlr_layer_surface_v1 *surface);
-static void create_and_upload_keymap(const char *name, uint32_t comp_unichr,
-                                     uint32_t comp_shift_unichr);
 
 /* event handlers */
 static const struct wl_pointer_listener pointer_listener = {
@@ -124,13 +122,7 @@ static const struct zwlr_layer_surface_v1_listener layer_surface_listener = {
   .closed = layer_surface_closed,
 };
 
-bool debug = false;
-
 /* configuration, allows nested code to access above variables */
-#ifndef LAYOUT
-#error "make sure to define LAYOUT"
-#endif
-#include LAYOUT
 
 char *
 estrdup(const char *s)
@@ -317,26 +309,6 @@ layer_surface_closed(void *data, struct zwlr_layer_surface_v1 *surface) {
 }
 
 void
-create_and_upload_keymap(const char *name, uint32_t comp_unichr,
-                         uint32_t comp_shift_unichr) {
-	const char *keymap_str = get_keymap(name, comp_unichr, comp_shift_unichr);
-	size_t keymap_size = strlen(keymap_str) + 1;
-	int keymap_fd = os_create_anonymous_file(keymap_size);
-	if (keymap_fd < 0) {
-		die("could not create keymap fd\n");
-	}
-	void *ptr =
-	  mmap(NULL, keymap_size, PROT_READ | PROT_WRITE, MAP_SHARED, keymap_fd, 0);
-	if (ptr == (void *)-1) {
-		die("could not map keymap data\n");
-	}
-	strcpy(ptr, keymap_str);
-	zwp_virtual_keyboard_v1_keymap(
-	  keyboard.vkbd, WL_KEYBOARD_KEYMAP_FORMAT_XKB_V1, keymap_fd, keymap_size);
-	free((void *)keymap_str);
-}
-
-void
 usage(char *argv0)
 {
 	fprintf(stderr, "usage: %s [-hov] [-H height] [-fn font] [-l layers]\n", argv0);
@@ -384,7 +356,7 @@ main(int argc, char **argv) {
 			}
 			height = atoi(argv[++i]);
 		} else if (!strcmp(argv[i], "-D")) {
-			debug = true;
+			keyboard.debug = true;
 		} else if ((!strcmp(argv[i], "-fn")) || (!strcmp(argv[i], "--fn"))) {
 			fc_font_pattern = estrdup(argv[++i]);
 		} else if (!strcmp(argv[i], "-o")) {
