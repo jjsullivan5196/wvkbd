@@ -351,18 +351,17 @@ usage(char *argv0)
 int
 main(int argc, char **argv) {
 	/* parse command line arguments */
-	int i;
 	char *layer_names_list = NULL;
 	const char *fc_font_pattern = NULL;
-	char *tmp;
 	uint32_t height = KBD_PIXEL_HEIGHT;
 
+	char *tmp;
 	if ((tmp = getenv("WVKBD_LAYERS")))
 		layer_names_list = estrdup(tmp);
 	if ((tmp = getenv("WVKBD_HEIGHT")))
 		height = atoi(tmp);
 
-
+	int i;
 	for (i = 1; argv[i]; i++) {
 		if ((!strcmp(argv[i], "-v")) || (!strcmp(argv[i], "--version"))) {
 			printf("wvkbd-%s", VERSION);
@@ -401,13 +400,14 @@ main(int argc, char **argv) {
 		fc_font_pattern = default_font;
 	}
 
-	/* connect to compositor */
 	display = wl_display_connect(NULL);
 	if (display == NULL) {
 		die("Failed to create display\n");
 	}
 
-	/* acquire state */
+	draw_surf.ctx = &draw_ctx;
+	keyboard.surf = &draw_surf;
+
 	struct wl_registry *registry = wl_display_get_registry(display);
 	wl_registry_add_listener(registry, &registry_listener, NULL);
 	wl_display_roundtrip(display);
@@ -425,20 +425,14 @@ main(int argc, char **argv) {
 		die("virtual_keyboard_manager not available\n");
 	}
 
-	/* create vkbd */
 	keyboard.vkbd =
 	  zwp_virtual_keyboard_manager_v1_create_virtual_keyboard(vkbd_mgr, seat);
 
 	kbd_init(&keyboard, (struct layout *) &layouts, layer_names_list);
 
-	/* assign kbd state */
-	keyboard.surf = &draw_surf;
-
-	/* create surface */
 	draw_surf.surf = wl_compositor_create_surface(compositor);;
 
 	draw_ctx.font_description = pango_font_description_from_string(fc_font_pattern);
-	draw_surf.ctx = &draw_ctx;
 
 	layer_surface = zwlr_layer_shell_v1_get_layer_surface(
 	  layer_shell, draw_surf.surf, wl_output, layer, namespace);
@@ -447,11 +441,9 @@ main(int argc, char **argv) {
 	zwlr_layer_surface_v1_set_anchor(layer_surface, anchor);
 	zwlr_layer_surface_v1_set_exclusive_zone(layer_surface, height);
 	zwlr_layer_surface_v1_set_keyboard_interactivity(layer_surface, false);
-	zwlr_layer_surface_v1_add_listener(layer_surface, &layer_surface_listener,
-	                                   NULL);
+	zwlr_layer_surface_v1_add_listener(layer_surface, &layer_surface_listener, NULL);
 	wl_surface_commit(draw_surf.surf);
 
-	/* flush requests and start drawing */
 	wl_display_roundtrip(display);
 	drwsurf_flip(&draw_surf);
 
