@@ -438,8 +438,11 @@ main(int argc, char **argv) {
 
 	/* create surface */
 	wl_surface = wl_compositor_create_surface(compositor);
-	drw_init(&draw_ctx, fc_font_pattern, shm);
-	drwsurf_init(&draw_ctx, &draw_surf, wl_surface);
+
+	draw_ctx.shm = shm;
+	draw_ctx.font_description = pango_font_description_from_string(fc_font_pattern);
+	draw_surf.ctx = &draw_ctx;
+	draw_surf.surf = wl_surface;
 
 	layer_surface = zwlr_layer_shell_v1_get_layer_surface(
 	  layer_shell, draw_surf.surf, wl_output, layer, namespace);

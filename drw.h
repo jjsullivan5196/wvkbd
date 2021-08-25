@@ -8,8 +8,6 @@ struct drw;
 struct drwsurf;
 struct kbd;
 
-void drw_init(struct drw *d, const char *fc_pattern, void *iface);
-void drwsurf_init(struct drw *d, struct drwsurf *ds, struct wl_surface *surf);
 void drwsurf_resize(struct drwsurf *ds, uint32_t w, uint32_t h, uint32_t s);
 void drwsurf_flip(struct drwsurf *ds);
 
