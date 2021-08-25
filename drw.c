@@ -6,18 +6,6 @@
 #include "shm_open.h"
 
 void
-drw_init(struct drw *d, const char *fc_pattern, void *shm) {
-	d->shm = shm;
-	d->font_description = pango_font_description_from_string(fc_pattern);
-}
-
-void
-drwsurf_init(struct drw *d, struct drwsurf *ds, struct wl_surface *surf) {
-	ds->ctx = d;
-	ds->surf = surf;
-}
-
-void
 drwsurf_resize(struct drwsurf *ds, uint32_t w, uint32_t h, uint32_t s) {
 	if (ds->buf) {
 		munmap(ds->pool_data, ds->size);
