@@ -10,7 +10,6 @@ struct drw {
 };
 struct drwsurf {
 	uint32_t width, height, scale, size;
-	bool dirty;
 
 	struct drw *ctx;
 	struct wl_surface *surf;
