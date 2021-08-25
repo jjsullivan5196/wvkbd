@@ -48,8 +48,6 @@ struct drwsurf {
 
 	cairo_t *cairo;
 	PangoLayout *layout;
-
-	struct wl_callback *cb;
 };
 
 #endif
