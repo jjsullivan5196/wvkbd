@@ -33,7 +33,6 @@ drwsurf_flip(struct drwsurf *ds) {
 	wl_callback_add_listener(cb, &frame_listener, (void *)ds);
 
 	wl_surface_attach(ds->surf, ds->buf, 0, 0);
-	wl_surface_set_buffer_scale(ds->surf, ds->scale);
 	wl_surface_commit(ds->surf);
 }
 
@@ -129,6 +128,8 @@ setup_buffer(struct drwsurf *drwsurf)
 	drwsurf->layout = pango_cairo_create_layout(drwsurf->cairo);
 	pango_layout_set_font_description(drwsurf->layout, drwsurf->ctx->font_description);
 	cairo_save(drwsurf->cairo);
+
+	wl_surface_set_buffer_scale(drwsurf->surf, drwsurf->scale);
 
 	return 0;
 }
