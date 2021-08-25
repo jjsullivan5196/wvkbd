@@ -32,11 +32,6 @@ drwsurf_flip(struct drwsurf *ds) {
 	struct wl_callback *cb = wl_surface_frame(ds->surf);
 	wl_callback_add_listener(cb, &frame_listener, (void *)ds);
 
-	if (ds->dirty) {
-		wl_surface_damage(ds->surf, 0, 0, ds->width, ds->height);
-		ds->dirty = false;
-	}
-
 	wl_surface_attach(ds->surf, ds->buf, 0, 0);
 	wl_surface_set_buffer_scale(ds->surf, ds->scale);
 	wl_surface_commit(ds->surf);
@@ -75,6 +70,8 @@ drw_draw_text(struct drwsurf *d, Color color,
 	cairo_rel_move_to(d->cairo, - ((double)width / PANGO_SCALE) / 2, - ((double)height / PANGO_SCALE) / 2);
 	pango_cairo_show_layout(d->cairo, d->layout);
 	cairo_restore(d->cairo);
+
+	wl_surface_damage(d->surf, x, y, w, h);
 }
 
 void
@@ -95,6 +92,8 @@ drw_fill_rectangle(struct drwsurf *d, Color color, uint32_t x, uint32_t y,
 	cairo_fill(d->cairo);
 
 	cairo_restore(d->cairo);
+
+	wl_surface_damage(d->surf, x, y, w, h);
 }
 
 uint32_t

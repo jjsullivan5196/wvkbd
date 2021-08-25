@@ -247,8 +247,6 @@ void
 kbd_unpress_key(struct kbd *kb, uint32_t time) {
 	if (kb->last_press) {
 		kbd_draw_key(kb, kb->last_press, false);
-		kb->surf->dirty = true;
-
 		if (kb->last_press->type == Copy) {
 			zwp_virtual_keyboard_v1_key(kb->vkbd, time, 127, // COMP key
 			                            WL_KEYBOARD_KEY_STATE_RELEASED);
@@ -277,7 +275,6 @@ kbd_press_key(struct kbd *kb, struct key *k, uint32_t time) {
 		compose++;
 		if (debug) fprintf(stderr, "showing compose %d\n", compose);
 		kbd_switch_layout(kb, k->layout);
-		kb->surf->dirty = true;
 		return;
 	}
 
@@ -353,8 +350,6 @@ kbd_press_key(struct kbd *kb, struct key *k, uint32_t time) {
 	default:
 		break;
 	}
-
-	kb->surf->dirty = true;
 }
 
 
@@ -440,7 +435,6 @@ kbd_resize(struct kbd *kb, struct layout *layouts, uint8_t layoutcount) {
 		kbd_init_layout(&layouts[i], kb->w, kb->h);
 	}
 	kbd_draw_layout(kb);
-	d->dirty = true;
 }
 
 void
