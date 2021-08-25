@@ -21,11 +21,9 @@ static const char *namespace = "wlroots";
 static struct wl_display *display;
 static struct wl_compositor *compositor;
 static struct wl_seat *seat;
-static struct wl_shm *shm;
 static struct wl_pointer *pointer;
 static struct wl_touch *touch;
 static struct wl_output *wl_output;
-static struct wl_surface *wl_surface;
 static struct zwlr_layer_shell_v1 *layer_shell;
 static struct zwlr_layer_surface_v1 *layer_surface;
 static struct zwp_virtual_keyboard_manager_v1 *vkbd_mgr;
@@ -278,7 +276,7 @@ handle_global(void *data, struct wl_registry *registry, uint32_t name,
 	if (strcmp(interface, wl_compositor_interface.name) == 0) {
 		compositor = wl_registry_bind(registry, name, &wl_compositor_interface, 3);
 	} else if (strcmp(interface, wl_shm_interface.name) == 0) {
-		shm = wl_registry_bind(registry, name, &wl_shm_interface, 1);
+		draw_ctx.shm = wl_registry_bind(registry, name, &wl_shm_interface, 1);
 	} else if (strcmp(interface, "wl_output") == 0) {
 		if (!wl_output) {
 			wl_output = wl_registry_bind(registry, name, &wl_output_interface, 2);
@@ -417,7 +415,7 @@ main(int argc, char **argv) {
 	if (compositor == NULL) {
 		die("wl_compositor not available\n");
 	}
-	if (shm == NULL) {
+	if (draw_ctx.shm == NULL) {
 		die("wl_shm not available\n");
 	}
 	if (layer_shell == NULL) {
@@ -437,12 +435,10 @@ main(int argc, char **argv) {
 	keyboard.surf = &draw_surf;
 
 	/* create surface */
-	wl_surface = wl_compositor_create_surface(compositor);
+	draw_surf.surf = wl_compositor_create_surface(compositor);;
 
-	draw_ctx.shm = shm;
 	draw_ctx.font_description = pango_font_description_from_string(fc_font_pattern);
 	draw_surf.ctx = &draw_ctx;
-	draw_surf.surf = wl_surface;
 
 	layer_surface = zwlr_layer_shell_v1_get_layer_surface(
 	  layer_shell, draw_surf.surf, wl_output, layer, namespace);
