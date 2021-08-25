@@ -1,8 +1,11 @@
-char *
-get_keymap(const char *name, uint32_t comp_unichr, uint32_t comp_shift_unichr) {
-	char *keymap = malloc(65000);
-	if (strcmp(name, "latin") == 0) {
-		sprintf(keymap, "xkb_keymap {\
+#define NUMKEYMAPS 3
+
+static const char * keymap_names[] = {"latin","cyrillic","arabic"};
+
+static const char * keymaps[NUMKEYMAPS] = {
+
+		//LATIN
+		"xkb_keymap {\
 xkb_keycodes \"(unnamed)\" {\
         minimum = 8;\
         maximum = 255;\
@@ -1465,10 +1468,8 @@ xkb_symbols \"(unnamed)\" {\
 \
 };\
 ",
-		        comp_unichr, comp_shift_unichr);
-		return keymap;
-	} else if (strcmp(name, "cyrillic") == 0) {
-		sprintf(keymap, "xkb_keymap {\
+	//CYRILLIC
+	"xkb_keymap {\
 xkb_keycodes \"(unnamed)\" {\
         minimum = 8;\
         maximum = 255;\
@@ -2930,10 +2931,8 @@ xkb_symbols \"(unnamed)\" {\
 \
 };\
 ",
-		        comp_unichr, comp_shift_unichr);
-		return keymap;
-	} else if (strcmp(name, "arabic") == 0) {
-		sprintf(keymap, "xkb_keymap {\
+	//ARABIC
+	"xkb_keymap {\
 xkb_keycodes \"(unnamed)\" {\
         minimum = 8;\
         maximum = 255;\
@@ -4390,10 +4389,6 @@ xkb_symbols \"(unnamed)\" {\
         modifier_map Mod4 { <LWIN>, <RWIN>, <SUPR>, <HYPR> };\
         modifier_map Mod5 { <LVL3>, <MDSW> };\
 };\
-};", comp_unichr, comp_shift_unichr);
-		return keymap;
-	} else {
-		fprintf(stderr, "No such keymap: '%s'", name);
-		exit(2);
-	}
-}
+};"
+};
+

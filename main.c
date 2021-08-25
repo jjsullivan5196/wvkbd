@@ -399,6 +399,9 @@ main(int argc, char **argv) {
 
 	keyboard.vkbd =
 	  zwp_virtual_keyboard_manager_v1_create_virtual_keyboard(vkbd_mgr, seat);
+	if (keyboard.vkbd == NULL) {
+		die("failed to init virtual keyboard_manager\n");
+	}
 
 	kbd_init(&keyboard, (struct layout *) &layouts, layer_names_list);
 

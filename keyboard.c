@@ -21,7 +21,7 @@ kbd_switch_layout(struct kbd *kb, struct layout *l) {
 	if ((!kb->prevlayout) ||
 		(strcmp(kb->prevlayout->keymap_name, kb->layout->keymap_name) != 0)) {
 		fprintf(stderr, "Switching to keymap %s\n", kb->layout->keymap_name);
-		create_and_upload_keymap(kb->layout->keymap_name, 0, 0);
+		create_and_upload_keymap(kb, kb->layout->keymap_name, 0, 0);
 	}
 	kbd_draw_layout(kb);
 }
@@ -96,7 +96,7 @@ void kbd_init(struct kbd *kb, struct layout * layouts, char * layer_names_list) 
 	kb->prevlayout = kb->layout;
 
 	/* upload keymap */
-	create_and_upload_keymap(kb->layout->keymap_name, 0, 0);
+	create_and_upload_keymap(kb, kb->layout->keymap_name, 0, 0);
 }
 
 void
@@ -246,7 +246,7 @@ kbd_press_key(struct kbd *kb, struct key *k, uint32_t time) {
 		kb->last_press = k;
 		kbd_draw_key(kb, k, true);
 		if (kb->debug) fprintf(stderr, "pressing copy key\n");
-		create_and_upload_keymap(kb->layout->keymap_name, k->code, k->code_mod);
+		create_and_upload_keymap(kb, kb->layout->keymap_name, k->code, k->code_mod);
 		zwp_virtual_keyboard_v1_modifiers(kb->vkbd, kb->mods, 0, 0, 0);
 		zwp_virtual_keyboard_v1_key(kb->vkbd, time, 127, // COMP key
 		                            WL_KEYBOARD_KEY_STATE_PRESSED);
@@ -351,10 +351,22 @@ draw_inset(struct drwsurf *ds, uint32_t x, uint32_t y, uint32_t width,
 }
 
 void
-create_and_upload_keymap(const char *name, uint32_t comp_unichr,
+create_and_upload_keymap(struct kbd * kb, const char *name, uint32_t comp_unichr,
                          uint32_t comp_shift_unichr) {
-	const char *keymap_str = get_keymap(name, comp_unichr, comp_shift_unichr);
-	size_t keymap_size = strlen(keymap_str) + 1;
+	int keymap_index = -1;
+	for (int i = 0; i < NUMKEYMAPS; i++) {
+		if (!strcmp(keymap_names[i], name)) {
+			keymap_index = i;
+		}
+	}
+	if (keymap_index == -1) {
+		fprintf(stderr,"No such keymap defined: %s\n", name);
+		exit(9);
+	}
+	const char * keymap_template = keymaps[keymap_index];
+	const size_t keymap_size = strlen(keymap_template) + 64;
+	char *keymap_str = malloc(keymap_size);
+	sprintf(keymap_str, keymap_template, comp_unichr, comp_shift_unichr);
 	int keymap_fd = os_create_anonymous_file(keymap_size);
 	if (keymap_fd < 0) {
 		die("could not create keymap fd\n");
@@ -364,8 +376,11 @@ create_and_upload_keymap(const char *name, uint32_t comp_unichr,
 	if (ptr == (void *)-1) {
 		die("could not map keymap data\n");
 	}
+	if (kb->vkbd == NULL) {
+		die("kb.vkbd = NULL\n");
+	}
 	strcpy(ptr, keymap_str);
 	zwp_virtual_keyboard_v1_keymap(
-	  keyboard.vkbd, WL_KEYBOARD_KEYMAP_FORMAT_XKB_V1, keymap_fd, keymap_size);
+	  kb->vkbd, WL_KEYBOARD_KEYMAP_FORMAT_XKB_V1, keymap_fd, keymap_size);
 	free((void *)keymap_str);
 }
