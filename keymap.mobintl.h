@@ -1,4 +1,4 @@
-static const char *
+char *
 get_keymap(const char *name, uint32_t comp_unichr, uint32_t comp_shift_unichr) {
 	char *keymap = malloc(65000);
 	if (strcmp(name, "latin") == 0) {

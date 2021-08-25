@@ -70,11 +70,6 @@ static enum layout_id layers[] = {
 	NumLayouts //signals the last item, may not be omitted
 };
 
-#include "keymap.mobintl.h"
-#include "keyboard.h"
-
-static const char *default_font = "Monospace 15";
-
 static struct key keys_full[], keys_special[], keys_simple[], keys_cyrillic[],
   keys_arabic[],
   keys_emoji[],
