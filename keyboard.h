@@ -89,7 +89,7 @@ struct kbd {
 	struct zwp_virtual_keyboard_v1 *vkbd;
 };
 
-static inline void draw_inset(struct drwsurf *d, uint32_t x, uint32_t y,
+static inline void draw_inset(struct drwsurf *ds, uint32_t x, uint32_t y,
                               uint32_t width, uint32_t height, uint32_t border,
                               Color color);
 
@@ -444,8 +444,8 @@ kbd_resize(struct kbd *kb, struct layout *layouts, uint8_t layoutcount) {
 }
 
 void
-draw_inset(struct drwsurf *d, uint32_t x, uint32_t y, uint32_t width,
+draw_inset(struct drwsurf *ds, uint32_t x, uint32_t y, uint32_t width,
            uint32_t height, uint32_t border, Color color) {
-	drw_fill_rectangle(d, color, x + border, y + border, width - border,
+	drw_fill_rectangle(ds, color, x + border, y + border, width - border,
 	                   height - border);
 }
