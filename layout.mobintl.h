@@ -9,6 +9,8 @@
 /* spacing between keys */
 #define KBD_KEY_BORDER 2
 
+#include "keymap.mobintl.h"
+
 /* layout declarations */
 enum layout_id {
 	Full = 0,

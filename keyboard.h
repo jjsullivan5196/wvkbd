@@ -114,12 +114,11 @@ uint8_t kbd_get_rows(struct layout *l);
 double kbd_get_row_length(struct key *k);
 void kbd_switch_layout(struct kbd *kb, struct layout *l);
 
-void create_and_upload_keymap(const char *name, uint32_t comp_unichr,
+void create_and_upload_keymap(struct kbd *kb, const char *name, uint32_t comp_unichr,
                                      uint32_t comp_shift_unichr);
 
 #ifndef LAYOUT
 #error "make sure to define LAYOUT"
 #endif
 #include LAYOUT
-
 #endif
