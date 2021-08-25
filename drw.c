@@ -41,8 +41,8 @@ static struct wl_callback_listener frame_listener = {
 
 void
 drwsurf_flip(struct drwsurf *ds) {
-	ds->cb = wl_surface_frame(ds->surf);
-	wl_callback_add_listener(ds->cb, &frame_listener, (void *)ds);
+	struct wl_callback *cb = wl_surface_frame(ds->surf);
+	wl_callback_add_listener(cb, &frame_listener, (void *)ds);
 
 	if (ds->dirty) {
 		wl_surface_damage(ds->surf, 0, 0, ds->width, ds->height);
@@ -58,7 +58,6 @@ void
 surface_frame_callback(void *data, struct wl_callback *cb, uint32_t time) {
 	struct drwsurf *ds = (struct drwsurf *)data;
 	wl_callback_destroy(cb);
-	ds->cb = NULL;
 
 	drwsurf_flip(ds);
 }
