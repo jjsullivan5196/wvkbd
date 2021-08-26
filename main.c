@@ -434,7 +434,7 @@ main(int argc, char **argv) {
 				usage(argv[0]);
 				exit(1);
 			}
-			height = atoi(argv[++i]);
+			height = normal_height = atoi(argv[++i]);
 		} else if (!strcmp(argv[i], "-L")) {
 			if (i >= argc - 1) {
 				usage(argv[0]);
