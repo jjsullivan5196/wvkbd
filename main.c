@@ -238,6 +238,21 @@ seat_handle_name(void *data, struct wl_seat *wl_seat, const char *name) {}
 static void
 display_handle_geometry(void *data, struct wl_output *wl_output, int x, int y, int physical_width, int physical_height, int subpixel, const char *make, const char *model, int transform)
 {
+	if (transform % 2 == 0) {
+		keyboard.landscape = false;
+	} else {
+		keyboard.landscape = true;
+	}
+
+	enum layout_id layer;
+	if (keyboard.landscape) {
+		layer = keyboard.landscape_layers[0];
+	} else {
+		layer = keyboard.layers[0];
+	}
+
+	keyboard.layout = &keyboard.layouts[layer];
+	keyboard.prevlayout = keyboard.layout;
 }
 
 static void
@@ -379,6 +394,7 @@ main(int argc, char **argv) {
 
 	/* keyboard settings */
 	keyboard.layers = (enum layout_id *) &layers;
+	keyboard.landscape_layers = (enum layout_id *) &landscape_layers;
 	keyboard.scheme = scheme;
 	keyboard.layer_index = 0;
 	keyboard.scheme1 = scheme1;
