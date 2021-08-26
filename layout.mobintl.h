@@ -9,8 +9,6 @@
 /* spacing between keys */
 #define KBD_KEY_BORDER 2
 
-#include "keymap.mobintl.h"
-
 /* layout declarations */
 enum layout_id {
 	Full = 0,
@@ -59,17 +57,6 @@ enum layout_id {
 	ComposeCyrG,
 	ComposeCyrK,
 	NumLayouts,
-};
-
-/* layers is an ordered list of layouts, used to cycle through */
-static enum layout_id layers[] = {
-	Full, //First layout is the default layout on startup
-	Special,
-	Emoji,
-	Simple,
-	Cyrillic,
-	Arabic,
-	NumLayouts //signals the last item, may not be omitted
 };
 
 static struct key keys_full[], keys_special[], keys_simple[], keys_cyrillic[],
@@ -138,28 +125,6 @@ static struct layout layouts[NumLayouts] = {
 };
 
 
-/* keyboard settings */
-static struct kbd keyboard = {
-  /* default layout */
-  .layers = (enum layout_id *) &layers,
-  .layer_index = 0,
-  .scheme =
-    {
-      /* colors */
-      .bg = {.bgra = {15, 15, 15, 225}},
-      .fg = {.bgra = {45, 45, 45, 225}},
-      .high = {.bgra = {100, 100, 100, 225}},
-      .text = {.color = UINT32_MAX},
-    },
-  .scheme1 =
-    {
-      /* colors */
-      .bg = {.bgra = {15, 15, 15, 225}},
-      .fg = {.bgra = {32, 32, 32, 225}},
-      .high = {.bgra = {100, 100, 100, 225}},
-      .text = {.color = UINT32_MAX},
-    },
-};
 
 /* key layouts
  *
