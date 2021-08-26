@@ -84,6 +84,7 @@ struct kbd {
 
 	bool print;
 	uint32_t w, h, s;
+	bool landscape;
 	uint8_t mods;
 	uint8_t compose;
 	struct key *last_press;
@@ -92,6 +93,7 @@ struct kbd {
 
 	struct layout *layouts;
 	enum layout_id *layers;
+	enum layout_id *landscape_layers;
 
 	struct drwsurf *surf;
 	struct zwp_virtual_keyboard_v1 *vkbd;
