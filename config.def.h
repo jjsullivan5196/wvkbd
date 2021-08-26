@@ -24,6 +24,7 @@ static enum layout_id layers[] = {
 	Special,
 	Emoji,
 	Simple,
+	SimpleGrid,
 	Cyrillic,
 	Arabic,
 	NumLayouts //signals the last item, may not be omitted
