@@ -43,7 +43,7 @@ static uint32_t anchor = ZWLR_LAYER_SURFACE_V1_ANCHOR_BOTTOM |
 static bool run_display = true;
 static int cur_x = -1, cur_y = -1;
 static struct kbd keyboard;
-static uint32_t height;
+static uint32_t height, normal_height, landscape_height;
 
 /* event handler prototypes */
 static void wl_pointer_enter(void *data, struct wl_pointer *wl_pointer,
@@ -238,10 +238,14 @@ seat_handle_name(void *data, struct wl_seat *wl_seat, const char *name) {}
 static void
 display_handle_geometry(void *data, struct wl_output *wl_output, int x, int y, int physical_width, int physical_height, int subpixel, const char *make, const char *model, int transform)
 {
-	if (transform % 2 == 0) {
+	if (transform % 2 == 0 && keyboard.landscape) {
 		keyboard.landscape = false;
-	} else {
+		height = normal_height;
+	} else if (transform % 2 != 0 && !keyboard.landscape) {
 		keyboard.landscape = true;
+		height = landscape_height;
+	} else {
+		return; // no changes
 	}
 
 	enum layout_id layer;
@@ -253,6 +257,10 @@ display_handle_geometry(void *data, struct wl_output *wl_output, int x, int y, i
 
 	keyboard.layout = &keyboard.layouts[layer];
 	keyboard.prevlayout = keyboard.layout;
+
+	zwlr_layer_surface_v1_set_size(layer_surface, 0, height);
+	zwlr_layer_surface_v1_set_exclusive_zone(layer_surface, height);
+	wl_surface_commit(draw_surf.surf);
 }
 
 static void
@@ -328,12 +336,13 @@ layer_surface_closed(void *data, struct zwlr_layer_surface_v1 *surface) {
 void
 usage(char *argv0)
 {
-	fprintf(stderr, "usage: %s [-hov] [-H height] [-fn font] [-l layers]\n", argv0);
+	fprintf(stderr, "usage: %s [-hov] [-H height] [-L landscape height] [-fn font] [-l layers]\n", argv0);
 	fprintf(stderr, "Options:\n");
 	fprintf(stderr, "  -D         - Enable debug\n");
 	fprintf(stderr, "  -o         - Print press keys to standard output\n");
 	fprintf(stderr, "  -l         - Comma separated list of layers\n");
 	fprintf(stderr, "  -H [int]   - Height in pixels\n");
+	fprintf(stderr, "  -L [int]   - Landscape height in pixels\n");
 	fprintf(stderr, "  -fn [font] - Set font (e.g: DejaVu Sans 20)\n");
 }
 
@@ -384,13 +393,16 @@ main(int argc, char **argv) {
 	/* parse command line arguments */
 	char *layer_names_list = NULL;
 	const char *fc_font_pattern = NULL;
-	height = KBD_PIXEL_HEIGHT;
+	height = normal_height = KBD_PIXEL_HEIGHT;
+	landscape_height = KBD_PIXEL_LANDSCAPE_HEIGHT;
 
 	char *tmp;
 	if ((tmp = getenv("WVKBD_LAYERS")))
 		layer_names_list = estrdup(tmp);
 	if ((tmp = getenv("WVKBD_HEIGHT")))
-		height = atoi(tmp);
+		normal_height = atoi(tmp);
+	if ((tmp = getenv("WVKBD_LANDSCAPE_HEIGHT")))
+		landscape_height = atoi(tmp);
 
 	/* keyboard settings */
 	keyboard.layers = (enum layout_id *) &layers;
@@ -423,6 +435,12 @@ main(int argc, char **argv) {
 				exit(1);
 			}
 			height = atoi(argv[++i]);
+		} else if (!strcmp(argv[i], "-L")) {
+			if (i >= argc - 1) {
+				usage(argv[0]);
+				exit(1);
+			}
+			landscape_height = atoi(argv[++i]);
 		} else if (!strcmp(argv[i], "-D")) {
 			keyboard.debug = true;
 		} else if ((!strcmp(argv[i], "-fn")) || (!strcmp(argv[i], "--fn"))) {
