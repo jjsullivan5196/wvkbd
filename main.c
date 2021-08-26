@@ -7,6 +7,7 @@
 #include <sys/mman.h>
 #include <wayland-client.h>
 #include <wchar.h>
+#include <unistd.h>
 
 #include "keyboard.h"
 #include "config.h"
@@ -42,6 +43,7 @@ static uint32_t anchor = ZWLR_LAYER_SURFACE_V1_ANCHOR_BOTTOM |
 static bool run_display = true;
 static int cur_x = -1, cur_y = -1;
 static struct kbd keyboard;
+static uint32_t height;
 
 /* event handler prototypes */
 static void wl_pointer_enter(void *data, struct wl_pointer *wl_pointer,
@@ -320,12 +322,54 @@ usage(char *argv0)
 	fprintf(stderr, "  -fn [font] - Set font (e.g: DejaVu Sans 20)\n");
 }
 
+void
+freeze(int sigint)
+{
+	signal(SIGUSR1, freeze);
+	if (!layer_surface) {
+		return;
+	}
+
+	zwlr_layer_surface_v1_destroy(layer_surface);
+	wl_surface_destroy(draw_surf.surf);
+	layer_surface = NULL;
+	if (draw_surf.cb) {
+		wl_callback_destroy(draw_surf.cb);
+		draw_surf.cb = NULL;
+	}
+}
+
+void
+unfreeze(int sigint)
+{
+	signal(SIGUSR2, unfreeze);
+	if (layer_surface) {
+		return;
+	}
+
+	wl_display_sync(display);
+
+	draw_surf.surf = wl_compositor_create_surface(compositor);;
+	layer_surface = zwlr_layer_shell_v1_get_layer_surface(
+	  layer_shell, draw_surf.surf, wl_output, layer, namespace);
+
+	zwlr_layer_surface_v1_set_size(layer_surface, 0, height);
+	zwlr_layer_surface_v1_set_anchor(layer_surface, anchor);
+	zwlr_layer_surface_v1_set_exclusive_zone(layer_surface, height);
+	zwlr_layer_surface_v1_set_keyboard_interactivity(layer_surface, false);
+	zwlr_layer_surface_v1_add_listener(layer_surface, &layer_surface_listener, NULL);
+	wl_surface_commit(draw_surf.surf);
+
+	wl_display_roundtrip(display);
+	drwsurf_flip(&draw_surf);
+}
+
 int
 main(int argc, char **argv) {
 	/* parse command line arguments */
 	char *layer_names_list = NULL;
 	const char *fc_font_pattern = NULL;
-	uint32_t height = KBD_PIXEL_HEIGHT;
+	height = KBD_PIXEL_HEIGHT;
 
 	char *tmp;
 	if ((tmp = getenv("WVKBD_LAYERS")))
@@ -430,7 +474,16 @@ main(int argc, char **argv) {
 	wl_display_roundtrip(display);
 	drwsurf_flip(&draw_surf);
 
-	while (wl_display_dispatch(display) != -1 && run_display) {
+	signal(SIGUSR1, freeze);
+	signal(SIGUSR2, unfreeze);
+
+	while (run_display) {
+		while (wl_display_dispatch(display) != -1 && layer_surface) {
+		}
+		wl_display_roundtrip(display);
+		while (run_display && !layer_surface) {
+			sleep(1);
+		}
 	}
 
 	if (fc_font_pattern != default_font) {
