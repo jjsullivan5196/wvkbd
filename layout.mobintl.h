@@ -1414,6 +1414,8 @@ static struct key keys_compose_punctuation[] = {
   {"9", "(", 1.0, Code, KEY_9},
   {"0", ")", 1.0, Code, KEY_0},
   {"", "", 0.0, EndRow},
+  {"", "", 10.0, Pad},
+  {"", "", 0.0, EndRow},
   {"⇧", "⇧", 2, Mod, Shift, .scheme = 1},
   {"", "", 1, Pad},
   {":", ":", 1, Code, KEY_SEMICOLON, 0, Shift},
