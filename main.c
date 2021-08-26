@@ -8,7 +8,6 @@
 #include <wayland-client.h>
 #include <wchar.h>
 
-#include "drw.h"
 #include "keyboard.h"
 #include "config.h"
 
@@ -42,6 +41,7 @@ static uint32_t anchor = ZWLR_LAYER_SURFACE_V1_ANCHOR_BOTTOM |
 /* application state */
 static bool run_display = true;
 static int cur_x = -1, cur_y = -1;
+static struct kbd keyboard;
 
 /* event handler prototypes */
 static void wl_pointer_enter(void *data, struct wl_pointer *wl_pointer,
@@ -332,6 +332,14 @@ main(int argc, char **argv) {
 		layer_names_list = estrdup(tmp);
 	if ((tmp = getenv("WVKBD_HEIGHT")))
 		height = atoi(tmp);
+
+	/* keyboard settings */
+	keyboard.layers = (enum layout_id *) &layers;
+	keyboard.scheme = scheme;
+	keyboard.layer_index = 0;
+	keyboard.scheme1 = scheme1;
+	keyboard.scheme1 = scheme1;
+
 
 	int i;
 	for (i = 1; argv[i]; i++) {

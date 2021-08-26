@@ -13,6 +13,11 @@
 	fprintf(stderr, __VA_ARGS__);                                                \
 	exit(1)
 
+#ifndef KEYMAP
+#error "make sure to define KEYMAP"
+#endif
+#include KEYMAP
+
 void
 kbd_switch_layout(struct kbd *kb, struct layout *l) {
 	kb->prevlayout = kb->layout;
