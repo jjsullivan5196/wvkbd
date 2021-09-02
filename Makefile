@@ -42,3 +42,8 @@ clean:
 
 format:
 	clang-format -i $(WVKBD_SOURCES) $(WVKBD_HEADERS)
+
+install: all
+	mkdir -p ${DESTDIR}${PREFIX}/bin
+	cp -f ${NAME}-${LAYOUT} ${DESTDIR}${PREFIX}/bin
+	chmod 755 ${DESTDIR}${PREFIX}/bin/${NAME}-${LAYOUT}
