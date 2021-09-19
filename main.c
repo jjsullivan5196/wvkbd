@@ -344,8 +344,8 @@ usage(char *argv0) {
 }
 
 void
-freeze(int sigint) {
-	signal(SIGUSR1, freeze);
+hide(int sigint) {
+	signal(SIGUSR1, hide);
 	if (!layer_surface) {
 		return;
 	}
@@ -360,8 +360,8 @@ freeze(int sigint) {
 }
 
 void
-unfreeze(int sigint) {
-	signal(SIGUSR2, unfreeze);
+show(int sigint) {
+	signal(SIGUSR2, show);
 	if (layer_surface) {
 		return;
 	}
@@ -513,8 +513,8 @@ main(int argc, char **argv) {
 		drwsurf_flip(&draw_surf);
 	}
 
-	signal(SIGUSR1, freeze);
-	signal(SIGUSR2, unfreeze);
+	signal(SIGUSR1, hide);
+	signal(SIGUSR2, show);
 
 	while (run_display) {
 		while (wl_display_dispatch(display) != -1 && layer_surface) {
