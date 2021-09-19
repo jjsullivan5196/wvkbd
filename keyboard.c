@@ -22,9 +22,10 @@ void
 kbd_switch_layout(struct kbd *kb, struct layout *l) {
 	kb->prevlayout = kb->layout;
 	kb->layout = l;
-	if (kb->debug) fprintf(stderr, "Switching to layout %s)\n", kb->layout->name);
+	if (kb->debug)
+		fprintf(stderr, "Switching to layout %s)\n", kb->layout->name);
 	if ((!kb->prevlayout) ||
-		(strcmp(kb->prevlayout->keymap_name, kb->layout->keymap_name) != 0)) {
+	    (strcmp(kb->prevlayout->keymap_name, kb->layout->keymap_name) != 0)) {
 		fprintf(stderr, "Switching to keymap %s\n", kb->layout->keymap_name);
 		create_and_upload_keymap(kb, kb->layout->keymap_name, 0, 0);
 	}
@@ -44,8 +45,8 @@ kbd_get_rows(struct layout *l) {
 	return rows + 1;
 }
 
-
-void kbd_init(struct kbd *kb, struct layout * layouts, char * layer_names_list) {
+void
+kbd_init(struct kbd *kb, struct layout *layouts, char *layer_names_list) {
 	char *s;
 	int i;
 	bool found;
@@ -54,8 +55,9 @@ void kbd_init(struct kbd *kb, struct layout * layouts, char * layer_names_list) 
 
 	kb->layouts = layouts;
 
-	for (i = 0; i < NumLayouts - 1; i++);
-	fprintf(stderr, "Found %d layouts\n",i);
+	for (i = 0; i < NumLayouts - 1; i++)
+		;
+	fprintf(stderr, "Found %d layouts\n", i);
 
 	kb->layer_index = 0;
 
@@ -81,9 +83,9 @@ void kbd_init(struct kbd *kb, struct layout * layouts, char * layer_names_list) 
 				fprintf(stderr, "No such layer: %s\n", s);
 				exit(3);
 			}
-			s = strtok(NULL,",");
+			s = strtok(NULL, ",");
 		}
-		kb->layers[numlayers] = NumLayouts; //mark the end of the sequence
+		kb->layers[numlayers] = NumLayouts; // mark the end of the sequence
 		if (numlayers == 0) {
 			fprintf(stderr, "No layers defined\n");
 			exit(3);
@@ -95,7 +97,7 @@ void kbd_init(struct kbd *kb, struct layout * layouts, char * layer_names_list) 
 	while (lid != NumLayouts) {
 		lid = kb->layers[++i];
 	}
-	fprintf(stderr, "Found %d layers\n",i);
+	fprintf(stderr, "Found %d layers\n", i);
 
 	enum layout_id layer;
 	if (kb->landscape) {
@@ -150,7 +152,8 @@ struct key *
 kbd_get_key(struct kbd *kb, uint32_t x, uint32_t y) {
 	struct layout *l = kb->layout;
 	struct key *k = l->keys;
-	if (kb->debug) fprintf(stderr, "get key: +%d+%d\n", x, y);
+	if (kb->debug)
+		fprintf(stderr, "get key: +%d+%d\n", x, y);
 	while (k->type != Last) {
 		if ((k->type != EndRow) && (k->type != Pad) && (k->type != Pad) &&
 		    (x >= k->x) && (y >= k->y) && (x < k->x + k->w) && (y < k->y + k->h)) {
@@ -191,7 +194,8 @@ kbd_press_key(struct kbd *kb, struct key *k, uint32_t time) {
 	if ((kb->compose == 1) && (k->type != Compose) && (k->type != Mod) &&
 	    (k->layout)) {
 		kb->compose++;
-		if (kb->debug) fprintf(stderr, "showing compose %d\n", kb->compose);
+		if (kb->debug)
+			fprintf(stderr, "showing compose %d\n", kb->compose);
 		kbd_switch_layout(kb, k->layout);
 		return;
 	}
@@ -215,7 +219,8 @@ kbd_press_key(struct kbd *kb, struct key *k, uint32_t time) {
 		if (kb->print)
 			kbd_print_key_stdout(kb, k);
 		if (kb->compose) {
-			if (kb->debug) fprintf(stderr, "pressing composed key\n");
+			if (kb->debug)
+				fprintf(stderr, "pressing composed key\n");
 			kb->compose++;
 		}
 		break;
@@ -228,11 +233,11 @@ kbd_press_key(struct kbd *kb, struct key *k, uint32_t time) {
 		zwp_virtual_keyboard_v1_modifiers(kb->vkbd, kb->mods, 0, 0, 0);
 		break;
 	case Layout:
-		//switch to the layout determined by the key
+		// switch to the layout determined by the key
 		kbd_switch_layout(kb, k->layout);
 		break;
 	case Compose:
-		//switch to the associated layout determined by the *next* keypress
+		// switch to the associated layout determined by the *next* keypress
 		if (kb->compose == 0) {
 			kb->compose = 1;
 		} else {
@@ -241,7 +246,7 @@ kbd_press_key(struct kbd *kb, struct key *k, uint32_t time) {
 		kbd_draw_key(kb, k, (bool)kb->compose);
 		break;
 	case NextLayer:
-		//switch to the next layout in the layer sequence
+		// switch to the next layout in the layer sequence
 		kb->layer_index++;
 		enum layout_id layer;
 		if (kb->landscape) {
@@ -260,15 +265,16 @@ kbd_press_key(struct kbd *kb, struct key *k, uint32_t time) {
 		kbd_switch_layout(kb, &kb->layouts[layer]);
 		break;
 	case BackLayer:
-		//switch to the previously active layout
+		// switch to the previously active layout
 		if (kb->prevlayout)
 			kbd_switch_layout(kb, kb->prevlayout);
 		break;
 	case Copy:
-		//copy code as unicode chr by setting a temporary keymap
+		// copy code as unicode chr by setting a temporary keymap
 		kb->last_press = k;
 		kbd_draw_key(kb, k, true);
-		if (kb->debug) fprintf(stderr, "pressing copy key\n");
+		if (kb->debug)
+			fprintf(stderr, "pressing copy key\n");
 		create_and_upload_keymap(kb, kb->layout->keymap_name, k->code, k->code_mod);
 		zwp_virtual_keyboard_v1_modifiers(kb->vkbd, kb->mods, 0, 0, 0);
 		zwp_virtual_keyboard_v1_key(kb->vkbd, time, 127, // COMP key
@@ -281,7 +287,6 @@ kbd_press_key(struct kbd *kb, struct key *k, uint32_t time) {
 	}
 }
 
-
 void
 kbd_print_key_stdout(struct kbd *kb, struct key *k) {
 	/* printed keys may slightly differ from the actual output
@@ -292,21 +297,21 @@ kbd_print_key_stdout(struct kbd *kb, struct key *k) {
 	bool handled = true;
 	if (k->type == Code) {
 		switch (k->code) {
-			case KEY_SPACE:
-				printf(" ");
-				break;
-			case KEY_ENTER:
-				printf("\n");
-				break;
-			case KEY_BACKSPACE:
-				printf("\b");
-				break;
-			case KEY_TAB:
-				printf("\t");
-				break;
-			default:
-				handled = false;
-				break;
+		case KEY_SPACE:
+			printf(" ");
+			break;
+		case KEY_ENTER:
+			printf("\n");
+			break;
+		case KEY_BACKSPACE:
+			printf("\b");
+			break;
+		case KEY_TAB:
+			printf("\t");
+			break;
+		default:
+			handled = false;
+			break;
 		}
 	} else if (k->type != Copy) {
 		return;
@@ -325,8 +330,9 @@ void
 kbd_draw_key(struct kbd *kb, struct key *k, bool pressed) {
 	struct drwsurf *d = kb->surf;
 	const char *label = (kb->mods & Shift) ? k->shift_label : k->label;
-	if (kb->debug) fprintf(stderr, "Draw key +%d+%d %dx%d -> %s\n", k->x, k->y, k->w, k->h,
-	        label);
+	if (kb->debug)
+		fprintf(stderr, "Draw key +%d+%d %dx%d -> %s\n", k->x, k->y, k->w, k->h,
+		        label);
 	struct clr_scheme *scheme = (k->scheme == 0) ? &(kb->scheme) : &(kb->scheme1);
 	Color *fill = pressed ? &scheme->high : &scheme->fg;
 	draw_inset(d, k->x, k->y, k->w, k->h, KBD_KEY_BORDER, *fill);
@@ -338,7 +344,8 @@ kbd_draw_layout(struct kbd *kb) {
 	struct drwsurf *d = kb->surf;
 	struct key *next_key = kb->layout->keys;
 	bool pressed = false;
-	if (kb->debug) fprintf(stderr, "Draw layout");
+	if (kb->debug)
+		fprintf(stderr, "Draw layout");
 
 	drw_fill_rectangle(d, kb->scheme.bg, 0, 0, kb->w, kb->h);
 
@@ -357,7 +364,8 @@ void
 kbd_resize(struct kbd *kb, struct layout *layouts, uint8_t layoutcount) {
 	struct drwsurf *d = kb->surf;
 
-	fprintf(stderr, "Resize %dx%d %d, %d layouts\n", kb->w, kb->h, kb->s, layoutcount);
+	fprintf(stderr, "Resize %dx%d %d, %d layouts\n", kb->w, kb->h, kb->s,
+	        layoutcount);
 
 	drwsurf_resize(d, kb->w, kb->h, kb->s);
 	for (int i = 0; i < layoutcount; i++) {
@@ -374,7 +382,7 @@ draw_inset(struct drwsurf *ds, uint32_t x, uint32_t y, uint32_t width,
 }
 
 void
-create_and_upload_keymap(struct kbd * kb, const char *name, uint32_t comp_unichr,
+create_and_upload_keymap(struct kbd *kb, const char *name, uint32_t comp_unichr,
                          uint32_t comp_shift_unichr) {
 	int keymap_index = -1;
 	for (int i = 0; i < NUMKEYMAPS; i++) {
@@ -383,10 +391,10 @@ create_and_upload_keymap(struct kbd * kb, const char *name, uint32_t comp_unichr
 		}
 	}
 	if (keymap_index == -1) {
-		fprintf(stderr,"No such keymap defined: %s\n", name);
+		fprintf(stderr, "No such keymap defined: %s\n", name);
 		exit(9);
 	}
-	const char * keymap_template = keymaps[keymap_index];
+	const char *keymap_template = keymaps[keymap_index];
 	const size_t keymap_size = strlen(keymap_template) + 64;
 	char *keymap_str = malloc(keymap_size);
 	sprintf(keymap_str, keymap_template, comp_unichr, comp_shift_unichr);
@@ -403,7 +411,7 @@ create_and_upload_keymap(struct kbd * kb, const char *name, uint32_t comp_unichr
 		die("kb.vkbd = NULL\n");
 	}
 	strcpy(ptr, keymap_str);
-	zwp_virtual_keyboard_v1_keymap(
-	  kb->vkbd, WL_KEYBOARD_KEYMAP_FORMAT_XKB_V1, keymap_fd, keymap_size);
+	zwp_virtual_keyboard_v1_keymap(kb->vkbd, WL_KEYBOARD_KEYMAP_FORMAT_XKB_V1,
+	                               keymap_fd, keymap_size);
 	free((void *)keymap_str);
 }

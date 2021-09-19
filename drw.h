@@ -31,17 +31,12 @@ typedef union {
 	uint32_t color;
 } Color;
 
-void
-drw_fill_rectangle(struct drwsurf *d, Color color, uint32_t x, uint32_t y,
-	uint32_t w, uint32_t h);
+void drw_fill_rectangle(struct drwsurf *d, Color color, uint32_t x, uint32_t y,
+                        uint32_t w, uint32_t h);
 
-void
-drw_draw_text(struct drwsurf *d, Color color,
-	uint32_t x, uint32_t y,
-	uint32_t w, uint32_t h,
-	const char *label);
+void drw_draw_text(struct drwsurf *d, Color color, uint32_t x, uint32_t y,
+                   uint32_t w, uint32_t h, const char *label);
 
-uint32_t
-setup_buffer(struct drwsurf *drwsurf);
+uint32_t setup_buffer(struct drwsurf *drwsurf);
 
 #endif
