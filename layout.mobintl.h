@@ -169,7 +169,7 @@ static struct key keys_full[] = {
   {"→", "→", 1.0, Code, KEY_RIGHT, .scheme = 1},
   {"'", "\"", 1.0, Code, KEY_APOSTROPHE, .scheme = 1},
   {";", ":", 1.0, Code, KEY_SEMICOLON, .scheme = 1},
-  {"/", "?", 1.0, Code, KEY_SLASH, .scheme = 1},
+  {"/", ">", 1.0, Code, KEY_SLASH, .scheme = 1},
   {"", "", 0.0, EndRow},
 
   {"1", "!", 1.0, Code, KEY_1},
@@ -274,7 +274,7 @@ static struct key keys_special[] = {
 
   {"⇧", "⇧", 2.0, Mod, Shift, .scheme = 1},
   {";", ":", 1.0, Code, KEY_SEMICOLON},
-  {"/", "?", 1.0, Code, KEY_SLASH},
+  {"/", ">", 1.0, Code, KEY_SLASH},
   {"<", "«", 1.0, Code, KEY_COMMA, 0, AltGr},
   {">", "»", 1.0, Code, KEY_DOT, 0, AltGr},
   {"¡", "¿", 1.0, Code, KEY_MENU},
@@ -772,7 +772,7 @@ static struct key keys_landscape[] = {
   {"m", "M", 1.0, Code, KEY_M, &layouts[ComposeM]},
   {"↑", "↑", 0.75, Code, KEY_UP, .scheme = 1},
   {"↓", "↓", 0.75, Code, KEY_DOWN, .scheme = 1},
-  {"/", "?", 0.75, Code, KEY_SLASH, .scheme = 1},
+  {"/", ">", 0.75, Code, KEY_SLASH, .scheme = 1},
   {"⌫", "⌫", 1.5, Code, KEY_BACKSPACE, .scheme = 1},
   {"", "", 0.0, EndRow},
 
