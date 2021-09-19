@@ -63,21 +63,19 @@ enum layout_id {
 	NumLayouts,
 };
 
-static struct key keys_full[], keys_special[], keys_simple[], keys_simplegrid[], keys_cyrillic[],
-  keys_arabic[],
-  keys_emoji[],
-  keys_landscape[],
+static struct key keys_full[], keys_special[], keys_simple[], keys_simplegrid[],
+  keys_cyrillic[], keys_arabic[], keys_emoji[], keys_landscape[],
   keys_compose_a[], keys_compose_e[], keys_compose_y[], keys_compose_u[],
-  keys_compose_i[], keys_compose_o[], keys_compose_w[],
-  keys_compose_r[], keys_compose_t[], keys_compose_p[], keys_compose_s[],
-  keys_compose_d[], keys_compose_f[], keys_compose_g[], keys_compose_h[],
-  keys_compose_j[], keys_compose_k[], keys_compose_l[], keys_compose_z[],
-  keys_compose_x[], keys_compose_c[], keys_compose_v[], keys_compose_b[],
-  keys_compose_n[], keys_compose_m[], keys_compose_math[],
-  keys_compose_punctuation[], keys_compose_bracket[], keys_compose_cyr_i[],
-  keys_compose_cyr_j[], keys_compose_cyr_e[], keys_compose_cyr_u[],
-  keys_compose_cyr_l[], keys_compose_cyr_n[], keys_compose_cyr_tse[],
-  keys_compose_cyr_che[], keys_compose_cyr_g[], keys_compose_cyr_k[];
+  keys_compose_i[], keys_compose_o[], keys_compose_w[], keys_compose_r[],
+  keys_compose_t[], keys_compose_p[], keys_compose_s[], keys_compose_d[],
+  keys_compose_f[], keys_compose_g[], keys_compose_h[], keys_compose_j[],
+  keys_compose_k[], keys_compose_l[], keys_compose_z[], keys_compose_x[],
+  keys_compose_c[], keys_compose_v[], keys_compose_b[], keys_compose_n[],
+  keys_compose_m[], keys_compose_math[], keys_compose_punctuation[],
+  keys_compose_bracket[], keys_compose_cyr_i[], keys_compose_cyr_j[],
+  keys_compose_cyr_e[], keys_compose_cyr_u[], keys_compose_cyr_l[],
+  keys_compose_cyr_n[], keys_compose_cyr_tse[], keys_compose_cyr_che[],
+  keys_compose_cyr_g[], keys_compose_cyr_k[];
 
 static struct layout layouts[NumLayouts] = {
   [Full] = {keys_full, "latin", "full"}, // second parameter is the keymap name
@@ -128,8 +126,6 @@ static struct layout layouts[NumLayouts] = {
   [ComposeCyrG] = {keys_compose_cyr_g, "cyrillic"},
   [ComposeCyrK] = {keys_compose_cyr_k, "cyrillic"},
 };
-
-
 
 /* key layouts
  *
@@ -711,14 +707,14 @@ static struct key keys_emoji[] = {
   {"😛", "😜", 1.0, Copy, 0x1f61b, 0, 0x1f61c},
   {"😮", "😝", 1.0, Copy, 0x1f62e, 0, 0x1f61d},
   {"😟", "😞", 1.0, Copy, 0x1f61f, 0, 0x1f61e},
-  {"😟", "🥺", 1.0, Copy, 0x1f620, 0, 0x1f97a },
+  {"😟", "🥺", 1.0, Copy, 0x1f620, 0, 0x1f97a},
   {"😢", "👿", 1.0, Copy, 0x1f622, 0, 0x1f47f},
   {"😭", "😯", 1.0, Copy, 0x1f62d, 0, 0x1f62f},
   {"😳", "😕", 1.0, Copy, 0x1f633, 0, 0x1f615},
   {"😴", "😵", 1.0, Copy, 0x1f634, 0, 0x1f635},
-  {"⌫", "⌫", 1.0, Code, KEY_BACKSPACE, .scheme=1},
+  {"⌫", "⌫", 1.0, Code, KEY_BACKSPACE, .scheme = 1},
   {"", "", 0.0, EndRow},
-  {"Abc", "Abc", 1.0, BackLayer, .scheme=1},
+  {"Abc", "Abc", 1.0, BackLayer, .scheme = 1},
   {"👆", "👊", 1.0, Copy, 0x1f446, 0, 0x1f44a},
   {"👇", "👌", 1.0, Copy, 0x1f447, 0, 0x1f44c},
   {"👈", "👏", 1.0, Copy, 0x1f448, 0, 0x1f44f},
@@ -726,7 +722,7 @@ static struct key keys_emoji[] = {
   {"👋", "🙌", 1.0, Copy, 0x1f603, 0, 0x1f44c},
   {"👍", "✅", 1.0, Copy, 0x1f604, 0, 0x2705},
   {"👎", "💪", 1.0, Copy, 0x1f605, 0, 0x1f606},
-  {"Enter", "Enter", 2.0, Code, KEY_ENTER, .scheme=1},
+  {"Enter", "Enter", 2.0, Code, KEY_ENTER, .scheme = 1},
   {"", "", 0.0, Last},
 };
 
@@ -1460,4 +1456,3 @@ static struct key keys_compose_bracket[] = {
   {"Enter", "Enter", 2.0, Code, KEY_ENTER, .scheme = 1},
   {"", "", 0.0, Last},
 };
-

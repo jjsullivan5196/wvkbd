@@ -5,9 +5,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/mman.h>
+#include <unistd.h>
 #include <wayland-client.h>
 #include <wchar.h>
-#include <unistd.h>
 
 #include "keyboard.h"
 #include "config.h"
@@ -127,8 +127,7 @@ static const struct zwlr_layer_surface_v1_listener layer_surface_listener = {
 /* configuration, allows nested code to access above variables */
 
 char *
-estrdup(const char *s)
-{
+estrdup(const char *s) {
 	char *p;
 
 	if (!(p = strdup(s))) {
@@ -236,8 +235,9 @@ void
 seat_handle_name(void *data, struct wl_seat *wl_seat, const char *name) {}
 
 static void
-display_handle_geometry(void *data, struct wl_output *wl_output, int x, int y, int physical_width, int physical_height, int subpixel, const char *make, const char *model, int transform)
-{
+display_handle_geometry(void *data, struct wl_output *wl_output, int x, int y,
+                        int physical_width, int physical_height, int subpixel,
+                        const char *make, const char *model, int transform) {
 	if (transform % 2 == 0 && keyboard.landscape) {
 		keyboard.landscape = false;
 		height = normal_height;
@@ -264,28 +264,22 @@ display_handle_geometry(void *data, struct wl_output *wl_output, int x, int y, i
 }
 
 static void
-display_handle_done(void *data, struct wl_output *wl_output)
-{
-}
+display_handle_done(void *data, struct wl_output *wl_output) {}
 
 static void
-display_handle_scale(void *data, struct wl_output *wl_output, int32_t scale)
-{
+display_handle_scale(void *data, struct wl_output *wl_output, int32_t scale) {
 	keyboard.s = scale;
-
 }
 
 static void
-display_handle_mode(void *data, struct wl_output *wl_output, uint32_t flags, int width, int height, int refresh)
-{
-}
+display_handle_mode(void *data, struct wl_output *wl_output, uint32_t flags,
+                    int width, int height, int refresh) {}
 
 static const struct wl_output_listener output_listener = {
-	.geometry = display_handle_geometry,
-	.mode = display_handle_mode,
-	.done = display_handle_done,
-	.scale = display_handle_scale
-};
+  .geometry = display_handle_geometry,
+  .mode = display_handle_mode,
+  .done = display_handle_done,
+  .scale = display_handle_scale};
 
 void
 handle_global(void *data, struct wl_registry *registry, uint32_t name,
@@ -334,9 +328,11 @@ layer_surface_closed(void *data, struct zwlr_layer_surface_v1 *surface) {
 }
 
 void
-usage(char *argv0)
-{
-	fprintf(stderr, "usage: %s [-hov] [-H height] [-L landscape height] [-fn font] [-l layers]\n", argv0);
+usage(char *argv0) {
+	fprintf(stderr,
+	        "usage: %s [-hov] [-H height] [-L landscape height] [-fn font] [-l "
+	        "layers]\n",
+	        argv0);
 	fprintf(stderr, "Options:\n");
 	fprintf(stderr, "  -D         - Enable debug\n");
 	fprintf(stderr, "  -o         - Print press keys to standard output\n");
@@ -347,8 +343,7 @@ usage(char *argv0)
 }
 
 void
-freeze(int sigint)
-{
+freeze(int sigint) {
 	signal(SIGUSR1, freeze);
 	if (!layer_surface) {
 		return;
@@ -364,8 +359,7 @@ freeze(int sigint)
 }
 
 void
-unfreeze(int sigint)
-{
+unfreeze(int sigint) {
 	signal(SIGUSR2, unfreeze);
 	if (layer_surface) {
 		return;
@@ -373,7 +367,8 @@ unfreeze(int sigint)
 
 	wl_display_sync(display);
 
-	draw_surf.surf = wl_compositor_create_surface(compositor);;
+	draw_surf.surf = wl_compositor_create_surface(compositor);
+	;
 	layer_surface = zwlr_layer_shell_v1_get_layer_surface(
 	  layer_shell, draw_surf.surf, wl_output, layer, namespace);
 
@@ -381,7 +376,8 @@ unfreeze(int sigint)
 	zwlr_layer_surface_v1_set_anchor(layer_surface, anchor);
 	zwlr_layer_surface_v1_set_exclusive_zone(layer_surface, height);
 	zwlr_layer_surface_v1_set_keyboard_interactivity(layer_surface, false);
-	zwlr_layer_surface_v1_add_listener(layer_surface, &layer_surface_listener, NULL);
+	zwlr_layer_surface_v1_add_listener(layer_surface, &layer_surface_listener,
+	                                   NULL);
 	wl_surface_commit(draw_surf.surf);
 
 	wl_display_roundtrip(display);
@@ -405,13 +401,12 @@ main(int argc, char **argv) {
 		landscape_height = atoi(tmp);
 
 	/* keyboard settings */
-	keyboard.layers = (enum layout_id *) &layers;
-	keyboard.landscape_layers = (enum layout_id *) &landscape_layers;
+	keyboard.layers = (enum layout_id *)&layers;
+	keyboard.landscape_layers = (enum layout_id *)&landscape_layers;
 	keyboard.scheme = scheme;
 	keyboard.layer_index = 0;
 	keyboard.scheme1 = scheme1;
 	keyboard.scheme1 = scheme1;
-
 
 	int i;
 	for (i = 1; argv[i]; i++) {
@@ -489,11 +484,13 @@ main(int argc, char **argv) {
 		die("failed to init virtual keyboard_manager\n");
 	}
 
-	kbd_init(&keyboard, (struct layout *) &layouts, layer_names_list);
+	kbd_init(&keyboard, (struct layout *)&layouts, layer_names_list);
 
-	draw_surf.surf = wl_compositor_create_surface(compositor);;
+	draw_surf.surf = wl_compositor_create_surface(compositor);
+	;
 
-	draw_ctx.font_description = pango_font_description_from_string(fc_font_pattern);
+	draw_ctx.font_description =
+	  pango_font_description_from_string(fc_font_pattern);
 
 	layer_surface = zwlr_layer_shell_v1_get_layer_surface(
 	  layer_shell, draw_surf.surf, wl_output, layer, namespace);
@@ -502,7 +499,8 @@ main(int argc, char **argv) {
 	zwlr_layer_surface_v1_set_anchor(layer_surface, anchor);
 	zwlr_layer_surface_v1_set_exclusive_zone(layer_surface, height);
 	zwlr_layer_surface_v1_set_keyboard_interactivity(layer_surface, false);
-	zwlr_layer_surface_v1_add_listener(layer_surface, &layer_surface_listener, NULL);
+	zwlr_layer_surface_v1_add_listener(layer_surface, &layer_surface_listener,
+	                                   NULL);
 	wl_surface_commit(draw_surf.surf);
 
 	wl_display_roundtrip(display);
@@ -521,7 +519,7 @@ main(int argc, char **argv) {
 	}
 
 	if (fc_font_pattern != default_font) {
-		free((void*) fc_font_pattern);
+		free((void *)fc_font_pattern);
 	}
 
 	return 0;

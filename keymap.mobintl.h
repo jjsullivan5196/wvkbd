@@ -1,11 +1,11 @@
 #define NUMKEYMAPS 3
 
-static const char * keymap_names[] = {"latin","cyrillic","arabic"};
+static const char *keymap_names[] = {"latin", "cyrillic", "arabic"};
 
-static const char * keymaps[NUMKEYMAPS] = {
+static const char *keymaps[NUMKEYMAPS] = {
 
-		//LATIN
-		"xkb_keymap {\
+  // LATIN
+  "xkb_keymap {\
 xkb_keycodes \"(unnamed)\" {\
         minimum = 8;\
         maximum = 255;\
@@ -1468,8 +1468,8 @@ xkb_symbols \"(unnamed)\" {\
 \
 };\
 ",
-	//CYRILLIC
-	"xkb_keymap {\
+  // CYRILLIC
+  "xkb_keymap {\
 xkb_keycodes \"(unnamed)\" {\
         minimum = 8;\
         maximum = 255;\
@@ -2931,8 +2931,8 @@ xkb_symbols \"(unnamed)\" {\
 \
 };\
 ",
-	//ARABIC
-	"xkb_keymap {\
+  // ARABIC
+  "xkb_keymap {\
 xkb_keycodes \"(unnamed)\" {\
         minimum = 8;\
         maximum = 255;\
@@ -4389,6 +4389,4 @@ xkb_symbols \"(unnamed)\" {\
         modifier_map Mod4 { <LWIN>, <RWIN>, <SUPR>, <HYPR> };\
         modifier_map Mod5 { <LVL3>, <MDSW> };\
 };\
-};"
-};
-
+};"};

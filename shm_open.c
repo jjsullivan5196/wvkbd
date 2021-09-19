@@ -6,21 +6,19 @@
 #include <unistd.h>
 
 static void
-randname(char *buf)
-{
+randname(char *buf) {
 	struct timespec ts;
 	long r;
 	clock_gettime(CLOCK_REALTIME, &ts);
 	r = ts.tv_nsec;
 	for (int i = 0; i < 6; ++i) {
-		buf[i] = 'A'+(r&15)+(r&16)*2;
+		buf[i] = 'A' + (r & 15) + (r & 16) * 2;
 		r >>= 5;
 	}
 }
 
 static int
-create_shm_file(void)
-{
+create_shm_file(void) {
 	int retries = 100;
 	int fd;
 	do {
@@ -37,8 +35,7 @@ create_shm_file(void)
 }
 
 int
-allocate_shm_file(size_t size)
-{
+allocate_shm_file(size_t size) {
 	int fd = create_shm_file();
 	int ret;
 	if (fd < 0)
@@ -52,4 +49,3 @@ allocate_shm_file(size_t size)
 	}
 	return fd;
 }
-

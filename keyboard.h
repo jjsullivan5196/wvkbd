@@ -13,17 +13,19 @@ struct layout;
 struct kbd;
 
 enum key_type {
-	Pad = 0,    //Padding, not a pressable key
-	Code,       //A normal key emitting a keycode
-	Mod,        //A modifier key
-	Copy,       //Copy key, copies the unicode value specified in code (creates and activates temporary keymap)
-	            // used for keys that are not part of the keymap
-	Layout,     //Layout switch to a specific layout
-	BackLayer,  //Layout switch to the layout that was previously active
-	NextLayer,  //Layout switch to the next layout in the layers sequence
-	Compose,    //Compose modifier key, switches to a specific associated layout upon next keypress
-	EndRow,     //Incidates the end of a key row
-	Last,       //Indicated the end of a layout
+	Pad = 0, // Padding, not a pressable key
+	Code,    // A normal key emitting a keycode
+	Mod,     // A modifier key
+	Copy,    // Copy key, copies the unicode value specified in code (creates and
+	         // activates temporary keymap)
+	         // used for keys that are not part of the keymap
+	Layout,  // Layout switch to a specific layout
+	BackLayer, // Layout switch to the layout that was previously active
+	NextLayer, // Layout switch to the next layout in the layers sequence
+	Compose,   // Compose modifier key, switches to a specific associated layout
+	           // upon next keypress
+	EndRow,    // Incidates the end of a key row
+	Last,      // Indicated the end of a layout
 };
 
 /* Modifiers passed to the virtual_keyboard protocol. They are based on
@@ -53,12 +55,12 @@ struct key {
 	const enum key_type type;
 
 	const uint32_t
-	  code;                /* code: key scancode or modifier name (see
-	                        *   `/usr/include/linux/input-event-codes.h` for scancode names, and
-	                        *   `keyboard.h` for modifiers)
-	                        *   XKB keycodes are +8 */
-	struct layout *layout; // pointer back to the parent layout that holds this
-	                       // key
+	  code;                  /* code: key scancode or modifier name (see
+	                          *   `/usr/include/linux/input-event-codes.h` for scancode names, and
+	                          *   `keyboard.h` for modifiers)
+	                          *   XKB keycodes are +8 */
+	struct layout *layout;   // pointer back to the parent layout that holds this
+	                         // key
 	const uint32_t code_mod; /* modifier to force when this key is pressed */
 	uint8_t scheme;          // index of the scheme to use
 	bool reset_mod;          /* reset modifiers when clicked */
@@ -99,11 +101,10 @@ struct kbd {
 	struct zwp_virtual_keyboard_v1 *vkbd;
 };
 
-void draw_inset(struct drwsurf *ds, uint32_t x, uint32_t y,
-                              uint32_t width, uint32_t height, uint32_t border,
-                              Color color);
+void draw_inset(struct drwsurf *ds, uint32_t x, uint32_t y, uint32_t width,
+                uint32_t height, uint32_t border, Color color);
 
-void kbd_init(struct kbd *kb, struct layout * layouts, char * layer_names_list);
+void kbd_init(struct kbd *kb, struct layout *layouts, char *layer_names_list);
 void kbd_init_layout(struct layout *l, uint32_t width, uint32_t height);
 struct key *kbd_get_key(struct kbd *kb, uint32_t x, uint32_t y);
 void kbd_unpress_key(struct kbd *kb, uint32_t time);
@@ -116,8 +117,8 @@ uint8_t kbd_get_rows(struct layout *l);
 double kbd_get_row_length(struct key *k);
 void kbd_switch_layout(struct kbd *kb, struct layout *l);
 
-void create_and_upload_keymap(struct kbd *kb, const char *name, uint32_t comp_unichr,
-                                     uint32_t comp_shift_unichr);
+void create_and_upload_keymap(struct kbd *kb, const char *name,
+                              uint32_t comp_unichr, uint32_t comp_shift_unichr);
 
 #ifndef LAYOUT
 #error "make sure to define LAYOUT"
