@@ -339,7 +339,8 @@ usage(char *argv0) {
 	fprintf(stderr, "  -l         - Comma separated list of layers\n");
 	fprintf(stderr, "  -H [int]   - Height in pixels\n");
 	fprintf(stderr, "  -L [int]   - Landscape height in pixels\n");
-	fprintf(stderr, "  -fn [font] - Set font (e.g: DejaVu Sans 20)\n");
+	fprintf(stderr, "  --fn [font] - Set font (e.g: DejaVu Sans 20)\n");
+	fprintf(stderr, "  --hidden   - Start hidden (send SIGUSR2 to show)\n");
 }
 
 void
@@ -408,6 +409,8 @@ main(int argc, char **argv) {
 	keyboard.scheme1 = scheme1;
 	keyboard.scheme1 = scheme1;
 
+	bool starthidden = false;
+
 	int i;
 	for (i = 1; argv[i]; i++) {
 		if ((!strcmp(argv[i], "-v")) || (!strcmp(argv[i], "--version"))) {
@@ -442,6 +445,8 @@ main(int argc, char **argv) {
 			fc_font_pattern = estrdup(argv[++i]);
 		} else if (!strcmp(argv[i], "-o")) {
 			keyboard.print = true;
+		} else if ((!strcmp(argv[i], "-hidden")) || (!strcmp(argv[i], "--hidden"))) {
+			starthidden = true;
 		} else {
 			fprintf(stderr, "Invalid argument: %s\n", argv[i]);
 			usage(argv[0]);
@@ -486,25 +491,27 @@ main(int argc, char **argv) {
 
 	kbd_init(&keyboard, (struct layout *)&layouts, layer_names_list);
 
-	draw_surf.surf = wl_compositor_create_surface(compositor);
-	;
-
 	draw_ctx.font_description =
 	  pango_font_description_from_string(fc_font_pattern);
 
-	layer_surface = zwlr_layer_shell_v1_get_layer_surface(
-	  layer_shell, draw_surf.surf, wl_output, layer, namespace);
 
-	zwlr_layer_surface_v1_set_size(layer_surface, 0, height);
-	zwlr_layer_surface_v1_set_anchor(layer_surface, anchor);
-	zwlr_layer_surface_v1_set_exclusive_zone(layer_surface, height);
-	zwlr_layer_surface_v1_set_keyboard_interactivity(layer_surface, false);
-	zwlr_layer_surface_v1_add_listener(layer_surface, &layer_surface_listener,
-	                                   NULL);
-	wl_surface_commit(draw_surf.surf);
+	if (!starthidden) {
+		draw_surf.surf = wl_compositor_create_surface(compositor);
 
-	wl_display_roundtrip(display);
-	drwsurf_flip(&draw_surf);
+		layer_surface = zwlr_layer_shell_v1_get_layer_surface(
+		  layer_shell, draw_surf.surf, wl_output, layer, namespace);
+
+		zwlr_layer_surface_v1_set_size(layer_surface, 0, height);
+		zwlr_layer_surface_v1_set_anchor(layer_surface, anchor);
+		zwlr_layer_surface_v1_set_exclusive_zone(layer_surface, height);
+		zwlr_layer_surface_v1_set_keyboard_interactivity(layer_surface, false);
+		zwlr_layer_surface_v1_add_listener(layer_surface, &layer_surface_listener,
+										   NULL);
+		wl_surface_commit(draw_surf.surf);
+
+		wl_display_roundtrip(display);
+		drwsurf_flip(&draw_surf);
+	}
 
 	signal(SIGUSR1, freeze);
 	signal(SIGUSR2, unfreeze);
