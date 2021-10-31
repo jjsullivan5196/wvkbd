@@ -21,6 +21,7 @@ enum layout_id {
 	Cyrillic,
 	Arabic,
 	Emoji,
+	Nav,
 	Landscape,
 	ComposeA,
 	ComposeE,
@@ -64,7 +65,7 @@ enum layout_id {
 };
 
 static struct key keys_full[], keys_special[], keys_simple[], keys_simplegrid[],
-  keys_cyrillic[], keys_arabic[], keys_emoji[], keys_landscape[],
+  keys_cyrillic[], keys_arabic[], keys_emoji[], keys_nav[], keys_landscape[],
   keys_compose_a[], keys_compose_e[], keys_compose_y[], keys_compose_u[],
   keys_compose_i[], keys_compose_o[], keys_compose_w[], keys_compose_r[],
   keys_compose_t[], keys_compose_p[], keys_compose_s[], keys_compose_d[],
@@ -86,6 +87,7 @@ static struct layout layouts[NumLayouts] = {
   [Cyrillic] = {keys_cyrillic, "cyrillic", "cyrillic"},
   [Arabic] = {keys_arabic, "arabic", "arabic"},
   [Emoji] = {keys_emoji, "latin", "emoji"},
+  [Nav] = {keys_nav, "latin", "nav"},
   [Landscape] = {keys_landscape, "latin", "landscape"},
   [ComposeA] = {keys_compose_a, "latin"},
   [ComposeE] = {keys_compose_e, "latin"},
@@ -723,6 +725,26 @@ static struct key keys_emoji[] = {
   {"👍", "✅", 1.0, Copy, 0x1f44d, 0, 0x2705},
   {"👎", "💪", 1.0, Copy, 0x1f44e, 0, 0x1f4aa},
   {"Enter", "Enter", 2.0, Code, KEY_ENTER, .scheme = 1},
+  {"", "", 0.0, Last},
+};
+
+static struct key keys_nav[] = {
+  {"Esc", "Esc", 1.0, Code, KEY_ESC, .scheme = 1},
+  {"", "", 1.0, Code, KEY_SPACE, .scheme = 1},
+  {"↑", "↑", 1.0, Code, KEY_UP, .scheme = 1},
+  {"⇈", "⇈", 1.0, Code, KEY_PAGEUP, .scheme = 1},
+  {"", "", 0.0, EndRow},
+
+  {"q", "q", 1.0, Code, KEY_Q, .scheme = 1},
+  {"←", "←", 1.0, Code, KEY_LEFT, .scheme = 1},
+  {"Enter", "Enter", 1.0, Code, KEY_ENTER, .scheme = 1},
+  {"→", "→", 1.0, Code, KEY_RIGHT, .scheme = 1},
+  {"", "", 0.0, EndRow},
+
+  {"⌫", "⌫", 1.0, Code, KEY_BACKSPACE, .scheme = 1},
+  {"", "", 1.0, Code, KEY_SPACE, .scheme = 1},
+  {"↓", "↓", 1.0, Code, KEY_DOWN, .scheme = 1},
+  {"⇊", "⇊", 1.0, Code, KEY_PAGEDOWN, .scheme = 1},
   {"", "", 0.0, Last},
 };
 
