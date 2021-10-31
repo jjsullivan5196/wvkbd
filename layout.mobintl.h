@@ -741,8 +741,8 @@ static struct key keys_nav[] = {
   {"→", "→", 1.0, Code, KEY_RIGHT, .scheme = 1},
   {"", "", 0.0, EndRow},
 
+  {"Sym", "Sym", 1.0, NextLayer, .scheme = 1},
   {"⌫", "⌫", 1.0, Code, KEY_BACKSPACE, .scheme = 1},
-  {"", "", 1.0, Code, KEY_SPACE, .scheme = 1},
   {"↓", "↓", 1.0, Code, KEY_DOWN, .scheme = 1},
   {"⇊", "⇊", 1.0, Code, KEY_PAGEDOWN, .scheme = 1},
   {"", "", 0.0, Last},
