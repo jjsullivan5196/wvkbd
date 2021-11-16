@@ -18,6 +18,7 @@ enum layout_id {
 	Special,
 	Simple,
 	SimpleGrid,
+	Dialer,
 	Cyrillic,
 	Arabic,
 	Emoji,
@@ -76,7 +77,7 @@ static struct key keys_full[], keys_special[], keys_simple[], keys_simplegrid[],
   keys_compose_bracket[], keys_compose_cyr_i[], keys_compose_cyr_j[],
   keys_compose_cyr_e[], keys_compose_cyr_u[], keys_compose_cyr_l[],
   keys_compose_cyr_n[], keys_compose_cyr_tse[], keys_compose_cyr_che[],
-  keys_compose_cyr_g[], keys_compose_cyr_k[];
+  keys_compose_cyr_g[], keys_compose_cyr_k[], keys_dialer[];
 
 static struct layout layouts[NumLayouts] = {
   [Full] = {keys_full, "latin", "full"}, // second parameter is the keymap name
@@ -85,6 +86,7 @@ static struct layout layouts[NumLayouts] = {
   [Simple] = {keys_simple, "latin", "simple"},
   [SimpleGrid] = {keys_simplegrid, "latin", "simplegrid"},
   [Cyrillic] = {keys_cyrillic, "cyrillic", "cyrillic"},
+  [Dialer] = {keys_dialer, "latin", "dialer"},
   [Arabic] = {keys_arabic, "arabic", "arabic"},
   [Emoji] = {keys_emoji, "latin", "emoji"},
   [Nav] = {keys_nav, "latin", "nav"},
@@ -336,6 +338,33 @@ static struct key keys_simple[] = {
   {"", "", 4.0, Code, KEY_SPACE},
   {".", "?", 1.0, Code, KEY_DOT, &layouts[ComposePunctuation]},
   {"Enter", "Enter", 2.0, Code, KEY_ENTER, .scheme = 1},
+
+  /* end of layout */
+  {"", "", 0.0, Last},
+};
+
+static struct key keys_dialer[] = {
+  {"Esc", "Esc", 1.0, Code, KEY_ESC, .scheme = 1},
+  {"⌫", "⌫", 1.0, Code, KEY_BACKSPACE, .scheme = 1},
+  {"", "", 0.0, EndRow},
+  {"1", "1", 1.0, Code, KEY_1},
+  {"2", "2", 1.0, Code, KEY_2},
+  {"3", "3", 1.0, Code, KEY_3},
+  {"", "", 0.0, EndRow},
+  {"4", "4", 1.0, Code, KEY_4},
+  {"5", "5", 1.0, Code, KEY_5},
+  {"6", "6", 1.0, Code, KEY_6},
+  {"", "", 0.0, EndRow},
+  {"7", "7", 1.0, Code, KEY_7},
+  {"8", "8", 1.0, Code, KEY_8},
+  {"9", "9", 1.0, Code, KEY_9},
+  {"", "", 0.0, EndRow},
+  {"*", "*", 1.0, Code, KEY_KPASTERISK},
+  {"0", "0", 1.0, Code, KEY_0},
+  {"#", "#", 1.0, Code, KEY_NUMERIC_POUND},
+  {"", "", 0.0, EndRow},
+  {"Enter", "Enter", 2.0, Code, KEY_ENTER, .scheme = 1}
+,
 
   /* end of layout */
   {"", "", 0.0, Last},
