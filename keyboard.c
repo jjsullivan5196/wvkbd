@@ -214,10 +214,13 @@ kbd_press_key(struct kbd *kb, struct key *k, uint32_t time) {
 		}
 		kb->last_press = k;
 		kbd_draw_key(kb, k, true);
-		zwp_virtual_keyboard_v1_key(kb->vkbd, time, kb->last_press->code,
-		                            WL_KEYBOARD_KEY_STATE_PRESSED);
+
 		if (kb->print)
 			kbd_print_key_stdout(kb, k);
+		else
+			zwp_virtual_keyboard_v1_key(kb->vkbd, time, kb->last_press->code,
+			                            WL_KEYBOARD_KEY_STATE_PRESSED);
+
 		if (kb->compose) {
 			if (kb->debug)
 				fprintf(stderr, "pressing composed key\n");
