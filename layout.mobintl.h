@@ -363,8 +363,8 @@ static struct key keys_dialer[] = {
   {"0", "0", 1.0, Code, KEY_0},
   {"#", "#", 1.0, Code, KEY_NUMERIC_POUND},
   {"", "", 0.0, EndRow},
-  {"Enter", "Enter", 2.0, Code, KEY_ENTER, .scheme = 1}
-,
+  {"Abc", "Abc", 1.0, NextLayer, .scheme = 1},
+  {"Enter", "Enter", 2.0, Code, KEY_ENTER, .scheme = 1},
 
   /* end of layout */
   {"", "", 0.0, Last},
