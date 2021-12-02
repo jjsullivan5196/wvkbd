@@ -42,6 +42,7 @@ static uint32_t anchor = ZWLR_LAYER_SURFACE_V1_ANCHOR_BOTTOM |
 /* application state */
 static bool run_display = true;
 static int cur_x = -1, cur_y = -1;
+static bool cur_press = false;
 static struct kbd keyboard;
 static uint32_t height, normal_height, landscape_height;
 
@@ -159,13 +160,18 @@ wl_touch_down(void *data, struct wl_touch *wl_touch, uint32_t serial,
 void
 wl_touch_up(void *data, struct wl_touch *wl_touch, uint32_t serial,
             uint32_t time, int32_t id) {
-	kbd_unpress_key(&keyboard, time);
+	kbd_release_key(&keyboard, time);
 }
 
 void
 wl_touch_motion(void *data, struct wl_touch *wl_touch, uint32_t time,
                 int32_t id, wl_fixed_t x, wl_fixed_t y) {
-	kbd_unpress_key(&keyboard, time);
+	uint32_t touch_x, touch_y;
+
+	touch_x = wl_fixed_to_int(x);
+	touch_y = wl_fixed_to_int(y);
+
+	kbd_motion_key(&keyboard, time, touch_x, touch_y);
 }
 
 void
@@ -199,18 +205,24 @@ wl_pointer_motion(void *data, struct wl_pointer *wl_pointer, uint32_t time,
 	cur_x = wl_fixed_to_int(surface_x);
 	cur_y = wl_fixed_to_int(surface_y);
 
-	kbd_unpress_key(&keyboard, time);
+	if (cur_press) {
+		kbd_motion_key(&keyboard, time, cur_x, cur_y);
+	}
 }
 
 void
 wl_pointer_button(void *data, struct wl_pointer *wl_pointer, uint32_t serial,
                   uint32_t time, uint32_t button, uint32_t state) {
 	struct key *next_key;
-	bool press = state == WL_POINTER_BUTTON_STATE_PRESSED;
+	cur_press = state == WL_POINTER_BUTTON_STATE_PRESSED;
 
-	kbd_unpress_key(&keyboard, time);
+	if (cur_press) {
+		kbd_unpress_key(&keyboard, time);
+	} else {
+		kbd_release_key(&keyboard, time);
+	}
 
-	if (press && cur_x >= 0 && cur_y >= 0) {
+	if (cur_press && cur_x >= 0 && cur_y >= 0) {
 		next_key = kbd_get_key(&keyboard, cur_x, cur_y);
 		if (next_key) {
 			kbd_press_key(&keyboard, next_key, time);
@@ -335,7 +347,8 @@ usage(char *argv0) {
 	        argv0);
 	fprintf(stderr, "Options:\n");
 	fprintf(stderr, "  -D         - Enable debug\n");
-	fprintf(stderr, "  -o         - Print press keys to standard output\n");
+	fprintf(stderr, "  -o         - Print pressed keys to standard output\n");
+	fprintf(stderr, "  -O         - Print intersected keys to standard output\n");
 	fprintf(stderr, "  -l         - Comma separated list of layers\n");
 	fprintf(stderr, "  -H [int]   - Height in pixels\n");
 	fprintf(stderr, "  -L [int]   - Landscape height in pixels\n");
@@ -445,6 +458,8 @@ main(int argc, char **argv) {
 			fc_font_pattern = estrdup(argv[++i]);
 		} else if (!strcmp(argv[i], "-o")) {
 			keyboard.print = true;
+		} else if (!strcmp(argv[i], "-O")) {
+			keyboard.print_intersect = true;
 		} else if ((!strcmp(argv[i], "-hidden")) || (!strcmp(argv[i], "--hidden"))) {
 			starthidden = true;
 		} else {

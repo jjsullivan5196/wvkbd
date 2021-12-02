@@ -189,6 +189,31 @@ kbd_unpress_key(struct kbd *kb, uint32_t time) {
 	}
 }
 
+void kbd_release_key(struct kbd *kb, uint32_t time) {
+	kbd_unpress_key(kb, time);
+	if (kb->print_intersect && kb->last_swipe) {
+		printf("\n");
+		// Important so autocompleted words get typed in time
+		fflush(stdout);
+		kb->last_swipe = NULL;
+	}
+}
+
+void kbd_motion_key(struct kbd *kb, uint32_t time, uint32_t x, uint32_t y) {
+	// Output intersecting keys
+	// (for external 'swiping'-based accelerators).
+	if (kb->print_intersect) {
+		struct key *intersect_key;
+		intersect_key = kbd_get_key(kb, x, y);
+		if (intersect_key &&
+		    (! kb->last_swipe || intersect_key->label != kb->last_swipe->label)) {
+			kbd_print_key_stdout(kb, intersect_key);
+			kb->last_swipe = intersect_key;
+		}
+	}
+	kbd_unpress_key(kb, time);
+}
+
 void
 kbd_press_key(struct kbd *kb, struct key *k, uint32_t time) {
 	if ((kb->compose == 1) && (k->type != Compose) && (k->type != Mod) &&
@@ -212,11 +237,11 @@ kbd_press_key(struct kbd *kb, struct key *k, uint32_t time) {
 		} else {
 			zwp_virtual_keyboard_v1_modifiers(kb->vkbd, kb->mods, 0, 0, 0);
 		}
-		kb->last_press = k;
+		kb->last_swipe = kb->last_press = k;
 		kbd_draw_key(kb, k, true);
 		zwp_virtual_keyboard_v1_key(kb->vkbd, time, kb->last_press->code,
 		                            WL_KEYBOARD_KEY_STATE_PRESSED);
-		if (kb->print)
+		if (kb->print || kb->print_intersect)
 			kbd_print_key_stdout(kb, k);
 		if (kb->compose) {
 			if (kb->debug)
@@ -271,7 +296,7 @@ kbd_press_key(struct kbd *kb, struct key *k, uint32_t time) {
 		break;
 	case Copy:
 		// copy code as unicode chr by setting a temporary keymap
-		kb->last_press = k;
+		kb->last_swipe = kb->last_press = k;
 		kbd_draw_key(kb, k, true);
 		if (kb->debug)
 			fprintf(stderr, "pressing copy key\n");
@@ -279,7 +304,7 @@ kbd_press_key(struct kbd *kb, struct key *k, uint32_t time) {
 		zwp_virtual_keyboard_v1_modifiers(kb->vkbd, kb->mods, 0, 0, 0);
 		zwp_virtual_keyboard_v1_key(kb->vkbd, time, 127, // COMP key
 		                            WL_KEYBOARD_KEY_STATE_PRESSED);
-		if (kb->print)
+		if (kb->print || kb->print_intersect)
 			kbd_print_key_stdout(kb, k);
 		break;
 	default:
