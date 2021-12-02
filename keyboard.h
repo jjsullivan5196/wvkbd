@@ -85,11 +85,13 @@ struct kbd {
 	struct clr_scheme scheme1;
 
 	bool print;
+	bool print_intersect;
 	uint32_t w, h, s;
 	bool landscape;
 	uint8_t mods;
 	uint8_t compose;
 	struct key *last_press;
+	struct key *last_swipe;
 	struct layout *prevlayout;
 	size_t layer_index;
 
@@ -108,6 +110,8 @@ void kbd_init(struct kbd *kb, struct layout *layouts, char *layer_names_list);
 void kbd_init_layout(struct layout *l, uint32_t width, uint32_t height);
 struct key *kbd_get_key(struct kbd *kb, uint32_t x, uint32_t y);
 void kbd_unpress_key(struct kbd *kb, uint32_t time);
+void kbd_release_key(struct kbd *kb, uint32_t time);
+void kbd_motion_key(struct kbd *kb, uint32_t time, uint32_t x, uint32_t y);
 void kbd_press_key(struct kbd *kb, struct key *k, uint32_t time);
 void kbd_print_key_stdout(struct kbd *kb, struct key *k);
 void kbd_draw_key(struct kbd *kb, struct key *k, bool pressed);

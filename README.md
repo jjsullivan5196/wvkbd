@@ -66,7 +66,12 @@ Wvkbd has an output mode `-o` that will echo its output to standard output. This
 audio/haptic feedback, a feature explicitly out of scope for wvkbd. To achieve this, simply pipe wvkbd's output through the external tool
 [clickclack](https://git.sr.ht/~proycon/clickclack):
 
-`$ wvkbd-mobileintl -l simple,special,emoji -o | clickclack -V -f keypress.wav`
+`$ wvkbd-mobintl -l simple,special,emoji -o | clickclack -V -f keypress.wav`
+
+Another output mode, `-O` will let the keyboard output keys which are swiped over. It can be used by an external program, such as [swipeGuess](https://git.sr.ht/~earboxer/swipeGuess) to get swipe-typing support.
+
+`$ wvkbd-mobintl -O | swipeGuess.sh words.txt | completelyTypeWord.sh`
+
 
 ## Contribute
 
@@ -80,6 +85,7 @@ possible.
 ## Related projects
 
 * [clickclack](https://git.sr.ht/~proycon/clickclack) - Audio/haptic feedback (standalone)
+* [swipeGuess](https://git.sr.ht/~earboxer/swipeGuess) - Word-completion for swipe-typing
 * [Sxmo](https://sxmo.org) - A hackable mobile interface environment for Linux phones that adopted wvkbd as its keyboard
 * [svkbd](https://tools.suckless.org/x/svkbd/) - A similar project as wvkbd but for X11 rather than Wayland
 * [squeekboard](https://gitlab.gnome.org/World/Phosh/squeekboard) - The virtual keyboard developed for the Librem5 (used
