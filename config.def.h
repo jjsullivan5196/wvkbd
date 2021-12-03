@@ -8,6 +8,7 @@ struct clr_scheme scheme = {
   .bg = {.bgra = {15, 15, 15, 225}},
   .fg = {.bgra = {45, 45, 45, 225}},
   .high = {.bgra = {100, 100, 100, 225}},
+  .swipe = {.bgra = {100, 255, 100, 64}},
   .text = {.color = UINT32_MAX},
 };
 struct clr_scheme scheme1 = {
@@ -15,6 +16,7 @@ struct clr_scheme scheme1 = {
   .bg = {.bgra = {15, 15, 15, 225}},
   .fg = {.bgra = {32, 32, 32, 225}},
   .high = {.bgra = {100, 100, 100, 225}},
+  .swipe = {.bgra = {100, 255, 100, 64}},
   .text = {.color = UINT32_MAX},
 };
 

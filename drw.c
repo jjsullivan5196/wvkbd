@@ -69,11 +69,15 @@ drw_draw_text(struct drwsurf *d, Color color, uint32_t x, uint32_t y,
 }
 
 void
-drw_fill_rectangle(struct drwsurf *d, Color color, uint32_t x, uint32_t y,
-                   uint32_t w, uint32_t h) {
+drw_do_rectangle(struct drwsurf *d, Color color, uint32_t x, uint32_t y,
+                 uint32_t w, uint32_t h, bool over) {
 	cairo_save(d->cairo);
 
-	cairo_set_operator(d->cairo, CAIRO_OPERATOR_SOURCE);
+	if (over) {
+		cairo_set_operator(d->cairo, CAIRO_OPERATOR_OVER);
+	} else {
+		cairo_set_operator(d->cairo, CAIRO_OPERATOR_SOURCE);
+	}
 
 	cairo_rectangle(d->cairo, x, y, w, h);
 	cairo_set_source_rgba(
@@ -81,9 +85,22 @@ drw_fill_rectangle(struct drwsurf *d, Color color, uint32_t x, uint32_t y,
 	  color.bgra[0] / (double)255, color.bgra[3] / (double)255);
 	cairo_fill(d->cairo);
 
+
 	cairo_restore(d->cairo);
 
 	wl_surface_damage(d->surf, x, y, w, h);
+}
+
+void
+drw_fill_rectangle(struct drwsurf *d, Color color, uint32_t x, uint32_t y,
+                   uint32_t w, uint32_t h) {
+	drw_do_rectangle(d, color, x, y, w, h, false);
+}
+
+void
+drw_over_rectangle(struct drwsurf *d, Color color, uint32_t x, uint32_t y,
+                   uint32_t w, uint32_t h) {
+	drw_do_rectangle(d, color, x, y, w, h, true);
 }
 
 uint32_t

@@ -167,7 +167,7 @@ kbd_get_key(struct kbd *kb, uint32_t x, uint32_t y) {
 void
 kbd_unpress_key(struct kbd *kb, uint32_t time) {
 	if (kb->last_press) {
-		kbd_draw_key(kb, kb->last_press, false);
+		kbd_draw_press(kb, kb->last_press, false);
 		if (kb->last_press->type == Copy) {
 			zwp_virtual_keyboard_v1_key(kb->vkbd, time, 127, // COMP key
 			                            WL_KEYBOARD_KEY_STATE_RELEASED);
@@ -195,6 +195,7 @@ void kbd_release_key(struct kbd *kb, uint32_t time) {
 		printf("\n");
 		// Important so autocompleted words get typed in time
 		fflush(stdout);
+		kbd_draw_layout(kb);
 		kb->last_swipe = NULL;
 	}
 }
@@ -203,15 +204,22 @@ void kbd_motion_key(struct kbd *kb, uint32_t time, uint32_t x, uint32_t y) {
 	// Output intersecting keys
 	// (for external 'swiping'-based accelerators).
 	if (kb->print_intersect) {
+		if (kb->last_press) {
+			kbd_unpress_key(kb, time);
+			// Redraw last press as a swipe.
+			kbd_draw_swipe(kb, kb->last_swipe);
+		}
 		struct key *intersect_key;
 		intersect_key = kbd_get_key(kb, x, y);
 		if (intersect_key &&
 		    (! kb->last_swipe || intersect_key->label != kb->last_swipe->label)) {
 			kbd_print_key_stdout(kb, intersect_key);
 			kb->last_swipe = intersect_key;
+			kbd_draw_swipe(kb, kb->last_swipe);
 		}
+	} else {
+		kbd_unpress_key(kb, time);
 	}
-	kbd_unpress_key(kb, time);
 }
 
 void
@@ -238,7 +246,7 @@ kbd_press_key(struct kbd *kb, struct key *k, uint32_t time) {
 			zwp_virtual_keyboard_v1_modifiers(kb->vkbd, kb->mods, 0, 0, 0);
 		}
 		kb->last_swipe = kb->last_press = k;
-		kbd_draw_key(kb, k, true);
+		kbd_draw_press(kb, k, true);
 		zwp_virtual_keyboard_v1_key(kb->vkbd, time, kb->last_press->code,
 		                            WL_KEYBOARD_KEY_STATE_PRESSED);
 		if (kb->print || kb->print_intersect)
@@ -254,7 +262,7 @@ kbd_press_key(struct kbd *kb, struct key *k, uint32_t time) {
 		if (k->code == Shift) {
 			kbd_draw_layout(kb);
 		}
-		kbd_draw_key(kb, k, kb->mods & k->code);
+		kbd_draw_press(kb, k, kb->mods & k->code);
 		zwp_virtual_keyboard_v1_modifiers(kb->vkbd, kb->mods, 0, 0, 0);
 		break;
 	case Layout:
@@ -268,7 +276,7 @@ kbd_press_key(struct kbd *kb, struct key *k, uint32_t time) {
 		} else {
 			kb->compose = 0;
 		}
-		kbd_draw_key(kb, k, (bool)kb->compose);
+		kbd_draw_press(kb, k, (bool)kb->compose);
 		break;
 	case NextLayer:
 		// switch to the next layout in the layer sequence
@@ -297,7 +305,7 @@ kbd_press_key(struct kbd *kb, struct key *k, uint32_t time) {
 	case Copy:
 		// copy code as unicode chr by setting a temporary keymap
 		kb->last_swipe = kb->last_press = k;
-		kbd_draw_key(kb, k, true);
+		kbd_draw_press(kb, k, true);
 		if (kb->debug)
 			fprintf(stderr, "pressing copy key\n");
 		create_and_upload_keymap(kb, kb->layout->keymap_name, k->code, k->code_mod);
@@ -352,16 +360,28 @@ kbd_print_key_stdout(struct kbd *kb, struct key *k) {
 }
 
 void
-kbd_draw_key(struct kbd *kb, struct key *k, bool pressed) {
+kbd_draw_key(struct kbd *kb, struct key *k, bool pressed, bool swiped) {
 	struct drwsurf *d = kb->surf;
 	const char *label = (kb->mods & Shift) ? k->shift_label : k->label;
 	if (kb->debug)
 		fprintf(stderr, "Draw key +%d+%d %dx%d -> %s\n", k->x, k->y, k->w, k->h,
 		        label);
 	struct clr_scheme *scheme = (k->scheme == 0) ? &(kb->scheme) : &(kb->scheme1);
-	Color *fill = pressed ? &scheme->high : &scheme->fg;
-	draw_inset(d, k->x, k->y, k->w, k->h, KBD_KEY_BORDER, *fill);
+	if (swiped) {
+		Color *fill = &scheme->swipe;
+		draw_over_inset(d, k->x, k->y, k->w, k->h, KBD_KEY_BORDER, *fill);
+	} else {
+		Color *fill = pressed ? &scheme->high : &scheme->fg;
+		draw_inset(d, k->x, k->y, k->w, k->h, KBD_KEY_BORDER, *fill);
+	}
 	drw_draw_text(d, scheme->text, k->x, k->y, k->w, k->h, label);
+}
+void
+kbd_draw_press(struct kbd *kb, struct key *k, bool pressed) {
+	kbd_draw_key(kb, k, pressed, false);
+}
+void kbd_draw_swipe(struct kbd *kb, struct key *k) {
+	kbd_draw_key(kb, k, false, true);
 }
 
 void
@@ -380,7 +400,7 @@ kbd_draw_layout(struct kbd *kb) {
 			continue;
 		}
 		pressed = next_key->type == Mod && kb->mods & next_key->code;
-		kbd_draw_key(kb, next_key, pressed);
+		kbd_draw_press(kb, next_key, pressed);
 		next_key++;
 	}
 }
@@ -403,6 +423,12 @@ void
 draw_inset(struct drwsurf *ds, uint32_t x, uint32_t y, uint32_t width,
            uint32_t height, uint32_t border, Color color) {
 	drw_fill_rectangle(ds, color, x + border, y + border, width - border,
+	                   height - border);
+}
+void
+draw_over_inset(struct drwsurf *ds, uint32_t x, uint32_t y, uint32_t width,
+                uint32_t height, uint32_t border, Color color) {
+	drw_over_rectangle(ds, color, x + border, y + border, width - border,
 	                   height - border);
 }
 
