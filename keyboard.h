@@ -26,6 +26,7 @@ enum key_type {
 	           // upon next keypress
 	EndRow,    // Incidates the end of a key row
 	Last,      // Indicated the end of a layout
+	StringFn,  // Function that somehow obtains a string to input
 };
 
 /* Modifiers passed to the virtual_keyboard protocol. They are based on
@@ -68,6 +69,8 @@ struct key {
 	// actual coordinates on the surface (pixels), will be computed automatically
 	// for all keys
 	uint32_t x, y, w, h;
+
+	const char *(*string_fn)();
 };
 
 struct layout {
