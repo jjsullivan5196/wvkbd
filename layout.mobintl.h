@@ -131,8 +131,17 @@ static struct layout layouts[NumLayouts] = {
   [ComposeCyrK] = {keys_compose_cyr_k, "cyrillic"},
 };
 
-static const char *njnj() {
-	return "njnj";
+static const char *dasher() {
+	FILE *fp = popen("/usr/bin/dasher-get-input", "r");
+	char buf[1024];
+	const char *input = "";
+	if (fp) {
+		if (fgets(buf, sizeof(buf), fp) != NULL) {
+			input = buf;
+		}
+		pclose(fp);
+	}
+	return input;
 }
 
 /* key layouts
@@ -231,7 +240,7 @@ static struct key keys_full[] = {
   {"Alt", "Alt", 1.0, Mod, Alt, .scheme = 1},
   {",", "'", 1.0, Code, KEY_COMMA},
   {"", "", 4.0, Code, KEY_SPACE},
-  {"njnj", "", 4.0, StringFn, .string_fn = njnj},
+  {"njnj", "", 4.0, StringFn, .string_fn = dasher},
   {".", "?", 1.0, Code, KEY_DOT},
   {"Enter", "Enter", 2.0, Code, KEY_ENTER, .scheme = 1},
 
