@@ -182,8 +182,10 @@ kbd_unpress_key(struct kbd *kb, uint32_t time) {
 			kbd_switch_layout(kb, kb->prevlayout);
 			if ((kb->mods & Shift) == Shift)
 				kb->mods ^= Shift;
+				zwp_virtual_keyboard_v1_modifiers(kb->vkbd, kb->mods, 0, 0, 0);
 		} else if ((kb->mods & Shift) == Shift) {
 			kb->mods ^= Shift;
+			zwp_virtual_keyboard_v1_modifiers(kb->vkbd, kb->mods, 0, 0, 0);
 			kbd_draw_layout(kb);
 		}
 	}
