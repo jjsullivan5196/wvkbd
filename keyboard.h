@@ -41,6 +41,12 @@ enum key_modifier_type {
 	AltGr = 128,
 };
 
+enum key_draw_type {
+	Unpress = 0,
+	Press,
+	Swipe,
+};
+
 struct clr_scheme {
 	Color fg;
 	Color bg;
@@ -117,9 +123,7 @@ void kbd_release_key(struct kbd *kb, uint32_t time);
 void kbd_motion_key(struct kbd *kb, uint32_t time, uint32_t x, uint32_t y);
 void kbd_press_key(struct kbd *kb, struct key *k, uint32_t time);
 void kbd_print_key_stdout(struct kbd *kb, struct key *k);
-void kbd_draw_key(struct kbd *kb, struct key *k, bool pressed, bool swiped);
-void kbd_draw_press(struct kbd *kb, struct key *k, bool pressed);
-void kbd_draw_swipe(struct kbd *kb, struct key *k);
+void kbd_draw_key(struct kbd *kb, struct key *k, enum key_draw_type);
 void kbd_draw_layout(struct kbd *kb);
 void kbd_resize(struct kbd *kb, struct layout *layouts, uint8_t layoutcount);
 uint8_t kbd_get_rows(struct layout *l);
