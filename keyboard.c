@@ -166,26 +166,34 @@ kbd_get_key(struct kbd *kb, uint32_t x, uint32_t y) {
 
 void
 kbd_unpress_key(struct kbd *kb, uint32_t time) {
+  bool unlatch_shift = false;
+
 	if (kb->last_press) {
-		kbd_draw_key(kb, kb->last_press, Unpress);
-		if (kb->last_press->type == Copy) {
+    unlatch_shift = (kb->mods & Shift) == Shift;
+
+    if (unlatch_shift) {
+      kb->mods ^= Shift;
+      zwp_virtual_keyboard_v1_modifiers(kb->vkbd, kb->mods, 0, 0, 0);
+    }
+
+    if (kb->last_press->type == Copy) {
 			zwp_virtual_keyboard_v1_key(kb->vkbd, time, 127, // COMP key
 			                            WL_KEYBOARD_KEY_STATE_RELEASED);
 		} else {
 			zwp_virtual_keyboard_v1_key(kb->vkbd, time, kb->last_press->code,
 			                            WL_KEYBOARD_KEY_STATE_RELEASED);
 		}
-		kb->last_press = NULL;
 
 		if (kb->compose >= 2) {
 			kb->compose = 0;
 			kbd_switch_layout(kb, kb->prevlayout);
-			if ((kb->mods & Shift) == Shift)
-				kb->mods ^= Shift;
-		} else if ((kb->mods & Shift) == Shift) {
-			kb->mods ^= Shift;
+		} else if (unlatch_shift) {
 			kbd_draw_layout(kb);
-		}
+		} else {
+      kbd_draw_key(kb, kb->last_press, Unpress);
+    }
+
+		kb->last_press = NULL;
 	}
 }
 
