@@ -4393,7 +4393,7 @@ xkb_symbols \"(unnamed)\" {\
 };\
 ",
   // GEORGIAN
-   "xkb_keymap {\
+  "xkb_keymap {\
 xkb_keycodes \"(unnamed)\" {\
         minimum = 8;\
         maximum = 255;\

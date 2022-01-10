@@ -166,17 +166,17 @@ kbd_get_key(struct kbd *kb, uint32_t x, uint32_t y) {
 
 void
 kbd_unpress_key(struct kbd *kb, uint32_t time) {
-  bool unlatch_shift = false;
+	bool unlatch_shift = false;
 
 	if (kb->last_press) {
-    unlatch_shift = (kb->mods & Shift) == Shift;
+		unlatch_shift = (kb->mods & Shift) == Shift;
 
-    if (unlatch_shift) {
-      kb->mods ^= Shift;
-      zwp_virtual_keyboard_v1_modifiers(kb->vkbd, kb->mods, 0, 0, 0);
-    }
+		if (unlatch_shift) {
+			kb->mods ^= Shift;
+			zwp_virtual_keyboard_v1_modifiers(kb->vkbd, kb->mods, 0, 0, 0);
+		}
 
-    if (kb->last_press->type == Copy) {
+		if (kb->last_press->type == Copy) {
 			zwp_virtual_keyboard_v1_key(kb->vkbd, time, 127, // COMP key
 			                            WL_KEYBOARD_KEY_STATE_RELEASED);
 		} else {
@@ -190,14 +190,15 @@ kbd_unpress_key(struct kbd *kb, uint32_t time) {
 		} else if (unlatch_shift) {
 			kbd_draw_layout(kb);
 		} else {
-      kbd_draw_key(kb, kb->last_press, Unpress);
-    }
+			kbd_draw_key(kb, kb->last_press, Unpress);
+		}
 
 		kb->last_press = NULL;
 	}
 }
 
-void kbd_release_key(struct kbd *kb, uint32_t time) {
+void
+kbd_release_key(struct kbd *kb, uint32_t time) {
 	kbd_unpress_key(kb, time);
 	if (kb->print_intersect && kb->last_swipe) {
 		printf("\n");
@@ -208,7 +209,8 @@ void kbd_release_key(struct kbd *kb, uint32_t time) {
 	}
 }
 
-void kbd_motion_key(struct kbd *kb, uint32_t time, uint32_t x, uint32_t y) {
+void
+kbd_motion_key(struct kbd *kb, uint32_t time, uint32_t x, uint32_t y) {
 	// Output intersecting keys
 	// (for external 'swiping'-based accelerators).
 	if (kb->print_intersect) {
@@ -220,7 +222,7 @@ void kbd_motion_key(struct kbd *kb, uint32_t time, uint32_t x, uint32_t y) {
 		struct key *intersect_key;
 		intersect_key = kbd_get_key(kb, x, y);
 		if (intersect_key &&
-		    (! kb->last_swipe || intersect_key->label != kb->last_swipe->label)) {
+		    (!kb->last_swipe || intersect_key->label != kb->last_swipe->label)) {
 			kbd_print_key_stdout(kb, intersect_key);
 			kb->last_swipe = intersect_key;
 			kbd_draw_key(kb, kb->last_swipe, Swipe);

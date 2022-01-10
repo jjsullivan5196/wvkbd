@@ -85,7 +85,6 @@ drw_do_rectangle(struct drwsurf *d, Color color, uint32_t x, uint32_t y,
 	  color.bgra[0] / (double)255, color.bgra[3] / (double)255);
 	cairo_fill(d->cairo);
 
-
 	cairo_restore(d->cairo);
 
 	wl_surface_damage(d->surf, x, y, w, h);

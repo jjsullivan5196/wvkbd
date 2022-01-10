@@ -460,7 +460,8 @@ main(int argc, char **argv) {
 			keyboard.print = true;
 		} else if (!strcmp(argv[i], "-O")) {
 			keyboard.print_intersect = true;
-		} else if ((!strcmp(argv[i], "-hidden")) || (!strcmp(argv[i], "--hidden"))) {
+		} else if ((!strcmp(argv[i], "-hidden")) ||
+		           (!strcmp(argv[i], "--hidden"))) {
 			starthidden = true;
 		} else {
 			fprintf(stderr, "Invalid argument: %s\n", argv[i]);
@@ -509,7 +510,6 @@ main(int argc, char **argv) {
 	draw_ctx.font_description =
 	  pango_font_description_from_string(fc_font_pattern);
 
-
 	if (!starthidden) {
 		draw_surf.surf = wl_compositor_create_surface(compositor);
 
@@ -521,7 +521,7 @@ main(int argc, char **argv) {
 		zwlr_layer_surface_v1_set_exclusive_zone(layer_surface, height);
 		zwlr_layer_surface_v1_set_keyboard_interactivity(layer_surface, false);
 		zwlr_layer_surface_v1_add_listener(layer_surface, &layer_surface_listener,
-										   NULL);
+		                                   NULL);
 		wl_surface_commit(draw_surf.surf);
 
 		wl_display_roundtrip(display);
