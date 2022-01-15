@@ -822,7 +822,7 @@ static struct key keys_emoji[] = {
 
 static struct key keys_nav[] = {
   {"Esc", "Esc", 1.0, Code, KEY_ESC, .scheme = 1},
-  {"", "", 1.0, Code, KEY_SPACE, .scheme = 1},
+  {"⌫", "⌫", 1.0, Code, KEY_BACKSPACE, .scheme = 1},
   {"↑", "↑", 1.0, Code, KEY_UP, .scheme = 1},
   {"⇈", "⇈", 1.0, Code, KEY_PAGEUP, .scheme = 1},
   {"", "", 0.0, EndRow},
@@ -834,7 +834,7 @@ static struct key keys_nav[] = {
   {"", "", 0.0, EndRow},
 
   {"Sym", "Sym", 1.0, NextLayer, .scheme = 1},
-  {"⌫", "⌫", 1.0, Code, KEY_BACKSPACE, .scheme = 1},
+  {"", "", 1.0, Code, KEY_SPACE, .scheme = 1},
   {"↓", "↓", 1.0, Code, KEY_DOWN, .scheme = 1},
   {"⇊", "⇊", 1.0, Code, KEY_PAGEDOWN, .scheme = 1},
   {"", "", 0.0, Last},
