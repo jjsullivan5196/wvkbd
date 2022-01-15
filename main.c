@@ -45,6 +45,7 @@ static int cur_x = -1, cur_y = -1;
 static bool cur_press = false;
 static struct kbd keyboard;
 static uint32_t height, normal_height, landscape_height;
+static bool hidden = false;
 
 /* event handler prototypes */
 static void wl_pointer_enter(void *data, struct wl_pointer *wl_pointer,
@@ -370,6 +371,8 @@ hide(int sigint) {
 		wl_callback_destroy(draw_surf.cb);
 		draw_surf.cb = NULL;
 	}
+
+	hidden = true;
 }
 
 void
@@ -396,6 +399,19 @@ show(int sigint) {
 
 	wl_display_roundtrip(display);
 	drwsurf_flip(&draw_surf);
+
+	hidden = false;
+}
+
+void
+toggle_visibility(int sigint) {
+	signal(SIGRTMIN, toggle_visibility);
+
+	if (hidden) {
+		show(sigint);
+	} else {
+		hide(sigint);
+	}
 }
 
 int
@@ -421,8 +437,6 @@ main(int argc, char **argv) {
 	keyboard.layer_index = 0;
 	keyboard.scheme1 = scheme1;
 	keyboard.scheme1 = scheme1;
-
-	bool starthidden = false;
 
 	int i;
 	for (i = 1; argv[i]; i++) {
@@ -462,7 +476,7 @@ main(int argc, char **argv) {
 			keyboard.print_intersect = true;
 		} else if ((!strcmp(argv[i], "-hidden")) ||
 		           (!strcmp(argv[i], "--hidden"))) {
-			starthidden = true;
+			hidden = true;
 		} else {
 			fprintf(stderr, "Invalid argument: %s\n", argv[i]);
 			usage(argv[0]);
@@ -510,7 +524,7 @@ main(int argc, char **argv) {
 	draw_ctx.font_description =
 	  pango_font_description_from_string(fc_font_pattern);
 
-	if (!starthidden) {
+	if (!hidden) {
 		draw_surf.surf = wl_compositor_create_surface(compositor);
 
 		layer_surface = zwlr_layer_shell_v1_get_layer_surface(
@@ -530,6 +544,7 @@ main(int argc, char **argv) {
 
 	signal(SIGUSR1, hide);
 	signal(SIGUSR2, show);
+	signal(SIGRTMIN, toggle_visibility);
 
 	while (run_display) {
 		while (wl_display_dispatch(display) != -1 && layer_surface) {
