@@ -2,20 +2,21 @@
 #define config_def_h_INCLUDED
 
 static const char *default_font = "Monospace 14";
+static const int transparency = 225;
 
 struct clr_scheme scheme = {
   /* colors */
-  .bg = {.bgra = {15, 15, 15, 225}},
-  .fg = {.bgra = {45, 45, 45, 225}},
-  .high = {.bgra = {100, 100, 100, 225}},
+  .bg = {.bgra = {15, 15, 15, transparency}},
+  .fg = {.bgra = {45, 45, 45, transparency}},
+  .high = {.bgra = {100, 100, 100, transparency}},
   .swipe = {.bgra = {100, 255, 100, 64}},
   .text = {.color = UINT32_MAX},
 };
 struct clr_scheme scheme1 = {
   /* colors */
-  .bg = {.bgra = {15, 15, 15, 225}},
-  .fg = {.bgra = {32, 32, 32, 225}},
-  .high = {.bgra = {100, 100, 100, 225}},
+  .bg = {.bgra = {15, 15, 15, transparency}},
+  .fg = {.bgra = {32, 32, 32, transparency}},
+  .high = {.bgra = {100, 100, 100, transparency}},
   .swipe = {.bgra = {100, 255, 100, 64}},
   .text = {.color = UINT32_MAX},
 };
