@@ -24,7 +24,7 @@ struct clr_scheme scheme1 = {
 static enum layout_id layers[] = {
   Full, // First layout is the default layout on startup
   Special,   Emoji,    Simple, SimpleGrid, Nav,
-  Dialer,    Cyrillic, Arabic, Georgian,   Persian,
+  Dialer,    Cyrillic, Arabic, Persian, Greek, Georgian,
   NumLayouts // signals the last item, may not be omitted
 };
 

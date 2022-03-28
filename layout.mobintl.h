@@ -1,5 +1,4 @@
 /* constants */
-
 /* how tall the keyboard should be by default (can be overriden) */
 #define KBD_PIXEL_HEIGHT 240
 
@@ -21,8 +20,9 @@ enum layout_id {
 	Dialer,
 	Cyrillic,
 	Arabic,
-	Georgian,
 	Persian,
+	Greek,
+	Georgian,
 	Emoji,
 	Nav,
 	Landscape,
@@ -68,7 +68,7 @@ enum layout_id {
 };
 
 static struct key keys_full[], keys_special[], keys_simple[], keys_simplegrid[],
-  keys_cyrillic[], keys_arabic[], keys_georgian[], keys_persian[], keys_emoji[],
+  keys_cyrillic[], keys_arabic[], keys_persian[], keys_georgian[], keys_greek[], keys_emoji[],
   keys_nav[], keys_landscape[], keys_compose_a[], keys_compose_e[],
   keys_compose_y[], keys_compose_u[], keys_compose_i[], keys_compose_o[],
   keys_compose_w[], keys_compose_r[], keys_compose_t[], keys_compose_p[],
@@ -93,6 +93,7 @@ static struct layout layouts[NumLayouts] = {
   [Arabic] = {keys_arabic, "arabic", "arabic"},
   [Georgian] = {keys_georgian, "georgian", "georgian"},
   [Persian] = {keys_persian, "persian", "persian"},
+  [Greek] = {keys_greek, "greek", "greek"},
   [Emoji] = {keys_emoji, "latin", "emoji"},
   [Nav] = {keys_nav, "latin", "nav"},
   [Landscape] = {keys_landscape, "latin", "landscape"},
@@ -638,8 +639,8 @@ static struct key keys_persian[] = {
   {"ه", "ﹽ", 1.0, Code, KEY_I},
   {"خ", "]", 1.0, Code, KEY_O},
   {"ح", "[", 1.0, Code, KEY_P},
-  {"ج", "\}", 1.0, Code, KEY_LEFTBRACE},
-  {"چ", "\{", 1.0, Code, KEY_RIGHTBRACE},
+  {"ج", "}", 1.0, Code, KEY_LEFTBRACE},
+  {"چ", "{", 1.0, Code, KEY_RIGHTBRACE},
   {"", "", 0.0, EndRow},
 
   {"ش", "ؤ", 1.0, Code, KEY_A},
@@ -674,6 +675,66 @@ static struct key keys_persian[] = {
   {"", "", 4.0, Code, KEY_SPACE},
   {"⥣", "↥", 1.0, Code, KEY_GRAVE},
   {"؟", "!", 1.0, Code, KEY_SLASH},
+  {"Enter", "Enter", 2.0, Code, KEY_ENTER, .scheme = 1},
+
+  /* end of layout */
+  {"", "", 0.0, Last},
+};
+
+static struct key keys_greek[] = {
+  {"1", "!", 1.0, Code, KEY_1},
+  {"2", "@", 1.0, Code, KEY_2},
+  {"3", "#", 1.0, Code, KEY_3},
+  {"4", "$", 1.0, Code, KEY_4},
+  {"5", "%", 1.0, Code, KEY_5},
+  {"6", "^", 1.0, Code, KEY_6},
+  {"7", "&", 1.0, Code, KEY_7},
+  {"8", "*", 1.0, Code, KEY_8},
+  {"9", "(", 1.0, Code, KEY_9},
+  {"0", ")", 1.0, Code, KEY_0},
+  {"", "", 0.0, EndRow},
+
+  {";", ":", 1.0, Code, KEY_Q},
+  {"ς", "Σ", 1.0, Code, KEY_W},
+  {"ε", "Ε", 1.0, Code, KEY_E},
+  {"ρ", "Ρ", 1.0, Code, KEY_R},
+  {"τ", "Τ", 1.0, Code, KEY_T},
+  {"υ", "Υ", 1.0, Code, KEY_Y},
+  {"θ", "Θ", 1.0, Code, KEY_U},
+  {"ι", "Ι", 1.0, Code, KEY_I},
+  {"ο", "Ο", 1.0, Code, KEY_O},
+  {"π", "Π", 1.0, Code, KEY_P},
+  {"", "", 0.0, EndRow},
+
+  {"α", "A", 1.0, Code, KEY_A},
+  {"σ", "Σ", 1.0, Code, KEY_S},
+  {"δ", "Δ", 1.0, Code, KEY_D},
+  {"φ", "Φ", 1.0, Code, KEY_F},
+  {"γ", "Γ", 1.0, Code, KEY_G},
+  {"η", "Η", 1.0, Code, KEY_H},
+  {"ξ", "Ξ", 1.0, Code, KEY_J},
+  {"κ", "Κ", 1.0, Code, KEY_K},
+  {"λ", "Λ", 1.0, Code, KEY_L},
+  {"΄", "¨", 1.0, Code, KEY_SEMICOLON},
+  {"", "", 0.0, EndRow},
+
+  {"ζ", "Ζ", 1.0, Code, KEY_Z},
+  {"χ", "Χ", 1.0, Code, KEY_X},
+  {"ψ", "Ψ", 1.0, Code, KEY_C},
+  {"ω", "Ω", 1.0, Code, KEY_V},
+  {"β", "Β", 1.0, Code, KEY_B},
+  {"ν", "Ν", 1.0, Code, KEY_N},
+  {"μ", "Μ", 1.0, Code, KEY_M},
+  {",", "'", 1.0, Code, KEY_COMMA},
+  {".", "\"", 1.0, Code, KEY_DOT},
+  {"⌫", "⌫", 1.0, Code, KEY_BACKSPACE, .scheme = 1},
+
+  {"", "", 0.0, EndRow},
+
+  {"Abc", "Abc", 1.0, NextLayer, .scheme = 1},
+  {"⇧", "⇧", 1.0, Mod, Shift, .scheme = 1},
+  {"Cmp", "Cmp", 1.0, Compose, .scheme = 1},
+  {"", "", 5.0, Code, KEY_SPACE},
   {"Enter", "Enter", 2.0, Code, KEY_ENTER, .scheme = 1},
 
   /* end of layout */
