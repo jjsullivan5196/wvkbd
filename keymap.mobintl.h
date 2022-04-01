@@ -7080,7 +7080,7 @@ xkb_symbols \"(unnamed)\" {\
         key <AB07>               {	[              Greek_mu,       Greek_MU, exclam ] };\
         key <AB08>               {	[                 comma,     apostrophe, U00AB] };\
         key <AB09>               {	[                period,       quotedbl, U00BB] };\
-        key <AB10>               {	[                 slash,        greater ] };\
+        key <AB10>               {	[                 slash,        backslash ] };\
         key <I147>               {  [            exclamdown,   questiondown, exclamdown ] };\
         key <RTSH>               {	[         Shift_R ] };\
         key <KPMU>               {\

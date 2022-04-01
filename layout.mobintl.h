@@ -623,6 +623,8 @@ static struct key keys_greek[] = {
   {"8", "*", 1.0, Code, KEY_8},
   {"9", "(", 1.0, Code, KEY_9},
   {"0", ")", 1.0, Code, KEY_0},
+  {"-", "_", 1.0, Code, KEY_MINUS},
+  {"=", "+", 1.0, Code, KEY_EQUAL},
   {"", "", 0.0, EndRow},
 
   {";", ":", 1.0, Code, KEY_Q},
@@ -649,6 +651,7 @@ static struct key keys_greek[] = {
   {"΄", "¨", 1.0, Code, KEY_SEMICOLON},
   {"", "", 0.0, EndRow},
 
+  {"⇧", "⇧", 1.5, Mod, Shift, .scheme = 1},
   {"ζ", "Ζ", 1.0, Code, KEY_Z},
   {"χ", "Χ", 1.0, Code, KEY_X},
   {"ψ", "Ψ", 1.0, Code, KEY_C},
@@ -656,17 +659,15 @@ static struct key keys_greek[] = {
   {"β", "Β", 1.0, Code, KEY_B},
   {"ν", "Ν", 1.0, Code, KEY_N},
   {"μ", "Μ", 1.0, Code, KEY_M},
-  {",", "'", 1.0, Code, KEY_COMMA},
-  {".", "\"", 1.0, Code, KEY_DOT},
-  {"⌫", "⌫", 1.0, Code, KEY_BACKSPACE, .scheme = 1},
-
+  {"/", "\\", 1.0, Code, KEY_SLASH},
+  {"⌫", "⌫", 1.5, Code, KEY_BACKSPACE, .scheme = 1},
   {"", "", 0.0, EndRow},
 
-  {"Abc", "Abc", 1.0, NextLayer, .scheme = 1},
-  {"⇧", "⇧", 1.0, Mod, Shift, .scheme = 1},
-  {"Cmp", "Cmp", 1.0, Compose, .scheme = 1},
-  {"", "", 5.0, Code, KEY_SPACE},
-  {"Enter", "Enter", 2.0, Code, KEY_ENTER, .scheme = 1},
+  {"Abc", "Abc", 1.5, NextLayer, .scheme = 1},
+  {",", "'", 1.0, Code, KEY_COMMA},
+  {"", "", 5, Code, KEY_SPACE},
+  {".", "\"", 1.0, Code, KEY_DOT},
+  {"Enter", "Enter", 2, Code, KEY_ENTER, .scheme = 1},
 
   /* end of layout */
   {"", "", 0.0, Last},
