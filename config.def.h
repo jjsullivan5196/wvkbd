@@ -31,7 +31,7 @@ static enum layout_id layers[] = {
 /* layers is an ordered list of layouts, used to cycle through */
 static enum layout_id landscape_layers[] = {
   Landscape, // First layout is the default layout on startup
-  Special, Emoji, Nav,
+  Special,   Emoji, Nav, Greek,
   NumLayouts // signals the last item, may not be omitted
 };
 
