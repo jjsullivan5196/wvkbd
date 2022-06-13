@@ -76,11 +76,17 @@ Another output mode, `-O` will let the keyboard output keys which are swiped ove
 
 ## Contribute
 
-Any contributions are welcome, please tell me what I did wrong in issues or
-PRs. I could also use some nice branding if that tickles your fancy.
+Any contributions are welcome, there are two ways to contribute, the first one is **preferred**:
 
-For code contributions, all I ask for now is you run `make format` (requires
-`clang-format`) before opening a PR and include as much relevant detail as
+1. [Sourcehut](https://git.sr.ht/~proycon/wvkbd) - Submit your patches using `git mail` to [~mil/sxmo-devel@lists.sr.ht](mailto:~mil/sxmo-devel@lists.sr.ht), follow [these contribution guidelines](https://sxmo.org/contribute/). Questions can also be asked on Sxmo's [mailing lists](https://sxmo.org/support/).
+2. [Github](https://github.com/jjsullivan5196/wvkbd/) - Submit a pull request or open an issue *(legacy method)*
+
+This project was started by [John Sullivan](https://jsullivan.cc/) and is
+currently being maintained by the [Sxmo](https://sxmo.org) project, whose
+maintainers will ensure both git remotes are kept in sync at all times.
+
+For code contributions, please run `make format` (requires `clang-format`)
+before sending a patch (opening a PR) and include as much relevant detail as
 possible.
 
 ## Related projects
