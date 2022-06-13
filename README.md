@@ -37,7 +37,8 @@ There are some areas that still need work:
 
 You'll need the following developer packages
 
- - pangocairo
+ - cairo
+ - pango
  - wayland-client
  - xkbcommon
 
@@ -46,7 +47,7 @@ Make any customizations you would like in `config.def.h` and run `make`
 The default set of layouts is called `mobintl` *(mobile international)*, which groups various layouts aimed at mobile devices
 and also attempts to accommodate various international users. The resulting binary is called `wvkbd-mobintl`.
 
-You can, however, define your own layouts by copying and and modifying `layout.mobintl.h` and `keymap.mobintl.h`
+You can, however, define your own layouts by copying and modifying `layout.mobintl.h` and `keymap.mobintl.h`
 (replace `mobintl` for something like `yourlayout`). Then make your layout set using `make LAYOUT=yourlayout`, and
 the resulting binary will be `wvkbd-yourlayout`
 

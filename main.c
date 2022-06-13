@@ -414,6 +414,11 @@ toggle_visibility(int sigint) {
 	}
 }
 
+void
+pipewarn(int sigint) {
+	fprintf(stderr, "wvkbd: cannot pipe data out.\n");
+}
+
 int
 main(int argc, char **argv) {
 	/* parse command line arguments */
@@ -441,7 +446,7 @@ main(int argc, char **argv) {
 	int i;
 	for (i = 1; argv[i]; i++) {
 		if ((!strcmp(argv[i], "-v")) || (!strcmp(argv[i], "--version"))) {
-			printf("wvkbd-%s", VERSION);
+			printf("wvkbd-%s\n", VERSION);
 			exit(0);
 		} else if ((!strcmp(argv[i], "-h")) || (!strcmp(argv[i], "--help"))) {
 			usage(argv[0]);
@@ -545,6 +550,7 @@ main(int argc, char **argv) {
 	signal(SIGUSR1, hide);
 	signal(SIGUSR2, show);
 	signal(SIGRTMIN, toggle_visibility);
+	signal(SIGPIPE, pipewarn);
 
 	while (run_display) {
 		while (wl_display_dispatch(display) != -1 && layer_surface) {
