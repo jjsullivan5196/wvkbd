@@ -11,7 +11,7 @@ WVKBD_HEADERS += $(wildcard $(SRC)/*.h)
 
 CFLAGS += -std=gnu99 -Wall -g -DWITH_WAYLAND_SHM -DLAYOUT=\"layout.${LAYOUT}.h\" -DKEYMAP=\"keymap.${LAYOUT}.h\"
 CFLAGS += $(shell pkg-config --cflags $(PKGS))
-LDFLAGS =$(shell pkg-config --libs $(PKGS)) -lm -lutil -lrt
+LDFLAGS += $(shell pkg-config --libs $(PKGS)) -lm -lutil -lrt
 
 WAYLAND_HEADERS = $(wildcard proto/*.xml)
 
