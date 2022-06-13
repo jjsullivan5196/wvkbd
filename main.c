@@ -427,7 +427,7 @@ main(int argc, char **argv) {
 	int i;
 	for (i = 1; argv[i]; i++) {
 		if ((!strcmp(argv[i], "-v")) || (!strcmp(argv[i], "--version"))) {
-			printf("wvkbd-%s", VERSION);
+			printf("wvkbd-%s\n", VERSION);
 			exit(0);
 		} else if ((!strcmp(argv[i], "-h")) || (!strcmp(argv[i], "--help"))) {
 			usage(argv[0]);
