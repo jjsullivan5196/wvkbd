@@ -413,7 +413,8 @@ kbd_draw_layout(struct kbd *kb) {
 			next_key++;
 			continue;
 		}
-		if (next_key->type == Mod && kb->mods & next_key->code) {
+		if ((next_key->type == Mod && kb->mods & next_key->code) ||
+			(next_key->type == Compose && kb->compose)) {
 			kbd_draw_key(kb, next_key, Press);
 		} else {
 			kbd_draw_key(kb, next_key, Unpress);
