@@ -271,9 +271,11 @@ display_handle_geometry(void *data, struct wl_output *wl_output, int x, int y,
 	keyboard.layout = &keyboard.layouts[layer];
 	keyboard.prevlayout = keyboard.layout;
 
-	zwlr_layer_surface_v1_set_size(layer_surface, 0, height);
-	zwlr_layer_surface_v1_set_exclusive_zone(layer_surface, height);
-	wl_surface_commit(draw_surf.surf);
+	if (layer_surface) {
+		zwlr_layer_surface_v1_set_size(layer_surface, 0, height);
+		zwlr_layer_surface_v1_set_exclusive_zone(layer_surface, height);
+		wl_surface_commit(draw_surf.surf);
+	}
 }
 
 static void
