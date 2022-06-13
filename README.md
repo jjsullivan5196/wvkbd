@@ -21,7 +21,7 @@ new features.
  - Support for 'Copy' keys which are not on the keymap
  - Emoji support
  - Compose key for character variants (e.g. diacritics)
- - Show/hide keyboard on signals (SIGUSR1 = hide, SIGUSR2 = show)
+ - Show/hide keyboard on signals (SIGUSR1 = hide, SIGUSR2 = show, SIGRTMIN = toggle)
  - Automatic portrait/landscape detection and subsequent layout switching
 
 
@@ -59,8 +59,8 @@ want a subset of the available layers, you can define which wants you want and i
 them using the `-l` parameter. This takes takes a ordered comma separated list of
 layout names that are defined in your layout set.
 
-The keyboard can be hidden by sending it a `SIGUSR1` signal and shown again by sending it `SIGUSR2`. This saves some
-start up time and may be appropriate in some low-resource environments.
+The keyboard can be hidden by sending it a `SIGUSR1` signal, shown again by sending it `SIGUSR2` or toggled by sending it `SIGRTMIN`.
+This saves some start up time and may be appropriate in some low-resource environments.
 
 Wvkbd has an output mode `-o` that will echo its output to standard output. This facility can be used if users want
 audio/haptic feedback, a feature explicitly out of scope for wvkbd. To achieve this, simply pipe wvkbd's output through the external tool
