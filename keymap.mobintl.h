@@ -1,6 +1,7 @@
 #define NUMKEYMAPS 6
 
-static const char *keymap_names[] = {"latin", "cyrillic", "arabic", "georgian", "greek", "persian" };
+static const char *keymap_names[] = {"latin",    "cyrillic", "arabic",
+                                     "georgian", "greek",    "persian"};
 
 static const char *keymaps[NUMKEYMAPS] = {
 

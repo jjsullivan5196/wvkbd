@@ -68,19 +68,19 @@ enum layout_id {
 };
 
 static struct key keys_full[], keys_special[], keys_simple[], keys_simplegrid[],
-  keys_cyrillic[], keys_arabic[], keys_persian[], keys_georgian[], keys_greek[], keys_emoji[],
-  keys_nav[], keys_landscape[], keys_compose_a[], keys_compose_e[],
-  keys_compose_y[], keys_compose_u[], keys_compose_i[], keys_compose_o[],
-  keys_compose_w[], keys_compose_r[], keys_compose_t[], keys_compose_p[],
-  keys_compose_s[], keys_compose_d[], keys_compose_f[], keys_compose_g[],
-  keys_compose_h[], keys_compose_j[], keys_compose_k[], keys_compose_l[],
-  keys_compose_z[], keys_compose_x[], keys_compose_c[], keys_compose_v[],
-  keys_compose_b[], keys_compose_n[], keys_compose_m[], keys_compose_math[],
-  keys_compose_punctuation[], keys_compose_bracket[], keys_compose_cyr_i[],
-  keys_compose_cyr_j[], keys_compose_cyr_e[], keys_compose_cyr_u[],
-  keys_compose_cyr_l[], keys_compose_cyr_n[], keys_compose_cyr_tse[],
-  keys_compose_cyr_che[], keys_compose_cyr_g[], keys_compose_cyr_k[],
-  keys_dialer[];
+  keys_cyrillic[], keys_arabic[], keys_persian[], keys_georgian[], keys_greek[],
+  keys_emoji[], keys_nav[], keys_landscape[], keys_compose_a[],
+  keys_compose_e[], keys_compose_y[], keys_compose_u[], keys_compose_i[],
+  keys_compose_o[], keys_compose_w[], keys_compose_r[], keys_compose_t[],
+  keys_compose_p[], keys_compose_s[], keys_compose_d[], keys_compose_f[],
+  keys_compose_g[], keys_compose_h[], keys_compose_j[], keys_compose_k[],
+  keys_compose_l[], keys_compose_z[], keys_compose_x[], keys_compose_c[],
+  keys_compose_v[], keys_compose_b[], keys_compose_n[], keys_compose_m[],
+  keys_compose_math[], keys_compose_punctuation[], keys_compose_bracket[],
+  keys_compose_cyr_i[], keys_compose_cyr_j[], keys_compose_cyr_e[],
+  keys_compose_cyr_u[], keys_compose_cyr_l[], keys_compose_cyr_n[],
+  keys_compose_cyr_tse[], keys_compose_cyr_che[], keys_compose_cyr_g[],
+  keys_compose_cyr_k[], keys_dialer[];
 
 static struct layout layouts[NumLayouts] = {
   [Full] = {keys_full, "latin", "full"}, // second parameter is the keymap name
