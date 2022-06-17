@@ -3,6 +3,7 @@ include config.mk
 NAME=wvkbd
 BIN=${NAME}-${LAYOUT}
 SRC=.
+MAN1 = ${NAME}.1
 
 PKGS = wayland-client xkbcommon pangocairo
 
@@ -47,3 +48,5 @@ install: all
 	mkdir -p ${DESTDIR}${PREFIX}/bin
 	cp -f ${NAME}-${LAYOUT} ${DESTDIR}${PREFIX}/bin
 	chmod 755 ${DESTDIR}${PREFIX}/bin/${NAME}-${LAYOUT}
+	sed "s/VERSION/${VERSION}/g" < ${MAN1} > ${DESTDIR}${MANPREFIX}/man1/${MAN1}
+	chmod 644 ${DESTDIR}${MANPREFIX}/man1/${MAN1}
