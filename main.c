@@ -251,21 +251,24 @@ static void
 display_handle_geometry(void *data, struct wl_output *wl_output, int x, int y,
                         int physical_width, int physical_height, int subpixel,
                         const char *make, const char *model, int transform) {
-	if (transform % 2 == 0 && keyboard.landscape) {
-		keyboard.landscape = false;
-		height = normal_height;
-	} else if (transform % 2 != 0 && !keyboard.landscape) {
-		keyboard.landscape = true;
-		height = landscape_height;
-	} else {
-		return; // no changes
+	// Swap width and height on rotated displays
+	if (transform % 2 != 0) {
+		int tmp = physical_width;
+		physical_width = physical_height;
+		physical_height = tmp;
 	}
+
+	bool landscape = physical_width > physical_height;
+	if (landscape == keyboard.landscape) return;
+	keyboard.landscape = landscape;
 
 	enum layout_id layer;
 	if (keyboard.landscape) {
 		layer = keyboard.landscape_layers[0];
+		height = landscape_height;
 	} else {
 		layer = keyboard.layers[0];
+		height = normal_height;
 	}
 
 	keyboard.layout = &keyboard.layouts[layer];
