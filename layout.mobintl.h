@@ -350,8 +350,9 @@ static struct key keys_simple[] = {
 };
 
 static struct key keys_dialer[] = {
-  {"Esc", "Esc", 1.0, Code, KEY_ESC, .scheme = 1},
-  {"⌫", "⌫", 1.0, Code, KEY_BACKSPACE, .scheme = 1},
+  {"Esc", "Esc", 1.0, Code, KEY_ESC},
+  {"+","+", 1.0, Code, KEY_KPPLUS},
+  {"⌫", "⌫", 1.0, Code, KEY_BACKSPACE},
   {"", "", 0.0, EndRow},
   {"1", "1", 1.0, Code, KEY_1},
   {"2", "2", 1.0, Code, KEY_2},
