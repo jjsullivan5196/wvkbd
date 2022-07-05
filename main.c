@@ -273,6 +273,7 @@ display_handle_geometry(void *data, struct wl_output *wl_output, int x, int y,
 
 	keyboard.layout = &keyboard.layouts[layer];
 	keyboard.prevlayout = keyboard.layout;
+	keyboard.layer_index = 0;
 
 	if (layer_surface) {
 		zwlr_layer_surface_v1_set_size(layer_surface, 0, height);
