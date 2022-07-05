@@ -405,6 +405,7 @@ show(int sigint) {
 	wl_surface_commit(draw_surf.surf);
 
 	wl_display_roundtrip(display);
+	kbd_resize(&keyboard, layouts, NumLayouts);
 	drwsurf_flip(&draw_surf);
 
 	hidden = false;
