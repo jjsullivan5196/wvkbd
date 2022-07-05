@@ -538,23 +538,7 @@ main(int argc, char **argv) {
 	draw_ctx.font_description =
 	  pango_font_description_from_string(fc_font_pattern);
 
-	if (!hidden) {
-		draw_surf.surf = wl_compositor_create_surface(compositor);
-
-		layer_surface = zwlr_layer_shell_v1_get_layer_surface(
-		  layer_shell, draw_surf.surf, wl_output, layer, namespace);
-
-		zwlr_layer_surface_v1_set_size(layer_surface, 0, height);
-		zwlr_layer_surface_v1_set_anchor(layer_surface, anchor);
-		zwlr_layer_surface_v1_set_exclusive_zone(layer_surface, height);
-		zwlr_layer_surface_v1_set_keyboard_interactivity(layer_surface, false);
-		zwlr_layer_surface_v1_add_listener(layer_surface, &layer_surface_listener,
-		                                   NULL);
-		wl_surface_commit(draw_surf.surf);
-
-		wl_display_roundtrip(display);
-		drwsurf_flip(&draw_surf);
-	}
+	if (!hidden) show(SIGUSR2);
 
 	signal(SIGUSR1, hide);
 	signal(SIGUSR2, show);
