@@ -5,6 +5,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/mman.h>
+#include <sys/signalfd.h>
+#include <poll.h>
 #include <unistd.h>
 #include <wayland-client.h>
 #include <wchar.h>
@@ -366,8 +368,7 @@ usage(char *argv0) {
 }
 
 void
-hide(int sigint) {
-	signal(SIGUSR1, hide);
+hide() {
 	if (!layer_surface) {
 		return;
 	}
@@ -384,8 +385,7 @@ hide(int sigint) {
 }
 
 void
-show(int sigint) {
-	signal(SIGUSR2, show);
+show() {
 	if (layer_surface) {
 		return;
 	}
@@ -393,7 +393,6 @@ show(int sigint) {
 	wl_display_sync(display);
 
 	draw_surf.surf = wl_compositor_create_surface(compositor);
-	;
 	layer_surface = zwlr_layer_shell_v1_get_layer_surface(
 	  layer_shell, draw_surf.surf, wl_output, layer, namespace);
 
@@ -413,18 +412,13 @@ show(int sigint) {
 }
 
 void
-toggle_visibility(int sigint) {
-	signal(SIGRTMIN, toggle_visibility);
-
-	if (hidden) {
-		show(sigint);
-	} else {
-		hide(sigint);
-	}
+toggle_visibility() {
+	if (hidden) show();
+	else hide();
 }
 
 void
-pipewarn(int sigint) {
+pipewarn() {
 	fprintf(stderr, "wvkbd: cannot pipe data out.\n");
 }
 
@@ -538,19 +532,50 @@ main(int argc, char **argv) {
 	draw_ctx.font_description =
 	  pango_font_description_from_string(fc_font_pattern);
 
-	if (!hidden) show(SIGUSR2);
+	if (!hidden) show();
 
-	signal(SIGUSR1, hide);
-	signal(SIGUSR2, show);
-	signal(SIGPIPE, pipewarn);
-	signal(SIGRTMIN, toggle_visibility);
+	struct pollfd fds[2];
+	int WAYLAND_FD = 0;
+	int SIGNAL_FD = 1;
+	fds[WAYLAND_FD].events = POLLIN;
+	fds[SIGNAL_FD].events = POLLIN;
+
+	fds[WAYLAND_FD].fd = wl_display_get_fd(display);
+	if (fds[WAYLAND_FD].fd == -1) {
+		die("Failed to get wayland_fd: %d\n", errno);
+	}
+
+	sigset_t signal_mask;
+	sigemptyset(&signal_mask);
+	sigaddset(&signal_mask, SIGUSR1);
+	sigaddset(&signal_mask, SIGUSR2);
+	sigaddset(&signal_mask, SIGRTMIN);
+	sigaddset(&signal_mask, SIGPIPE);
+	if (sigprocmask(SIG_BLOCK, &signal_mask, NULL) == -1) {
+		die("Failed to disable handled signals: %d\n", errno);
+	}
+
+	fds[SIGNAL_FD].fd = signalfd(-1, &signal_mask, 0);
+	if (fds[SIGNAL_FD].fd == -1) {
+		die("Failed to get signalfd: %d\n", errno);
+	}
 
 	while (run_display) {
-		while (wl_display_dispatch(display) != -1 && layer_surface) {
-		}
-		wl_display_roundtrip(display);
-		while (run_display && !layer_surface) {
-			sleep(1);
+		wl_display_flush(display);
+		poll(fds, 2, -1);
+
+		if (fds[WAYLAND_FD].revents & POLLIN)
+			wl_display_dispatch(display);
+
+		if (fds[SIGNAL_FD].revents & POLLIN) {
+			struct signalfd_siginfo si;
+
+			if (read(fds[SIGNAL_FD].fd, &si, sizeof(si)) != sizeof(si))
+				fprintf(stderr, "Signal read error: %d", errno);
+			else if (si.ssi_signo == SIGUSR1) hide();
+			else if (si.ssi_signo == SIGUSR2) show();
+			else if (si.ssi_signo == SIGRTMIN) toggle_visibility();
+			else if (si.ssi_signo == SIGPIPE) pipewarn();
 		}
 	}
 
