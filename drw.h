@@ -15,7 +15,6 @@ struct drwsurf {
 	struct wl_surface *surf;
 	struct wl_buffer *buf;
 	struct wl_shm *shm;
-	struct wl_callback *cb;
 	unsigned char *pool_data;
 
 	cairo_t *cairo;

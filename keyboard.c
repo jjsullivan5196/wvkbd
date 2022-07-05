@@ -207,6 +207,8 @@ kbd_release_key(struct kbd *kb, uint32_t time) {
 		kbd_draw_layout(kb);
 		kb->last_swipe = NULL;
 	}
+
+	drwsurf_flip(kb->surf);
 }
 
 void
@@ -230,6 +232,8 @@ kbd_motion_key(struct kbd *kb, uint32_t time, uint32_t x, uint32_t y) {
 	} else {
 		kbd_unpress_key(kb, time);
 	}
+
+	drwsurf_flip(kb->surf);
 }
 
 void
@@ -336,6 +340,8 @@ kbd_press_key(struct kbd *kb, struct key *k, uint32_t time) {
 	default:
 		break;
 	}
+
+	drwsurf_flip(kb->surf);
 }
 
 void

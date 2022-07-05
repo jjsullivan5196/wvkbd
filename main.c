@@ -341,6 +341,8 @@ layer_surface_configure(void *data, struct zwlr_layer_surface_v1 *surface,
 	}
 
 	zwlr_layer_surface_v1_ack_configure(surface, serial);
+
+	drwsurf_flip(&draw_surf);
 }
 
 void
@@ -376,11 +378,6 @@ hide() {
 	zwlr_layer_surface_v1_destroy(layer_surface);
 	wl_surface_destroy(draw_surf.surf);
 	layer_surface = NULL;
-	if (draw_surf.cb) {
-		wl_callback_destroy(draw_surf.cb);
-		draw_surf.cb = NULL;
-	}
-
 	hidden = true;
 }
 

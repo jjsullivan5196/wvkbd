@@ -20,28 +20,10 @@ drwsurf_resize(struct drwsurf *ds, uint32_t w, uint32_t h, uint32_t s) {
 	setup_buffer(ds);
 }
 
-static void surface_frame_callback(void *data, struct wl_callback *cb,
-                                   uint32_t time);
-
-static struct wl_callback_listener frame_listener = {.done =
-                                                       surface_frame_callback};
-
 void
 drwsurf_flip(struct drwsurf *ds) {
-	ds->cb = wl_surface_frame(ds->surf);
-	wl_callback_add_listener(ds->cb, &frame_listener, (void *)ds);
-
 	wl_surface_attach(ds->surf, ds->buf, 0, 0);
 	wl_surface_commit(ds->surf);
-}
-
-void
-surface_frame_callback(void *data, struct wl_callback *cb, uint32_t time) {
-	struct drwsurf *ds = (struct drwsurf *)data;
-	wl_callback_destroy(cb);
-	ds->cb = NULL;
-
-	drwsurf_flip(ds);
 }
 
 void
