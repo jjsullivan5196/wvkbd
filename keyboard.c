@@ -122,16 +122,23 @@ kbd_init_layout(struct layout *l, uint32_t width, uint32_t height) {
 
 	struct key *k = l->keys;
 	double rowlength = kbd_get_row_length(k);
+	double rowwidth = 0.0;
 	while (k->type != Last) {
 		if (k->type == EndRow) {
 			y += l->keyheight;
 			x = 0;
+			rowwidth = 0.0;
 			rowlength = kbd_get_row_length(k + 1);
 		} else if (k->width > 0) {
 			k->x = x;
 			k->y = y;
 			k->w = ((double)width / rowlength) * k->width;
 			x += k->w;
+			rowwidth += k->width;
+			if (x < (rowwidth / rowlength) * (double)width) {
+				k->w++;
+				x++;
+			}
 		}
 		k->h = l->keyheight;
 		k++;

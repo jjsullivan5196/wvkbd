@@ -334,8 +334,8 @@ handle_global_remove(void *data, struct wl_registry *registry, uint32_t name) {}
 void
 layer_surface_configure(void *data, struct zwlr_layer_surface_v1 *surface,
                         uint32_t serial, uint32_t w, uint32_t h) {
-	if ( keyboard.w != w + KBD_PIXEL_OVERSCAN_WIDTH || keyboard.h != h ) {
-		keyboard.w = w + KBD_PIXEL_OVERSCAN_WIDTH;
+	if (keyboard.w != w || keyboard.h != h) {
+		keyboard.w = w;
 		keyboard.h = h;
 		kbd_resize(&keyboard, layouts, NumLayouts);
 	}

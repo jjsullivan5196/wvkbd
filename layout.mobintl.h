@@ -5,9 +5,6 @@
 /* how tall the keyboard should be by default (can be overriden) */
 #define KBD_PIXEL_LANDSCAPE_HEIGHT 120
 
-/* if your layout leaves an empty margin, increase this to fix it */
-#define KBD_PIXEL_OVERSCAN_WIDTH 5
-
 /* spacing between keys */
 #define KBD_KEY_BORDER 2
 
