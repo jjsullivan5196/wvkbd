@@ -453,14 +453,14 @@ kbd_resize(struct kbd *kb, struct layout *layouts, uint8_t layoutcount) {
 void
 draw_inset(struct drwsurf *ds, uint32_t x, uint32_t y, uint32_t width,
            uint32_t height, uint32_t border, Color color) {
-	drw_fill_rectangle(ds, color, x + border, y + border, width - border,
-	                   height - border);
+	drw_fill_rectangle(ds, color, x + border, y + border, width - (border * 2),
+	                   height - (border * 2));
 }
 void
 draw_over_inset(struct drwsurf *ds, uint32_t x, uint32_t y, uint32_t width,
                 uint32_t height, uint32_t border, Color color) {
-	drw_over_rectangle(ds, color, x + border, y + border, width - border,
-	                   height - border);
+	drw_over_rectangle(ds, color, x + border, y + border, width - (border * 2),
+	                   height - (border * 2));
 }
 
 void

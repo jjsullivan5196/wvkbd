@@ -5,8 +5,8 @@
 /* how tall the keyboard should be by default (can be overriden) */
 #define KBD_PIXEL_LANDSCAPE_HEIGHT 120
 
-/* spacing between keys */
-#define KBD_KEY_BORDER 2
+/* spacing around each key */
+#define KBD_KEY_BORDER 1
 
 /* layout declarations */
 enum layout_id {
