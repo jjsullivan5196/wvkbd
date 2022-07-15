@@ -245,8 +245,8 @@ kbd_motion_key(struct kbd *kb, uint32_t time, uint32_t x, uint32_t y) {
 
 void
 kbd_press_key(struct kbd *kb, struct key *k, uint32_t time) {
-	if ((kb->compose == 1) && (k->type != Compose) && (k->type != Mod) &&
-	    (k->layout)) {
+	if ((kb->compose == 1) && (k->type != Compose) && (k->type != Mod) && 
+		(k->type != NextLayer) && (k->layout)) {
 		kb->compose++;
 		if (kb->debug)
 			fprintf(stderr, "showing compose %d\n", kb->compose);
@@ -308,8 +308,30 @@ kbd_press_key(struct kbd *kb, struct key *k, uint32_t time) {
 		}
 		break;
 	case NextLayer:
-		// switch to the next layout in the layer sequence
-		kb->layer_index++;
+		if ((kb->mods & Ctrl) || (kb->mods & Alt) || (kb->mods & AltGr) || ((bool)kb->compose)) {
+			// with modifiers: switch to the first layer
+			kb->layer_index = 0;
+			kb->mods = 0;
+		} else if ((kb->mods & Shift) || (kb->mods & CapsLock)) {
+			// with modifiers: switch to the previous layout in the layer sequence
+			if (kb->layer_index > 0) {
+				kb->layer_index--;
+			} else {
+				size_t layercount = 0;
+				for (size_t i = 0; layercount == 0; i++) {
+					if (kb->landscape) {
+						if (kb->landscape_layers[i] == NumLayouts) layercount = i;
+					} else {
+						if (kb->layers[i] == NumLayouts) layercount = i;
+					}
+				}
+				kb->layer_index = layercount - 1;
+			}
+			kb->mods = 0;
+		} else {
+			// normal behaviour: switch to the next layout in the layer sequence
+			kb->layer_index++;
+		}
 		enum layout_id layer;
 		if (kb->landscape) {
 			layer = kb->landscape_layers[kb->layer_index];
@@ -323,6 +345,10 @@ kbd_press_key(struct kbd *kb, struct key *k, uint32_t time) {
 			} else {
 				layer = kb->layers[kb->layer_index];
 			}
+		}
+		if ((bool)kb->compose) {
+			kb->compose = 0;
+			kbd_draw_key(kb, k, Unpress);
 		}
 		kbd_switch_layout(kb, &kb->layouts[layer]);
 		break;
