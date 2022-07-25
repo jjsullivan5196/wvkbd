@@ -510,9 +510,9 @@ static struct key keys_arabic[] = {
   {"غ", "إ", 1.0, Code, KEY_Y},
   {"ع", "`", 1.0, Code, KEY_U},
   {"ه", "", 1.0, Code, KEY_I},
-  {"ج", ";", 1.0, Code, KEY_O},
+  {"خ", ";", 1.0, Code, KEY_O},
   {"ح", "", 1.0, Code, KEY_P},
-  {"خ", "<", 1.0, Code, KEY_LEFTBRACE},
+  {"ج", "<", 1.0, Code, KEY_LEFTBRACE},
   {"", "", 0.0, EndRow},
 
   {"ش", "ـِ", 1.0, Code, KEY_A},
