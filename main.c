@@ -430,21 +430,21 @@ pipewarn() {
 
 void
 set_kbd_colors(uint8_t * bgra, char * hex) {
-  // bg, fg, text, high, swipe
-  int length = strlen(hex);
-  if (length == 6 || length == 8) {
-    char subhex[2];
-    memcpy(subhex, hex, 2);
-    bgra[2] = (int)strtol(subhex, NULL, 16);
-    memcpy(subhex, hex+2, 2);
-    bgra[1] = (int)strtol(subhex, NULL, 16);
-    memcpy(subhex, hex+4, 2);
-    bgra[0] = (int)strtol(subhex, NULL, 16);
-    if (length == 8) {
-      memcpy(subhex, hex+6, 2);
-      bgra[3] = (int)strtol(subhex, NULL, 16);
-    }
-  }
+	// bg, fg, text, high, swipe
+	int length = strlen(hex);
+	if (length == 6 || length == 8) {
+		char subhex[2];
+		memcpy(subhex, hex, 2);
+		bgra[2] = (int)strtol(subhex, NULL, 16);
+		memcpy(subhex, hex+2, 2);
+		bgra[1] = (int)strtol(subhex, NULL, 16);
+		memcpy(subhex, hex+4, 2);
+		bgra[0] = (int)strtol(subhex, NULL, 16);
+		if (length == 8) {
+			memcpy(subhex, hex+6, 2);
+			bgra[3] = (int)strtol(subhex, NULL, 16);
+		}
+	}
 }
 
 int
@@ -491,55 +491,55 @@ main(int argc, char **argv) {
 				usage(argv[0]);
 				exit(1);
 			}
-      set_kbd_colors(keyboard.scheme.bg.bgra, argv[++i]);
+			set_kbd_colors(keyboard.scheme.bg.bgra, argv[++i]);
 		} else if ((!strcmp(argv[i], "-fg")) || (!strcmp(argv[i], "--fg"))) {
 			if (i >= argc - 1) {
 				usage(argv[0]);
 				exit(1);
 			}
-      set_kbd_colors(keyboard.scheme.fg.bgra, argv[++i]);
+			set_kbd_colors(keyboard.scheme.fg.bgra, argv[++i]);
 		} else if ((!strcmp(argv[i], "-fg-sp")) || (!strcmp(argv[i], "--fg-sp"))) {
 			if (i >= argc - 1) {
 				usage(argv[0]);
 				exit(1);
 			}
-      set_kbd_colors(keyboard.scheme1.fg.bgra, argv[++i]);
+			set_kbd_colors(keyboard.scheme1.fg.bgra, argv[++i]);
 		} else if ((!strcmp(argv[i], "-press")) || (!strcmp(argv[i], "--press"))) {
 			if (i >= argc - 1) {
 				usage(argv[0]);
 				exit(1);
 			}
-      set_kbd_colors(keyboard.scheme.high.bgra, argv[++i]);
+			set_kbd_colors(keyboard.scheme.high.bgra, argv[++i]);
 		} else if ((!strcmp(argv[i], "-press-sp")) || (!strcmp(argv[i], "--press-sp"))) {
 			if (i >= argc - 1) {
 				usage(argv[0]);
 				exit(1);
 			}
-      set_kbd_colors(keyboard.scheme1.high.bgra, argv[++i]);
+			set_kbd_colors(keyboard.scheme1.high.bgra, argv[++i]);
 		} else if ((!strcmp(argv[i], "-swipe")) || (!strcmp(argv[i], "--swipe"))) {
 			if (i >= argc - 1) {
 				usage(argv[0]);
 				exit(1);
 			}
-      set_kbd_colors(keyboard.scheme.swipe.bgra, argv[++i]);
+			set_kbd_colors(keyboard.scheme.swipe.bgra, argv[++i]);
 		} else if ((!strcmp(argv[i], "-swipe-sp")) || (!strcmp(argv[i], "--swipe-sp"))) {
 			if (i >= argc - 1) {
 				usage(argv[0]);
 				exit(1);
 			}
-      set_kbd_colors(keyboard.scheme1.swipe.bgra, argv[++i]);
+			set_kbd_colors(keyboard.scheme1.swipe.bgra, argv[++i]);
 		} else if ((!strcmp(argv[i], "-text")) || (!strcmp(argv[i], "--text"))) {
 			if (i >= argc - 1) {
 				usage(argv[0]);
 				exit(1);
 			}
-      set_kbd_colors(keyboard.scheme.text.bgra, argv[++i]);
+			set_kbd_colors(keyboard.scheme.text.bgra, argv[++i]);
 		} else if ((!strcmp(argv[i], "-text-sp")) || (!strcmp(argv[i], "--text-sp"))) {
 			if (i >= argc - 1) {
 				usage(argv[0]);
 				exit(1);
 			}
-      set_kbd_colors(keyboard.scheme1.text.bgra, argv[++i]);
+			set_kbd_colors(keyboard.scheme1.text.bgra, argv[++i]);
 		} else if (!strcmp(argv[i], "-H")) {
 			if (i >= argc - 1) {
 				usage(argv[0]);
