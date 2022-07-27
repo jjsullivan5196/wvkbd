@@ -359,14 +359,23 @@ usage(char *argv0) {
 	        "layers]\n",
 	        argv0);
 	fprintf(stderr, "Options:\n");
-	fprintf(stderr, "  -D         - Enable debug\n");
-	fprintf(stderr, "  -o         - Print pressed keys to standard output\n");
-	fprintf(stderr, "  -O         - Print intersected keys to standard output\n");
-	fprintf(stderr, "  -l         - Comma separated list of layers\n");
-	fprintf(stderr, "  -H [int]   - Height in pixels\n");
-	fprintf(stderr, "  -L [int]   - Landscape height in pixels\n");
+	fprintf(stderr, "  -D          - Enable debug\n");
+	fprintf(stderr, "  -o          - Print pressed keys to standard output\n");
+	fprintf(stderr, "  -O          - Print intersected keys to standard output\n");
+	fprintf(stderr, "  -l          - Comma separated list of layers\n");
+	fprintf(stderr, "  -H [int]    - Height in pixels\n");
+	fprintf(stderr, "  -L [int]    - Landscape height in pixels\n");
 	fprintf(stderr, "  --fn [font] - Set font (e.g: DejaVu Sans 20)\n");
-	fprintf(stderr, "  --hidden   - Start hidden (send SIGUSR2 to show)\n");
+	fprintf(stderr, "  --hidden    - Start hidden (send SIGUSR2 to show)\n");
+	fprintf(stderr, "  --bg [rrggbb|aa]       - Set color of background\n");
+	fprintf(stderr, "  --fg [rrggbb|aa]       - Set color of keys\n");
+	fprintf(stderr, "  --fg-sp [rrggbb|aa]    - Set color of special keys\n");
+	fprintf(stderr, "  --press [rrggbb|aa]     - Set color of pressed keys\n");
+	fprintf(stderr, "  --press-sp [rrggbb|aa]  - Set color of pressed special keys\n");
+	fprintf(stderr, "  --swipe [rrggbb|aa]    - Set color of swiped keys\n");
+	fprintf(stderr, "  --swipe-sp [rrggbb|aa] - Set color of swiped special keys\n");
+	fprintf(stderr, "  --text [rrggbb|aa]     - Set color of text on keys\n");
+	fprintf(stderr, "  --text-sp [rrggbb|aa]  - Set color of text on special keys\n");
 }
 
 void
@@ -419,6 +428,25 @@ pipewarn() {
 	fprintf(stderr, "wvkbd: cannot pipe data out.\n");
 }
 
+void
+set_kbd_colors(uint8_t * bgra, char * hex) {
+  // bg, fg, text, high, swipe
+  int length = strlen(hex);
+  if (length == 6 || length == 8) {
+    char subhex[2];
+    memcpy(subhex, hex, 2);
+    bgra[2] = (int)strtol(subhex, NULL, 16);
+    memcpy(subhex, hex+2, 2);
+    bgra[1] = (int)strtol(subhex, NULL, 16);
+    memcpy(subhex, hex+4, 2);
+    bgra[0] = (int)strtol(subhex, NULL, 16);
+    if (length == 8) {
+      memcpy(subhex, hex+6, 2);
+      bgra[3] = (int)strtol(subhex, NULL, 16);
+    }
+  }
+}
+
 int
 main(int argc, char **argv) {
 	/* parse command line arguments */
@@ -441,7 +469,6 @@ main(int argc, char **argv) {
 	keyboard.scheme = scheme;
 	keyboard.layer_index = 0;
 	keyboard.scheme1 = scheme1;
-	keyboard.scheme1 = scheme1;
 
 	int i;
 	for (i = 1; argv[i]; i++) {
@@ -459,6 +486,60 @@ main(int argc, char **argv) {
 			if (layer_names_list)
 				free(layer_names_list);
 			layer_names_list = estrdup(argv[++i]);
+		} else if ((!strcmp(argv[i], "-bg")) || (!strcmp(argv[i], "--bg"))) {
+			if (i >= argc - 1) {
+				usage(argv[0]);
+				exit(1);
+			}
+      set_kbd_colors(keyboard.scheme.bg.bgra, argv[++i]);
+		} else if ((!strcmp(argv[i], "-fg")) || (!strcmp(argv[i], "--fg"))) {
+			if (i >= argc - 1) {
+				usage(argv[0]);
+				exit(1);
+			}
+      set_kbd_colors(keyboard.scheme.fg.bgra, argv[++i]);
+		} else if ((!strcmp(argv[i], "-fg-sp")) || (!strcmp(argv[i], "--fg-sp"))) {
+			if (i >= argc - 1) {
+				usage(argv[0]);
+				exit(1);
+			}
+      set_kbd_colors(keyboard.scheme1.fg.bgra, argv[++i]);
+		} else if ((!strcmp(argv[i], "-press")) || (!strcmp(argv[i], "--press"))) {
+			if (i >= argc - 1) {
+				usage(argv[0]);
+				exit(1);
+			}
+      set_kbd_colors(keyboard.scheme.high.bgra, argv[++i]);
+		} else if ((!strcmp(argv[i], "-press-sp")) || (!strcmp(argv[i], "--press-sp"))) {
+			if (i >= argc - 1) {
+				usage(argv[0]);
+				exit(1);
+			}
+      set_kbd_colors(keyboard.scheme1.high.bgra, argv[++i]);
+		} else if ((!strcmp(argv[i], "-swipe")) || (!strcmp(argv[i], "--swipe"))) {
+			if (i >= argc - 1) {
+				usage(argv[0]);
+				exit(1);
+			}
+      set_kbd_colors(keyboard.scheme.swipe.bgra, argv[++i]);
+		} else if ((!strcmp(argv[i], "-swipe-sp")) || (!strcmp(argv[i], "--swipe-sp"))) {
+			if (i >= argc - 1) {
+				usage(argv[0]);
+				exit(1);
+			}
+      set_kbd_colors(keyboard.scheme1.swipe.bgra, argv[++i]);
+		} else if ((!strcmp(argv[i], "-text")) || (!strcmp(argv[i], "--text"))) {
+			if (i >= argc - 1) {
+				usage(argv[0]);
+				exit(1);
+			}
+      set_kbd_colors(keyboard.scheme.text.bgra, argv[++i]);
+		} else if ((!strcmp(argv[i], "-text-sp")) || (!strcmp(argv[i], "--text-sp"))) {
+			if (i >= argc - 1) {
+				usage(argv[0]);
+				exit(1);
+			}
+      set_kbd_colors(keyboard.scheme1.text.bgra, argv[++i]);
 		} else if (!strcmp(argv[i], "-H")) {
 			if (i >= argc - 1) {
 				usage(argv[0]);
@@ -474,6 +555,10 @@ main(int argc, char **argv) {
 		} else if (!strcmp(argv[i], "-D")) {
 			keyboard.debug = true;
 		} else if ((!strcmp(argv[i], "-fn")) || (!strcmp(argv[i], "--fn"))) {
+			if (i >= argc - 1) {
+				usage(argv[0]);
+				exit(1);
+			}
 			fc_font_pattern = estrdup(argv[++i]);
 		} else if (!strcmp(argv[i], "-o")) {
 			keyboard.print = true;
