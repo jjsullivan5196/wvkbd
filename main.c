@@ -376,6 +376,17 @@ usage(char *argv0) {
 	fprintf(stderr, "  --swipe-sp [rrggbb|aa] - Set color of swiped special keys\n");
 	fprintf(stderr, "  --text [rrggbb|aa]     - Set color of text on keys\n");
 	fprintf(stderr, "  --text-sp [rrggbb|aa]  - Set color of text on special keys\n");
+	fprintf(stderr, "  --list-layers          - Print the list of available layers\n");
+}
+
+void
+list_layers() {
+	int i;
+	for (i = 0; i < NumLayouts - 1; i++) {
+		if (layouts[i].name) {
+			puts(layouts[i].name);
+		}
+	}
 }
 
 void
@@ -567,6 +578,10 @@ main(int argc, char **argv) {
 		} else if ((!strcmp(argv[i], "-hidden")) ||
 		           (!strcmp(argv[i], "--hidden"))) {
 			hidden = true;
+		} else if ((!strcmp(argv[i], "-list-layers")) ||
+		           (!strcmp(argv[i], "--list-layers"))) {
+			list_layers();
+			exit(0);
 		} else {
 			fprintf(stderr, "Invalid argument: %s\n", argv[i]);
 			usage(argv[0]);
