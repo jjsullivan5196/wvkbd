@@ -115,7 +115,8 @@ void draw_inset(struct drwsurf *ds, uint32_t x, uint32_t y, uint32_t width,
 void draw_over_inset(struct drwsurf *ds, uint32_t x, uint32_t y, uint32_t width,
                      uint32_t height, uint32_t border, Color color);
 
-void kbd_init(struct kbd *kb, struct layout *layouts, char *layer_names_list);
+void kbd_init(struct kbd *kb, struct layout *layouts,
+              char *layer_names_list, char *landscape_layer_names_list);
 void kbd_init_layout(struct layout *l, uint32_t width, uint32_t height);
 struct key *kbd_get_key(struct kbd *kb, uint32_t x, uint32_t y);
 void kbd_unpress_key(struct kbd *kb, uint32_t time);

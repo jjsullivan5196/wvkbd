@@ -85,7 +85,8 @@ kbd_init_layers(char *layer_names_list) {
 }
 
 void
-kbd_init(struct kbd *kb, struct layout *layouts, char *layer_names_list) {
+kbd_init(struct kbd *kb, struct layout *layouts,
+         char *layer_names_list, char *landscape_layer_names_list) {
 	int i;
 
 	fprintf(stderr, "Initializing keyboard\n");
@@ -100,6 +101,8 @@ kbd_init(struct kbd *kb, struct layout *layouts, char *layer_names_list) {
 
 	if (layer_names_list)
 		kb->layers = kbd_init_layers(layer_names_list);
+	if (landscape_layer_names_list)
+		kb->landscape_layers = kbd_init_layers(landscape_layer_names_list);
 
 	i = 0;
 	enum layout_id lid = kb->layers[0];
