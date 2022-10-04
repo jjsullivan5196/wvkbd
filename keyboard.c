@@ -45,11 +45,48 @@ kbd_get_rows(struct layout *l) {
 	return rows + 1;
 }
 
-void
-kbd_init(struct kbd *kb, struct layout *layouts, char *layer_names_list) {
+enum layout_id *
+kbd_init_layers(char *layer_names_list) {
+	enum layout_id *layers;
+	uint8_t numlayers = 0;
+	bool found;
 	char *s;
 	int i;
-	bool found;
+
+	layers = malloc(MAX_LAYERS * sizeof(enum layout_id));
+	s = strtok(layer_names_list, ",");
+	while (s != NULL) {
+		if (numlayers + 1 == MAX_LAYERS) {
+			fprintf(stderr, "too many layers specified");
+			exit(3);
+		}
+		found = false;
+		for (i = 0; i < NumLayouts - 1; i++) {
+			if (layouts[i].name && strcmp(layouts[i].name, s) == 0) {
+				fprintf(stderr, "layer #%d = %s\n", numlayers + 1, s);
+				layers[numlayers++] = i;
+				found = true;
+				break;
+			}
+		}
+		if (!found) {
+			fprintf(stderr, "No such layer: %s\n", s);
+			exit(3);
+		}
+		s = strtok(NULL, ",");
+	}
+	layers[numlayers] = NumLayouts; // mark the end of the sequence
+	if (numlayers == 0) {
+		fprintf(stderr, "No layers defined\n");
+		exit(3);
+	}
+
+	return layers;
+}
+
+void
+kbd_init(struct kbd *kb, struct layout *layouts, char *layer_names_list) {
+	int i;
 
 	fprintf(stderr, "Initializing keyboard\n");
 
@@ -61,36 +98,8 @@ kbd_init(struct kbd *kb, struct layout *layouts, char *layer_names_list) {
 
 	kb->layer_index = 0;
 
-	if (layer_names_list) {
-		uint8_t numlayers = 0;
-		kb->layers = malloc(MAX_LAYERS * sizeof(enum layout_id));
-		s = strtok(layer_names_list, ",");
-		while (s != NULL) {
-			if (numlayers + 1 == MAX_LAYERS) {
-				fprintf(stderr, "too many layers specified");
-				exit(3);
-			}
-			found = false;
-			for (i = 0; i < NumLayouts - 1; i++) {
-				if (kb->layouts[i].name && strcmp(kb->layouts[i].name, s) == 0) {
-					fprintf(stderr, "layer #%d = %s\n", numlayers + 1, s);
-					kb->layers[numlayers++] = i;
-					found = true;
-					break;
-				}
-			}
-			if (!found) {
-				fprintf(stderr, "No such layer: %s\n", s);
-				exit(3);
-			}
-			s = strtok(NULL, ",");
-		}
-		kb->layers[numlayers] = NumLayouts; // mark the end of the sequence
-		if (numlayers == 0) {
-			fprintf(stderr, "No layers defined\n");
-			exit(3);
-		}
-	}
+	if (layer_names_list)
+		kb->layers = kbd_init_layers(layer_names_list);
 
 	i = 0;
 	enum layout_id lid = kb->layers[0];
