@@ -362,7 +362,6 @@ usage(char *argv0) {
 	fprintf(stderr, "  -D          - Enable debug\n");
 	fprintf(stderr, "  -o          - Print pressed keys to standard output\n");
 	fprintf(stderr, "  -O          - Print intersected keys to standard output\n");
-	fprintf(stderr, "  -l          - Comma separated list of layers\n");
 	fprintf(stderr, "  -H [int]    - Height in pixels\n");
 	fprintf(stderr, "  -L [int]    - Landscape height in pixels\n");
 	fprintf(stderr, "  --fn [font] - Set font (e.g: DejaVu Sans 20)\n");
@@ -377,6 +376,8 @@ usage(char *argv0) {
 	fprintf(stderr, "  --text [rrggbb|aa]     - Set color of text on keys\n");
 	fprintf(stderr, "  --text-sp [rrggbb|aa]  - Set color of text on special keys\n");
 	fprintf(stderr, "  --list-layers          - Print the list of available layers\n");
+	fprintf(stderr, "  -l                     - Comma separated list of layers\n");
+	fprintf(stderr, "  --landscape-layers     - Comma separated list of landscape layers\n");
 }
 
 void
@@ -461,7 +462,7 @@ set_kbd_colors(uint8_t * bgra, char * hex) {
 int
 main(int argc, char **argv) {
 	/* parse command line arguments */
-	char *layer_names_list = NULL;
+	char *layer_names_list = NULL, *landscape_layer_names_list = NULL;
 	const char *fc_font_pattern = NULL;
 	height = normal_height = KBD_PIXEL_HEIGHT;
 	landscape_height = KBD_PIXEL_LANDSCAPE_HEIGHT;
@@ -469,6 +470,8 @@ main(int argc, char **argv) {
 	char *tmp;
 	if ((tmp = getenv("WVKBD_LAYERS")))
 		layer_names_list = estrdup(tmp);
+	if ((tmp = getenv("WVKBD_LANDSCAPE_LAYERS")))
+		landscape_layer_names_list = estrdup(tmp);
 	if ((tmp = getenv("WVKBD_HEIGHT")))
 		normal_height = atoi(tmp);
 	if ((tmp = getenv("WVKBD_LANDSCAPE_HEIGHT")))
@@ -497,6 +500,15 @@ main(int argc, char **argv) {
 			if (layer_names_list)
 				free(layer_names_list);
 			layer_names_list = estrdup(argv[++i]);
+		} else if ((!strcmp(argv[i], "-landscape-layers")) ||
+				   (!strcmp(argv[i], "--landscape-layers"))) {
+			if (i >= argc - 1) {
+				usage(argv[0]);
+				exit(1);
+			}
+			if (landscape_layer_names_list)
+				free(landscape_layer_names_list);
+			landscape_layer_names_list = estrdup(argv[++i]);
 		} else if ((!strcmp(argv[i], "-bg")) || (!strcmp(argv[i], "--bg"))) {
 			if (i >= argc - 1) {
 				usage(argv[0]);
@@ -624,7 +636,8 @@ main(int argc, char **argv) {
 		die("failed to init virtual keyboard_manager\n");
 	}
 
-	kbd_init(&keyboard, (struct layout *)&layouts, layer_names_list);
+	kbd_init(&keyboard, (struct layout *)&layouts,
+			 layer_names_list, landscape_layer_names_list);
 
 	draw_ctx.font_description =
 	  pango_font_description_from_string(fc_font_pattern);
