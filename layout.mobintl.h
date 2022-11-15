@@ -365,7 +365,7 @@ static struct key keys_dialer[] = {
   {"", "", 0.0, EndRow},
   {"*", "*", 1.0, Code, KEY_KPASTERISK},
   {"0", "0", 1.0, Code, KEY_0},
-  {"#", "#", 1.0, Code, KEY_NUMERIC_POUND},
+  {"#", "#", 1.0, Code, KEY_3, 0, Shift},
   {"", "", 0.0, EndRow},
   {"Abc", "Abc", 1.0, NextLayer, .scheme = 1},
   {"Enter", "Enter", 2.0, Code, KEY_ENTER, .scheme = 1},
