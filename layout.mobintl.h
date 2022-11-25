@@ -981,7 +981,7 @@ static struct key keys_landscape[] = {
   {"i", "I", 1.0, Code, KEY_I, &layouts[ComposeI]},
   {"o", "O", 1.0, Code, KEY_O, &layouts[ComposeO]},
   {"p", "P", 1.0, Code, KEY_P, &layouts[ComposeP]},
-  {"(", "(", 0.75, Copy, KEY_9, &layouts[ComposeBracket], Shift, .scheme = 1},
+  {"(", "(", 0.75, Code, KEY_9, &layouts[ComposeBracket], Shift, .scheme = 1},
   {")", ")", 0.75, Code, KEY_0, &layouts[ComposeBracket], Shift, .scheme = 1},
   {"Tab", "Tab", 0.75, Code, KEY_TAB, .scheme = 1},
   {"", "", 0.0, EndRow},
