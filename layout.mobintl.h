@@ -1260,7 +1260,7 @@ static struct key keys_compose_k[] = {
 };
 
 static struct key keys_compose_l[] = {
-  {"ľ", "Ľ", 1.0, Copy, 0x013D, 0, 0x013E},
+  {"ľ", "Ľ", 1.0, Copy, 0x013E, 0, 0x013D},
   {"ŀ", "Ŀ", 1.0, Copy, 0x0140, 0, 0x013F},
   {"ł", "Ł", 1.0, Copy, 0x0142, 0, 0x0141},
   {"", "", 7.0, Pad},
