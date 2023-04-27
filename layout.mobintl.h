@@ -337,8 +337,9 @@ static struct key keys_simple[] = {
 
   {"Abc", "Abc", 1.0, NextLayer, .scheme = 1},
   {"Ctr", "Ctr", 1.0, Mod, Ctrl, .scheme = 1},
+  {",", "'", 1.0, Code, KEY_COMMA, &layouts[ComposeMath]},
   {"-", "_", 1.0, Code, KEY_MINUS, &layouts[ComposeMath]},
-  {"", "", 4.0, Code, KEY_SPACE},
+  {"", "", 3.0, Code, KEY_SPACE},
   {".", "?", 1.0, Code, KEY_DOT, &layouts[ComposePunctuation]},
   {"Enter", "Enter", 2.0, Code, KEY_ENTER, .scheme = 1},
 
