@@ -12,6 +12,7 @@
 enum layout_id {
 	Full = 0,
 	Special,
+	SpecialPad,
 	Simple,
 	SimpleGrid,
 	Dialer,
@@ -64,7 +65,7 @@ enum layout_id {
 	NumLayouts,
 };
 
-static struct key keys_full[], keys_special[], keys_simple[], keys_simplegrid[],
+static struct key keys_full[], keys_special[], keys_specialpad[], keys_simple[], keys_simplegrid[],
   keys_cyrillic[], keys_arabic[], keys_persian[], keys_georgian[], keys_greek[],
   keys_emoji[], keys_nav[], keys_landscape[], keys_compose_a[],
   keys_compose_e[], keys_compose_y[], keys_compose_u[], keys_compose_i[],
@@ -83,6 +84,7 @@ static struct layout layouts[NumLayouts] = {
   [Full] = {keys_full, "latin", "full"}, // second parameter is the keymap name
                                          // third parameter is the layout name
   [Special] = {keys_special, "latin", "special"},
+  [SpecialPad] = {keys_specialpad, "latin", "specialpad"},
   [Simple] = {keys_simple, "latin", "simple"},
   [SimpleGrid] = {keys_simplegrid, "latin", "simplegrid"},
   [Cyrillic] = {keys_cyrillic, "cyrillic", "cyrillic"},
@@ -293,6 +295,58 @@ static struct key keys_special[] = {
   {".", "?", 1.0, Code, KEY_DOT},
   {"Enter", "Enter", 2.0, Code, KEY_ENTER, .scheme = 1},
 
+  /* end of layout */
+  {"", "", 0.0, Last},
+};
+
+static struct key keys_specialpad[] = {
+  {"⎋", "⎋", 1.0, Code, KEY_ESC, .scheme = 1},
+  {"↑", "↑", 1.0, Code, KEY_UP, .scheme = 1},
+  {"⇈", "⇈", 1.0, Code, KEY_PAGEUP, .scheme = 1},
+  {"`", "~", 1.0, Code, KEY_GRAVE},
+  {"\\", "|", 1.0, Code, KEY_BACKSLASH},
+  {"/", ">", 1.0, Code, KEY_SLASH},
+  {"1", "!", 1.0, Code, KEY_1},
+  {"2", "@", 1.0, Code, KEY_2},
+  {"3", "#", 1.0, Code, KEY_3},
+  {"⌦", "⌦", 1.0, Code, KEY_DELETE, .scheme = 1},
+  {"", "", 0.0, EndRow},
+  //{"Tab", "Tab", 1.0, Code, KEY_TAB, .scheme = 1},
+  {"←", "←", 1.0, Code, KEY_LEFT, .scheme = 1},
+  {"", "", 1.0, Code, KEY_SPACE},
+  {"→", "→", 1.0, Code, KEY_RIGHT, .scheme = 1},
+  {".", "?", 1.0, Code, KEY_DOT},
+  {"[", "{", 1.0, Code, KEY_LEFTBRACE},
+  {"]", "}", 1.0, Code, KEY_RIGHTBRACE},
+  {"4", "$", 1.0, Code, KEY_4},
+  {"5", "%", 1.0, Code, KEY_5},
+  {"6", "^", 1.0, Code, KEY_6},
+  {"'", "\"", 1.0, Code, KEY_APOSTROPHE},
+  {"", "", 0.0, EndRow},
+  {"⇧", "⇫", 1.0, Mod, Shift, .scheme = 1},
+  {"↓", "↓", 1.0, Code, KEY_DOWN, .scheme = 1},
+  {"⇊", "⇊", 1.0, Code, KEY_PAGEDOWN, .scheme = 1},
+  {";", ":", 1.0, Code, KEY_SEMICOLON},
+  {"<", "«", 1.0, Code, KEY_COMMA, 0, AltGr},
+  {">", "»", 1.0, Code, KEY_DOT, 0, AltGr},
+  {"7", "&", 1.0, Code, KEY_7},
+  {"8", "*", 1.0, Code, KEY_8},
+  {"9", "(", 1.0, Code, KEY_9},
+  {"⌫", "⌫", 1.0, Code, KEY_BACKSPACE, .scheme = 1},
+  {"", "", 0.0, EndRow},
+
+  {"Abc", "Abc", 1.0, NextLayer, .scheme = 1},
+  {"Ctr", "Ctr", 1.0, Mod, Ctrl, .scheme = 1},
+  {"Alt", "Alt", 1.0, Mod, Alt, .scheme = 1},
+  {"Sup", "Sup", 1.0, Mod, Super, .scheme = 1},
+
+  {"⇤", "⇤", 1.0, Code, KEY_HOME, .scheme = 1},
+  {"⇥", "⇥", 1.0, Code, KEY_END, .scheme = 1},
+  {"-", "_", 1.0, Code, KEY_MINUS},
+  {"0", ")", 1.0, Code, KEY_0},
+  {"=", "+", 1.0, Code, KEY_EQUAL},
+  {"↵", "↵", 1.0, Code, KEY_ENTER, .scheme = 1},
+  //{",", "'", 1.0, Code, KEY_COMMA},
   /* end of layout */
   {"", "", 0.0, Last},
 };
