@@ -1,5 +1,6 @@
 #include "proto/virtual-keyboard-unstable-v1-client-protocol.h"
 #include <linux/input-event-codes.h>
+#include <stddef.h>
 #include <stdio.h>
 #include <sys/mman.h>
 #include "keyboard.h"
@@ -19,11 +20,16 @@
 #include KEYMAP
 
 void
-kbd_switch_layout(struct kbd *kb, struct layout *l) {
+kbd_switch_layout(struct kbd *kb, struct layout *l, size_t layer_index) {
 	kb->prevlayout = kb->layout;
+	if ((kb->layer_index != kb->last_abc_index) && (kb->layout->abc)) {
+		kb->last_abc_layout = kb->layout;
+		kb->last_abc_index = kb->layer_index;
+	}
+	kb->layer_index = layer_index;
 	kb->layout = l;
 	if (kb->debug)
-		fprintf(stderr, "Switching to layout %s)\n", kb->layout->name);
+		fprintf(stderr, "Switching to layout %s, layer_index %ld\n", kb->layout->name, layer_index);
 	if ((!kb->prevlayout) ||
 	    (strcmp(kb->prevlayout->keymap_name, kb->layout->keymap_name) != 0)) {
 		fprintf(stderr, "Switching to keymap %s\n", kb->layout->keymap_name);
@@ -98,6 +104,7 @@ kbd_init(struct kbd *kb, struct layout *layouts,
 	fprintf(stderr, "Found %d layouts\n", i);
 
 	kb->layer_index = 0;
+	kb->last_abc_index = 0;
 
 	if (layer_names_list)
 		kb->layers = kbd_init_layers(layer_names_list);
@@ -119,7 +126,7 @@ kbd_init(struct kbd *kb, struct layout *layouts,
 	}
 
 	kb->layout = &kb->layouts[layer];
-	kb->prevlayout = kb->layout;
+	kb->last_abc_layout = &kb->layouts[layer];
 
 	/* upload keymap */
 	create_and_upload_keymap(kb, kb->layout->keymap_name, 0, 0);
@@ -183,6 +190,16 @@ kbd_get_key(struct kbd *kb, uint32_t x, uint32_t y) {
 	return NULL;
 }
 
+size_t
+kbd_get_layer_index(struct kbd *kb, struct layout *l) {
+	for (size_t i = 0; i < NumLayouts - 1; i++) {
+		if (l == &kb->layouts[i]) {
+			return i;
+		}
+	}
+	return 0;
+}
+
 void
 kbd_unpress_key(struct kbd *kb, uint32_t time) {
 	bool unlatch_shift = false;
@@ -205,7 +222,7 @@ kbd_unpress_key(struct kbd *kb, uint32_t time) {
 
 		if (kb->compose >= 2) {
 			kb->compose = 0;
-			kbd_switch_layout(kb, kb->prevlayout);
+			kbd_switch_layout(kb, kb->prevlayout, kb->last_abc_index);
 		} else if (unlatch_shift) {
 			kbd_draw_layout(kb);
 		} else {
@@ -257,13 +274,22 @@ kbd_motion_key(struct kbd *kb, uint32_t time, uint32_t x, uint32_t y) {
 
 void
 kbd_press_key(struct kbd *kb, struct key *k, uint32_t time) {
-	if ((kb->compose == 1) && (k->type != Compose) && (k->type != Mod) && 
-		(k->type != NextLayer) && (k->layout)) {
-		kb->compose++;
-		if (kb->debug)
-			fprintf(stderr, "showing compose %d\n", kb->compose);
-		kbd_switch_layout(kb, k->layout);
-		return;
+	if ((kb->compose == 1) && (k->type != Compose) && (k->type != Mod)) {
+		if ((k->type == NextLayer) || (k->type == BackLayer) || ((k->type == Code) && (k->code == KEY_SPACE))) {
+			kb->compose = 0;
+			if (kb->debug)
+				fprintf(stderr, "showing layout index\n");
+			kbd_switch_layout(kb, &kb->layouts[Index], 0);
+			return;
+		} else if (k->layout) {
+			kb->compose++;
+			if (kb->debug)
+				fprintf(stderr, "showing compose %d\n", kb->compose);
+			kbd_switch_layout(kb, k->layout, kbd_get_layer_index(kb, k->layout));
+			return;
+		} else {
+			return;
+		}
 	}
 
 	switch (k->type) {
@@ -304,7 +330,14 @@ kbd_press_key(struct kbd *kb, struct key *k, uint32_t time) {
 		break;
 	case Layout:
 		// switch to the layout determined by the key
-		kbd_switch_layout(kb, k->layout);
+		kbd_switch_layout(kb, k->layout, kbd_get_layer_index(kb, k->layout));
+		//reset previous layout to default/first so we don't get any weird cycles
+		kb->last_abc_index = 0;
+		if (kb->landscape) {
+			kb->last_abc_layout = &kb->layouts[kb->landscape_layers[0]];
+		} else {
+			kb->last_abc_layout = &kb->layouts[kb->layers[0]];
+		}
 		break;
 	case Compose:
 		// switch to the associated layout determined by the *next* keypress
@@ -319,15 +352,16 @@ kbd_press_key(struct kbd *kb, struct key *k, uint32_t time) {
 			kbd_draw_key(kb, k, Unpress);
 		}
 		break;
-	case NextLayer:
+	case NextLayer: //(also handles previous layer when shift modifier is on, or "first layer" with other modifiers)
+		size_t layer_index = kb->layer_index;
 		if ((kb->mods & Ctrl) || (kb->mods & Alt) || (kb->mods & AltGr) || ((bool)kb->compose)) {
 			// with modifiers: switch to the first layer
-			kb->layer_index = 0;
+			layer_index = 0;
 			kb->mods = 0;
 		} else if ((kb->mods & Shift) || (kb->mods & CapsLock)) {
 			// with modifiers: switch to the previous layout in the layer sequence
-			if (kb->layer_index > 0) {
-				kb->layer_index--;
+			if (layer_index > 0) {
+				layer_index--;
 			} else {
 				size_t layercount = 0;
 				for (size_t i = 0; layercount == 0; i++) {
@@ -337,37 +371,46 @@ kbd_press_key(struct kbd *kb, struct key *k, uint32_t time) {
 						if (kb->layers[i] == NumLayouts) layercount = i;
 					}
 				}
-				kb->layer_index = layercount - 1;
+				layer_index = layercount - 1;
 			}
 			kb->mods = 0;
 		} else {
 			// normal behaviour: switch to the next layout in the layer sequence
-			kb->layer_index++;
+			layer_index++;
 		}
 		enum layout_id layer;
 		if (kb->landscape) {
-			layer = kb->landscape_layers[kb->layer_index];
+			layer = kb->landscape_layers[layer_index];
 		} else {
-			layer = kb->layers[kb->layer_index];
+			layer = kb->layers[layer_index];
 		}
 		if (layer == NumLayouts) {
-			kb->layer_index = 0;
+			layer_index = 0;
 			if (kb->landscape) {
-				layer = kb->landscape_layers[kb->layer_index];
+				layer = kb->landscape_layers[layer_index];
 			} else {
-				layer = kb->layers[kb->layer_index];
+				layer = kb->layers[layer_index];
 			}
 		}
 		if ((bool)kb->compose) {
 			kb->compose = 0;
 			kbd_draw_key(kb, k, Unpress);
 		}
-		kbd_switch_layout(kb, &kb->layouts[layer]);
+		kbd_switch_layout(kb, &kb->layouts[layer], layer_index);
 		break;
-	case BackLayer:
-		// switch to the previously active layout
-		if (kb->prevlayout)
-			kbd_switch_layout(kb, kb->prevlayout);
+	case BackLayer: //triggered when "Abc" keys are pressed
+		// switch to the last active alphabetical layout
+		if (kb->last_abc_layout) {
+			kb->compose = 0;
+			kbd_switch_layout(kb, kb->last_abc_layout, kb->last_abc_index);
+			//reset previous layout to default/first so we don't get any weird cycles
+			kb->last_abc_index = 0;
+			if (kb->landscape) {
+				kb->last_abc_layout = &kb->layouts[kb->landscape_layers[0]];
+			} else {
+				kb->last_abc_layout = &kb->layouts[kb->layers[0]];
+			}
+		}
 		break;
 	case Copy:
 		// copy code as unicode chr by setting a temporary keymap
@@ -455,7 +498,7 @@ kbd_draw_layout(struct kbd *kb) {
 	struct drwsurf *d = kb->surf;
 	struct key *next_key = kb->layout->keys;
 	if (kb->debug)
-		fprintf(stderr, "Draw layout");
+		fprintf(stderr, "Draw layout\n");
 
 	drw_fill_rectangle(d, kb->scheme.bg, 0, 0, kb->w, kb->h);
 
@@ -483,6 +526,12 @@ kbd_resize(struct kbd *kb, struct layout *layouts, uint8_t layoutcount) {
 
 	drwsurf_resize(d, kb->w, kb->h, kb->scale);
 	for (int i = 0; i < layoutcount; i++) {
+		if (kb->debug) {
+	  		if (layouts[i].name)
+				fprintf(stderr, "Initialising layout %s\n", layouts[i].name);
+			else 
+				fprintf(stderr, "Initialising unnamed layout %d\n", i);
+		}
 		kbd_init_layout(&layouts[i], kb->w, kb->h);
 	}
 	kbd_draw_layout(kb);

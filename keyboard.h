@@ -81,6 +81,7 @@ struct layout {
 	struct key *keys;
 	const char *keymap_name;
 	const char *name;
+	bool abc; //is this an alphabetical/abjad layout or not? (i.e. something that is a primary input layout)
 	uint32_t keyheight; // absolute height (pixels)
 };
 
@@ -99,8 +100,10 @@ struct kbd {
 	uint8_t compose;
 	struct key *last_press;
 	struct key *last_swipe;
-	struct layout *prevlayout;
+	struct layout *prevlayout; //the previous layout, needed to keep track of keymap changes
 	size_t layer_index;
+	struct layout *last_abc_layout; //the last alphabetical layout to fall back to (may be further away than prevlayout)
+	size_t last_abc_index; //the layer index of the last alphabetical layout
 
 	struct layout *layouts;
 	enum layout_id *layers;
@@ -119,6 +122,7 @@ void kbd_init(struct kbd *kb, struct layout *layouts,
               char *layer_names_list, char *landscape_layer_names_list);
 void kbd_init_layout(struct layout *l, uint32_t width, uint32_t height);
 struct key *kbd_get_key(struct kbd *kb, uint32_t x, uint32_t y);
+size_t kbd_get_layer_index(struct kbd *kb, struct layout *l);
 void kbd_unpress_key(struct kbd *kb, uint32_t time);
 void kbd_release_key(struct kbd *kb, uint32_t time);
 void kbd_motion_key(struct kbd *kb, uint32_t time, uint32_t x, uint32_t y);
@@ -129,7 +133,7 @@ void kbd_draw_layout(struct kbd *kb);
 void kbd_resize(struct kbd *kb, struct layout *layouts, uint8_t layoutcount);
 uint8_t kbd_get_rows(struct layout *l);
 double kbd_get_row_length(struct key *k);
-void kbd_switch_layout(struct kbd *kb, struct layout *l);
+void kbd_switch_layout(struct kbd *kb, struct layout *l, size_t layer_index);
 
 void create_and_upload_keymap(struct kbd *kb, const char *name,
                               uint32_t comp_unichr, uint32_t comp_shift_unichr);

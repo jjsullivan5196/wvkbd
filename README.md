@@ -17,7 +17,7 @@ new features.
  - Custom color schemes
  - Proper font drawing
  - Intuitive layouts
- - International layouts (cyrillic, arabic)
+ - International layouts (cyrillic, arabic, persian, greek, georgian)
  - Support for 'Copy' keys which are not on the keymap
  - Emoji support
  - Compose key for character variants (e.g. diacritics)
@@ -55,7 +55,7 @@ the resulting binary will be `wvkbd-yourlayout`
 
 Run `wvkbd-mobintl` (or the binary for your custom layout set).
 
-You can switch between the layouts/layers of the keyboard by pressing the Abc/Sym key in the bottom-left. If you only
+You can switch between the layouts/layers of the keyboard by pressing the little keyboard key in the bottom-left. If you only
 want a subset of the available layers, you can define which wants you want and in what order you want to cycle through
 them using the `-l` parameter. This takes takes a ordered comma separated list of
 layout names that are defined in your layout set.

@@ -173,6 +173,9 @@ wl_touch_down(void *data, struct wl_touch *wl_touch, uint32_t serial,
 	next_key = kbd_get_key(&keyboard, touch_x, touch_y);
 	if (next_key) {
 		kbd_press_key(&keyboard, next_key, time);
+	} else if (keyboard.compose) {
+		keyboard.compose = 0;
+		kbd_switch_layout(&keyboard, keyboard.prevlayout, keyboard.last_abc_index);
 	}
 }
 
@@ -245,6 +248,9 @@ wl_pointer_button(void *data, struct wl_pointer *wl_pointer, uint32_t serial,
 		next_key = kbd_get_key(&keyboard, cur_x, cur_y);
 		if (next_key) {
 			kbd_press_key(&keyboard, next_key, time);
+		} else if (keyboard.compose) {
+			keyboard.compose = 0;
+			kbd_switch_layout(&keyboard, keyboard.prevlayout, keyboard.last_abc_index);
 		}
 	}
 }
@@ -301,8 +307,10 @@ display_handle_geometry(void *data, struct wl_output *wl_output, int x, int y,
 	}
 
 	keyboard.layout = &keyboard.layouts[layer];
-	keyboard.prevlayout = keyboard.layout;
 	keyboard.layer_index = 0;
+	keyboard.prevlayout = keyboard.layout;
+	keyboard.last_abc_layout = keyboard.layout;
+	keyboard.last_abc_index = 0;
 
 	if (layer_surface) {
 		zwlr_layer_surface_v1_set_size(layer_surface, 0, height);
