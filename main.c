@@ -26,10 +26,19 @@ static struct wl_compositor *compositor;
 static struct wl_seat *seat;
 static struct wl_pointer *pointer;
 static struct wl_touch *touch;
-static struct wl_output *wl_output;
 static struct zwlr_layer_shell_v1 *layer_shell;
 static struct zwlr_layer_surface_v1 *layer_surface;
 static struct zwp_virtual_keyboard_manager_v1 *vkbd_mgr;
+
+struct Output {
+    uint32_t name;
+    uint32_t scale;
+    struct wl_output *data;
+};
+
+#define WL_OUTPUTS_LIMIT 8
+static struct Output wl_outputs[WL_OUTPUTS_LIMIT];
+static int           wl_outputs_size;
 
 /* drawing */
 static struct drw draw_ctx;
@@ -83,6 +92,9 @@ static void seat_handle_capabilities(void *data, struct wl_seat *wl_seat,
 static void seat_handle_name(void *data, struct wl_seat *wl_seat,
                              const char *name);
 
+static void wl_surface_enter(void *data, struct wl_surface *wl_surface,
+                             struct wl_output *wl_output);
+
 static void handle_global(void *data, struct wl_registry *registry,
                           uint32_t name, const char *interface,
                           uint32_t version);
@@ -116,6 +128,10 @@ static const struct wl_touch_listener touch_listener = {
 static const struct wl_seat_listener seat_listener = {
   .capabilities = seat_handle_capabilities,
   .name = seat_handle_name,
+};
+
+static const struct wl_surface_listener surface_listener = {
+  .enter = wl_surface_enter,
 };
 
 static const struct wl_registry_listener registry_listener = {
@@ -249,6 +265,17 @@ seat_handle_capabilities(void *data, struct wl_seat *wl_seat,
 void
 seat_handle_name(void *data, struct wl_seat *wl_seat, const char *name) {}
 
+void
+wl_surface_enter(void *data, struct wl_surface *wl_surface,
+                 struct wl_output *wl_output) {
+    for(int i = 0; i < WL_OUTPUTS_LIMIT; i += 1) {
+        if(wl_outputs[i].data == wl_output) {
+            keyboard.s = wl_outputs[i].scale;
+            return;
+        }
+    }
+}
+
 static void
 display_handle_geometry(void *data, struct wl_output *wl_output, int x, int y,
                         int physical_width, int physical_height, int subpixel,
@@ -289,7 +316,7 @@ display_handle_done(void *data, struct wl_output *wl_output) {}
 
 static void
 display_handle_scale(void *data, struct wl_output *wl_output, int32_t scale) {
-	keyboard.s = scale;
+    ((struct Output*)data)->scale = scale;
 }
 
 static void
@@ -310,10 +337,13 @@ handle_global(void *data, struct wl_registry *registry, uint32_t name,
 	} else if (strcmp(interface, wl_shm_interface.name) == 0) {
 		draw_ctx.shm = wl_registry_bind(registry, name, &wl_shm_interface, 1);
 	} else if (strcmp(interface, "wl_output") == 0) {
-		if (!wl_output) {
-			wl_output = wl_registry_bind(registry, name, &wl_output_interface, 2);
-			keyboard.s = 1;
-			wl_output_add_listener(wl_output, &output_listener, NULL);
+		if(wl_outputs_size < WL_OUTPUTS_LIMIT) {
+			struct Output *output = &wl_outputs[wl_outputs_size];
+			output->data = wl_registry_bind(registry, name, &wl_output_interface, 2);
+			output->name = name;
+			output->scale = 1;
+			wl_output_add_listener(output->data, &output_listener, output);
+			wl_outputs_size += 1;
 		}
 	} else if (strcmp(interface, wl_seat_interface.name) == 0) {
 		seat = wl_registry_bind(registry, name, &wl_seat_interface, 1);
@@ -329,7 +359,18 @@ handle_global(void *data, struct wl_registry *registry, uint32_t name,
 }
 
 void
-handle_global_remove(void *data, struct wl_registry *registry, uint32_t name) {}
+handle_global_remove(void *data, struct wl_registry *registry, uint32_t name) {
+    for(int i = 0; i < WL_OUTPUTS_LIMIT; i += 1) {
+        if(wl_outputs[i].name == name) {
+            wl_output_destroy(wl_outputs[i].data);
+            for(; i < WL_OUTPUTS_LIMIT - 1; i += 1) {
+                wl_outputs[i] = wl_outputs[i + 1];
+            }
+            wl_outputs_size -= 1;
+            break;
+        }
+    }
+}
 
 void
 layer_surface_configure(void *data, struct zwlr_layer_surface_v1 *surface,
@@ -411,8 +452,9 @@ show() {
 	wl_display_sync(display);
 
 	draw_surf.surf = wl_compositor_create_surface(compositor);
+	wl_surface_add_listener(draw_surf.surf, &surface_listener, NULL);
 	layer_surface = zwlr_layer_shell_v1_get_layer_surface(
-	  layer_shell, draw_surf.surf, wl_output, layer, namespace);
+	  layer_shell, draw_surf.surf, NULL, layer, namespace);
 
 	zwlr_layer_surface_v1_set_size(layer_surface, 0, height);
 	zwlr_layer_surface_v1_set_anchor(layer_surface, anchor);
@@ -483,6 +525,7 @@ main(int argc, char **argv) {
 	keyboard.scheme = scheme;
 	keyboard.layer_index = 0;
 	keyboard.scheme1 = scheme1;
+	keyboard.s =  1;
 
 	int i;
 	for (i = 1; argv[i]; i++) {
