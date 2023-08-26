@@ -55,10 +55,12 @@ the resulting binary will be `wvkbd-yourlayout`
 
 Run `wvkbd-mobintl` (or the binary for your custom layout set).
 
-You can switch between the layouts/layers of the keyboard by pressing the little keyboard key in the bottom-left. If you only
-want a subset of the available layers, you can define which wants you want and in what order you want to cycle through
-them using the `-l` parameter. This takes takes a ordered comma separated list of
-layout names that are defined in your layout set.
+You can switch between the layouts/layers of the keyboard by pressing the
+⌨ key (little keyboard) the bottom-left (press shift to iterate back instead of
+forward). If you only want a subset of the available layers, you can define
+which you want and in what order you want to cycle through them using the
+`-l` parameter (or `--landscape-layers` for landscape mode). This takes takes a ordered comma separated list of layout names
+that are defined in your layout set.
 
 The keyboard can be hidden by sending it a `SIGUSR1` signal, shown again by sending it `SIGUSR2` or toggled by sending it `SIGRTMIN`.
 This saves some start up time and may be appropriate in some low-resource environments.
@@ -73,6 +75,25 @@ Another output mode, `-O` will let the keyboard output keys which are swiped ove
 
 `$ wvkbd-mobintl -O | swipeGuess.sh words.txt | completelyTypeWord.sh`
 
+### Compose button
+
+The default mobile international layout features a Compose button (`Cmp`)
+which, when combined with another key, opens up a layout that offers variants
+for that key. This is similar to functionality that other keyboards implemented
+using a *long press* (wvkbd has no such notion, holding a key will repeat
+it like on a physical keyboard).
+
+For example, press Cmp + a to access variants with diacritics like á,à,â,ä, etc.. 
+
+Most layouts also feature the following that are less obvious:
+
+* Press Cmp + ``.`` to access more punctuation
+* Press Cmp + ``-`` or ``,`` to access 'mathematical' symbols (+,-,=,etc)
+* Press Cmp + ``'`` or ``0`` or ``9`` to access more brackets and quotes
+* Press Cmp + ``q`` to access emojis
+
+Last, but not least, pressing Cmp + space or Cmp + ⌨  or Cmp + Abc opens up an index that allows you to immediately jump to any
+layout by name, even layouts not explicitly added to your layers on startup.
 
 ## Contribute
 
