@@ -267,6 +267,47 @@ kbd_press_key(struct kbd *kb, struct key *k, uint32_t time) {
 	}
 
 	switch (k->type) {
+	case StringFn:
+		const char *s = (*k->string_fn)();
+		for (const char *c = s; *c != 0; c++) {
+			// Find the key code for this character.
+			uint32_t code;
+			bool shift;
+			for (int il = 0; il < NumLayouts; il++) {
+				struct key *key = layouts[il].keys;
+				if (!key) {
+					continue;
+				}
+				for (; key->type != Last; key++) {
+					if (key->type != Code) {
+						continue;
+					}
+					if (key->label && (*key->label == *c)) {
+						code = key->code;
+						shift = 0;
+						goto found_code;
+					}
+					if (key->shift_label && (*key->shift_label == *c)) {
+						code = key->code;
+						shift = 1;
+						goto found_code;
+					}
+				}
+			}
+			// Reaching here means key code not found.
+			continue;
+		found_code:
+			if (shift) {
+				zwp_virtual_keyboard_v1_modifiers(kb->vkbd, Shift, 0, 0, 0);
+			}
+			zwp_virtual_keyboard_v1_key(kb->vkbd, time, code,
+						    WL_KEYBOARD_KEY_STATE_PRESSED);
+			zwp_virtual_keyboard_v1_key(kb->vkbd, time, code,
+			                            WL_KEYBOARD_KEY_STATE_RELEASED);
+			if (shift) {
+				zwp_virtual_keyboard_v1_modifiers(kb->vkbd, 0, 0, 0, 0);
+			}
+		}
 	case Code:
 		if (k->code_mod) {
 			if (k->reset_mod) {
