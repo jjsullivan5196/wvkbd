@@ -478,10 +478,10 @@ void
 kbd_resize(struct kbd *kb, struct layout *layouts, uint8_t layoutcount) {
 	struct drwsurf *d = kb->surf;
 
-	fprintf(stderr, "Resize %dx%d %d, %d layouts\n", kb->w, kb->h, kb->s,
+	fprintf(stderr, "Resize %dx%d %d, %d layouts\n", kb->w, kb->h, kb->scale,
 	        layoutcount);
 
-	drwsurf_resize(d, kb->w, kb->h, kb->s);
+	drwsurf_resize(d, kb->w, kb->h, kb->scale);
 	for (int i = 0; i < layoutcount; i++) {
 		kbd_init_layout(&layouts[i], kb->w, kb->h);
 	}

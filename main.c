@@ -270,7 +270,7 @@ wl_surface_enter(void *data, struct wl_surface *wl_surface,
                  struct wl_output *wl_output) {
     for(int i = 0; i < WL_OUTPUTS_LIMIT; i += 1) {
         if(wl_outputs[i].data == wl_output) {
-            keyboard.s = wl_outputs[i].scale;
+            keyboard.scale = wl_outputs[i].scale;
             return;
         }
     }
@@ -316,7 +316,8 @@ display_handle_done(void *data, struct wl_output *wl_output) {}
 
 static void
 display_handle_scale(void *data, struct wl_output *wl_output, int32_t scale) {
-    ((struct Output*)data)->scale = scale;
+	((struct Output*)data)->scale = scale;
+	keyboard.scale = scale;
 }
 
 static void
@@ -525,7 +526,7 @@ main(int argc, char **argv) {
 	keyboard.scheme = scheme;
 	keyboard.layer_index = 0;
 	keyboard.scheme1 = scheme1;
-	keyboard.s =  1;
+	keyboard.scale =  1;
 
 	int i;
 	for (i = 1; argv[i]; i++) {
