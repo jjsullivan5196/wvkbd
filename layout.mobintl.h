@@ -21,6 +21,7 @@ enum layout_id {
 	Persian,
 	Greek,
 	Georgian,
+	Hebrew,
 	Emoji,
 	Nav,
 	Landscape,
@@ -67,7 +68,7 @@ enum layout_id {
 };
 
 static struct key keys_full[], keys_special[], keys_specialpad[], keys_simple[], keys_simplegrid[],
-  keys_cyrillic[], keys_arabic[], keys_persian[], keys_georgian[], keys_greek[],
+  keys_cyrillic[], keys_arabic[], keys_persian[], keys_georgian[], keys_greek[], keys_hebrew[],
   keys_emoji[], keys_nav[], keys_landscape[], keys_compose_a[],
   keys_compose_e[], keys_compose_y[], keys_compose_u[], keys_compose_i[],
   keys_compose_o[], keys_compose_w[], keys_compose_r[], keys_compose_t[],
@@ -95,6 +96,7 @@ static struct layout layouts[NumLayouts] = {
   [Georgian] = {keys_georgian, "georgian", "georgian", true},
   [Persian] = {keys_persian, "persian", "persian", true},
   [Greek] = {keys_greek, "greek", "greek", true},
+  [Hebrew] = {keys_hebrew, "hebrew", "hebrew", true},
   [Emoji] = {keys_emoji, "latin", "emoji", false},
   [Nav] = {keys_nav, "latin", "nav", false},
   [Landscape] = {keys_landscape, "latin", "landscape", true},
@@ -795,6 +797,56 @@ static struct key keys_greek[] = {
   {"", "", 0.0, Last},
 };
 
+static struct key keys_hebrew[] = {
+  {"/", "/", 1.0, Code, KEY_Q},
+  {"'", "'", 1.0, Code, KEY_W, &layouts[ComposeBracket]},
+  {"ק", "ק", 1.0, Code, KEY_E},
+  {"ר", "ר", 1.0, Code, KEY_R},
+  {"א", "א", 1.0, Code, KEY_T},
+  {"ט", "ט", 1.0, Code, KEY_Y},
+  {"ו", "ו", 1.0, Code, KEY_U},
+  {"ן", "ן", 1.0, Code, KEY_I},
+  {"ם", "ם", 1.0, Code, KEY_O},
+  {"פ", "פ", 1.0, Code, KEY_P},
+  {"", "", 0.0, EndRow},
+
+  {"ש", "ש", 1.0, Code, KEY_A},
+  {"ד", "ד", 1.0, Code, KEY_S},
+  {"ג", "ג", 1.0, Code, KEY_D},
+  {"כ", "כ", 1.0, Code, KEY_F},
+  {"ע", "ע", 1.0, Code, KEY_G},
+  {"י", "י", 1.0, Code, KEY_H},
+  {"ח", "ח", 1.0, Code, KEY_J},
+  {"ל", "ל", 1.0, Code, KEY_K},
+  {"ך", "ך", 1.0, Code, KEY_L},
+  {"ף", "ף", 1.0, Code, KEY_SEMICOLON},
+  {"", "", 0.0, EndRow},
+
+  {"ז", "ז", 1.0, Code, KEY_Z},
+  {"ס", "ס", 1.0, Code, KEY_X},
+  {"ב", "ב", 1.0, Code, KEY_C},
+  {"ה", "ה", 1.0, Code, KEY_V},
+  {"נ", "נ", 1.0, Code, KEY_B},
+  {"מ", "מ", 1.0, Code, KEY_N},
+  {"צ", "צ", 1.0, Code, KEY_M},
+  {"ת", "ת", 1.0, Code, KEY_COMMA},
+  {"ץ", "ץ", 1.0, Code, KEY_DOT},
+  {"⌫", "⌫", 1.0, Code, KEY_BACKSPACE, .scheme = 1},
+
+  {"", "", 0.0, EndRow},
+
+  {"⌨→", "←⌨", 1.0, NextLayer, .scheme = 1},
+  {"Cmp", "Cmp", 1.0, Compose, .scheme = 1},
+  {",", "\"", 1.0, Code, KEY_APOSTROPHE, &layouts[ComposeMath]},
+  {"", "", 3.5, Code, KEY_SPACE},
+  {".", "?", 1.0, Code, KEY_SLASH, &layouts[ComposePunctuation]},
+  {"?", "?", 1.0, Code, KEY_SLASH, &layouts[ComposePunctuation], Shift},
+  {"Enter", "Enter", 1.5, Code, KEY_ENTER, .scheme = 1},
+
+  /* end of layout */
+  {"", "", 0.0, Last},
+};
+
 static struct key keys_compose_a[] = {
   {"à", "À", 1.0, Copy, 0x00E0, 0, 0x00C0},
   {"á", "Á", 1.0, Copy, 0x00E1, 0, 0x00C1},
@@ -1044,6 +1096,7 @@ static struct key keys_index[] = {
   {"ابج", "ابج", 1.0, Layout, 0, &layouts[Arabic]},
   {"فر", "فر", 1.0, Layout, 0, &layouts[Persian]},
   {"აბგ", "აბგ", 1.0, Layout, 0, &layouts[Georgian]},
+  {"א", "א", 1.0, Layout, 0, &layouts[Hebrew]},
   {"", "", 0.0, Last},
 };
 
