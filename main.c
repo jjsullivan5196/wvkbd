@@ -8,6 +8,7 @@
 #include <sys/signalfd.h>
 #include <poll.h>
 #include <unistd.h>
+#include <wayland-client-protocol.h>
 #include <wayland-client.h>
 #include <wchar.h>
 
@@ -70,6 +71,8 @@ static void wl_pointer_motion(void *data, struct wl_pointer *wl_pointer,
 static void wl_pointer_button(void *data, struct wl_pointer *wl_pointer,
                               uint32_t serial, uint32_t time, uint32_t button,
                               uint32_t state);
+static void wl_pointer_axis(void *data, struct wl_pointer *wl_pointer,
+                  uint32_t time, uint32_t axis, wl_fixed_t value);
 
 static void wl_touch_down(void *data, struct wl_touch *wl_touch,
                           uint32_t serial, uint32_t time,
@@ -113,6 +116,7 @@ static const struct wl_pointer_listener pointer_listener = {
   .leave = wl_pointer_leave,
   .motion = wl_pointer_motion,
   .button = wl_pointer_button,
+  .axis = wl_pointer_axis,
 };
 
 static const struct wl_touch_listener touch_listener = {
@@ -253,6 +257,13 @@ wl_pointer_button(void *data, struct wl_pointer *wl_pointer, uint32_t serial,
 			kbd_switch_layout(&keyboard, keyboard.prevlayout, keyboard.last_abc_index);
 		}
 	}
+}
+
+void
+wl_pointer_axis(void *data, struct wl_pointer *wl_pointer,
+                  uint32_t time, uint32_t axis, wl_fixed_t value) {
+	kbd_next_layer(&keyboard, NULL, (value >= 0));
+	drwsurf_flip(keyboard.surf);
 }
 
 void

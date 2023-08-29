@@ -62,7 +62,7 @@ kbd_next_layer(struct kbd *kb, struct key *k, bool invert) {
 			}
 			layer_index = layercount - 1;
 		}
-		kb->mods ^= Shift;
+		if (!invert) kb->mods ^= Shift;
 	} else {
 		// normal behaviour: switch to the next layout in the layer sequence
 		layer_index++;
