@@ -40,6 +40,59 @@ kbd_switch_layout(struct kbd *kb, struct layout *l, size_t layer_index) {
 	kbd_draw_layout(kb);
 }
 
+void
+kbd_next_layer(struct kbd *kb, struct key *k, bool invert) {
+	size_t layer_index = kb->layer_index;
+	if ((kb->mods & Ctrl) || (kb->mods & Alt) || (kb->mods & AltGr) || ((bool)kb->compose)) {
+		// with modifiers ctrl/alt/altgr: switch to the first layer
+		layer_index = 0;
+		kb->mods = 0;
+	} else if ((kb->mods & Shift) || (kb->mods & CapsLock) || (invert)) {
+		// with modifiers shift/capslock or invert set: switch to the previous layout in the layer sequence
+		if (layer_index > 0) {
+			layer_index--;
+		} else {
+			size_t layercount = 0;
+			for (size_t i = 0; layercount == 0; i++) {
+				if (kb->landscape) {
+					if (kb->landscape_layers[i] == NumLayouts) layercount = i;
+				} else {
+					if (kb->layers[i] == NumLayouts) layercount = i;
+				}
+			}
+			layer_index = layercount - 1;
+		}
+		kb->mods ^= Shift;
+	} else {
+		// normal behaviour: switch to the next layout in the layer sequence
+		layer_index++;
+		size_t layercount = 0;
+		for (size_t i = 0; layercount == 0; i++) {
+			if (kb->landscape) {
+				if (kb->landscape_layers[i] == NumLayouts) layercount = i;
+			} else {
+				if (kb->layers[i] == NumLayouts) layercount = i;
+			}
+		}
+		if (layer_index >= layercount) {
+			if (kb->debug)
+				fprintf(stderr, "wrapping layer_index back to start\n");
+			layer_index = 0;
+		}
+	}
+	enum layout_id layer;
+	if (kb->landscape) {
+		layer = kb->landscape_layers[layer_index];
+	} else {
+		layer = kb->layers[layer_index];
+	}
+	if (((bool)kb->compose) && (k)) {
+		kb->compose = 0;
+		kbd_draw_key(kb, k, Unpress);
+	}
+	kbd_switch_layout(kb, &kb->layouts[layer], layer_index);
+}
+
 uint8_t
 kbd_get_rows(struct layout *l) {
 	uint8_t rows = 0;
@@ -355,55 +408,7 @@ kbd_press_key(struct kbd *kb, struct key *k, uint32_t time) {
 		}
 		break;
 	case NextLayer: //(also handles previous layer when shift modifier is on, or "first layer" with other modifiers)
-		size_t layer_index = kb->layer_index;
-		if ((kb->mods & Ctrl) || (kb->mods & Alt) || (kb->mods & AltGr) || ((bool)kb->compose)) {
-			// with modifiers: switch to the first layer
-			layer_index = 0;
-			kb->mods = 0;
-		} else if ((kb->mods & Shift) || (kb->mods & CapsLock)) {
-			// with modifiers: switch to the previous layout in the layer sequence
-			if (layer_index > 0) {
-				layer_index--;
-			} else {
-				size_t layercount = 0;
-				for (size_t i = 0; layercount == 0; i++) {
-					if (kb->landscape) {
-						if (kb->landscape_layers[i] == NumLayouts) layercount = i;
-					} else {
-						if (kb->layers[i] == NumLayouts) layercount = i;
-					}
-				}
-				layer_index = layercount - 1;
-			}
-			kb->mods ^= Shift;
-		} else {
-			// normal behaviour: switch to the next layout in the layer sequence
-			layer_index++;
-			size_t layercount = 0;
-			for (size_t i = 0; layercount == 0; i++) {
-				if (kb->landscape) {
-					if (kb->landscape_layers[i] == NumLayouts) layercount = i;
-				} else {
-					if (kb->layers[i] == NumLayouts) layercount = i;
-				}
-			}
-			if (layer_index >= layercount) {
-				if (kb->debug)
-					fprintf(stderr, "wrapping layer_index back to start\n");
-				layer_index = 0;
-			}
-		}
-		enum layout_id layer;
-		if (kb->landscape) {
-			layer = kb->landscape_layers[layer_index];
-		} else {
-			layer = kb->layers[layer_index];
-		}
-		if ((bool)kb->compose) {
-			kb->compose = 0;
-			kbd_draw_key(kb, k, Unpress);
-		}
-		kbd_switch_layout(kb, &kb->layouts[layer], layer_index);
+		kbd_next_layer(kb, k, false);
 		break;
 	case BackLayer: //triggered when "Abc" keys are pressed
 		// switch to the last active alphabetical layout

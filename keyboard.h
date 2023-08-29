@@ -133,6 +133,7 @@ void kbd_draw_layout(struct kbd *kb);
 void kbd_resize(struct kbd *kb, struct layout *layouts, uint8_t layoutcount);
 uint8_t kbd_get_rows(struct layout *l);
 double kbd_get_row_length(struct key *k);
+void kbd_next_layer(struct kbd *kb, struct key *k, bool invert);
 void kbd_switch_layout(struct kbd *kb, struct layout *l, size_t layer_index);
 
 void create_and_upload_keymap(struct kbd *kb, const char *name,
