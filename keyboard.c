@@ -30,6 +30,8 @@ kbd_switch_layout(struct kbd *kb, struct layout *l, size_t layer_index) {
 	kb->layout = l;
 	if (kb->debug)
 		fprintf(stderr, "Switching to layout %s, layer_index %ld\n", kb->layout->name, layer_index);
+	if (!l->keymap_name) 
+		fprintf(stderr,"Layout has no keymap!"); //sanity check
 	if ((!kb->prevlayout) ||
 	    (strcmp(kb->prevlayout->keymap_name, kb->layout->keymap_name) != 0)) {
 		fprintf(stderr, "Switching to keymap %s\n", kb->layout->keymap_name);
@@ -222,7 +224,7 @@ kbd_unpress_key(struct kbd *kb, uint32_t time) {
 
 		if (kb->compose >= 2) {
 			kb->compose = 0;
-			kbd_switch_layout(kb, kb->prevlayout, kb->last_abc_index);
+			kbd_switch_layout(kb, kb->last_abc_layout, kb->last_abc_index);
 		} else if (unlatch_shift) {
 			kbd_draw_layout(kb);
 		} else {
@@ -373,24 +375,29 @@ kbd_press_key(struct kbd *kb, struct key *k, uint32_t time) {
 				}
 				layer_index = layercount - 1;
 			}
-			kb->mods = 0;
+			kb->mods ^= Shift;
 		} else {
 			// normal behaviour: switch to the next layout in the layer sequence
 			layer_index++;
+			size_t layercount = 0;
+			for (size_t i = 0; layercount == 0; i++) {
+				if (kb->landscape) {
+					if (kb->landscape_layers[i] == NumLayouts) layercount = i;
+				} else {
+					if (kb->layers[i] == NumLayouts) layercount = i;
+				}
+			}
+			if (layer_index >= layercount) {
+				if (kb->debug)
+					fprintf(stderr, "wrapping layer_index back to start\n");
+				layer_index = 0;
+			}
 		}
 		enum layout_id layer;
 		if (kb->landscape) {
 			layer = kb->landscape_layers[layer_index];
 		} else {
 			layer = kb->layers[layer_index];
-		}
-		if (layer == NumLayouts) {
-			layer_index = 0;
-			if (kb->landscape) {
-				layer = kb->landscape_layers[layer_index];
-			} else {
-				layer = kb->layers[layer_index];
-			}
 		}
 		if ((bool)kb->compose) {
 			kb->compose = 0;
@@ -528,9 +535,9 @@ kbd_resize(struct kbd *kb, struct layout *layouts, uint8_t layoutcount) {
 	for (int i = 0; i < layoutcount; i++) {
 		if (kb->debug) {
 	  		if (layouts[i].name)
-				fprintf(stderr, "Initialising layout %s\n", layouts[i].name);
+				fprintf(stderr, "Initialising layout %s, keymap %s\n", layouts[i].name, layouts[i].keymap_name);
 			else 
-				fprintf(stderr, "Initialising unnamed layout %d\n", i);
+				fprintf(stderr, "Initialising unnamed layout %d, keymap %s\n", i, layouts[i].keymap_name);
 		}
 		kbd_init_layout(&layouts[i], kb->w, kb->h);
 	}
