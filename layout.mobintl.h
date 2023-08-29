@@ -11,6 +11,7 @@
 /* layout declarations */
 enum layout_id {
 	Full = 0,
+	FullWide,
 	Special,
 	SpecialPad,
 	Simple,
@@ -68,7 +69,7 @@ enum layout_id {
 	NumLayouts,
 };
 
-static struct key keys_full[], keys_special[], keys_specialpad[], keys_simple[], keys_simplegrid[],
+static struct key keys_full[], keys_full_wide[], keys_special[], keys_specialpad[], keys_simple[], keys_simplegrid[],
   keys_cyrillic[], keys_arabic[], keys_persian[], keys_georgian[], keys_greek[], keys_hebrew[],
   keys_emoji[], keys_nav[], keys_landscape[], keys_landscape_special[], keys_compose_a[],
   keys_compose_e[], keys_compose_y[], keys_compose_u[], keys_compose_i[],
@@ -87,6 +88,7 @@ static struct layout layouts[NumLayouts] = {
   [Full] = {keys_full, "latin", "full", true}, // second parameter is the keymap name
                                          // third parameter is the layout name
 										 // last parameter indicates if it's an alphabetical/primary layout
+  [FullWide] = {keys_full_wide, "latin", "fullwide", true},
   [Special] = {keys_special, "latin", "special", false},
   [SpecialPad] = {keys_specialpad, "latin", "specialpad", false},
   [Simple] = {keys_simple, "latin", "simple", true},
@@ -195,6 +197,80 @@ static struct key keys_full[] = {
   {"8", "*", 1.0, Code, KEY_8},
   {"9", "(", 1.0, Code, KEY_9, &layouts[ComposeBracket]},
   {"0", ")", 1.0, Code, KEY_0, &layouts[ComposeBracket]},
+  {"", "", 0.0, EndRow},
+
+  {"q", "Q", 1.0, Code, KEY_Q, &layouts[Emoji]},
+  {"w", "W", 1.0, Code, KEY_W, &layouts[ComposeW]},
+  {"e", "E", 1.0, Code, KEY_E, &layouts[ComposeE]},
+  {"r", "R", 1.0, Code, KEY_R, &layouts[ComposeR]},
+  {"t", "T", 1.0, Code, KEY_T, &layouts[ComposeT]},
+  {"y", "Y", 1.0, Code, KEY_Y, &layouts[ComposeY]},
+  {"u", "U", 1.0, Code, KEY_U, &layouts[ComposeU]},
+  {"i", "I", 1.0, Code, KEY_I, &layouts[ComposeI]},
+  {"o", "O", 1.0, Code, KEY_O, &layouts[ComposeO]},
+  {"p", "P", 1.0, Code, KEY_P, &layouts[ComposeP]},
+  {"", "", 0.0, EndRow},
+
+  {"", "", 0.5, Pad},
+  {"a", "A", 1.0, Code, KEY_A, &layouts[ComposeA]},
+  {"s", "S", 1.0, Code, KEY_S, &layouts[ComposeS]},
+  {"d", "D", 1.0, Code, KEY_D, &layouts[ComposeD]},
+  {"f", "F", 1.0, Code, KEY_F, &layouts[ComposeF]},
+  {"g", "G", 1.0, Code, KEY_G, &layouts[ComposeG]},
+  {"h", "H", 1.0, Code, KEY_H, &layouts[ComposeH]},
+  {"j", "J", 1.0, Code, KEY_J, &layouts[ComposeJ]},
+  {"k", "K", 1.0, Code, KEY_K, &layouts[ComposeK]},
+  {"l", "L", 1.0, Code, KEY_L, &layouts[ComposeL]},
+  {"", "", 0.5, Pad},
+  {"", "", 0.0, EndRow},
+
+  {"⇧", "⇫", 1.5, Mod, Shift, .scheme = 1},
+  {"z", "Z", 1.0, Code, KEY_Z, &layouts[ComposeZ]},
+  {"x", "X", 1.0, Code, KEY_X, &layouts[ComposeX]},
+  {"c", "C", 1.0, Code, KEY_C, &layouts[ComposeC]},
+  {"v", "V", 1.0, Code, KEY_V, &layouts[ComposeV]},
+  {"b", "B", 1.0, Code, KEY_B, &layouts[ComposeB]},
+  {"n", "N", 1.0, Code, KEY_N, &layouts[ComposeN]},
+  {"m", "M", 1.0, Code, KEY_M, &layouts[ComposeM]},
+  {"⌫", "⌫", 1.5, Code, KEY_BACKSPACE, .scheme = 1},
+  {"", "", 0.0, EndRow},
+
+  {"⌨→", "←⌨", 1.5, NextLayer, .scheme = 1},
+  {"Cmp", "Cmp", 1.0, Compose, .scheme = 1},
+  {",", "'", 1.0, Code, KEY_COMMA, &layouts[ComposeMath]},
+  {"", "", 4.0, Code, KEY_SPACE},
+  {".", "?", 1.0, Code, KEY_DOT, &layouts[ComposePunctuation]},
+  {"Enter", "Enter", 1.5, Code, KEY_ENTER, .scheme = 1},
+
+  /* end of layout */
+  {"", "", 0.0, Last},
+};
+
+static struct key keys_full_wide[] = {
+  {"Esc", "Esc", 1.0, Code, KEY_ESC, .scheme = 1},
+  {"Ctr", "Ctr", 1.0, Mod, Ctrl, .scheme = 1},
+  {"↑", "↑", 1.0, Code, KEY_UP, .scheme = 1},
+  {"↓", "↓", 1.0, Code, KEY_DOWN, .scheme = 1},
+  {"←", "←", 1.0, Code, KEY_LEFT, .scheme = 1},
+  {"→", "→", 1.0, Code, KEY_RIGHT, .scheme = 1},
+  {"'", "\"", 1.0, Code, KEY_APOSTROPHE, &layouts[ComposeBracket] },
+  {";", ":", 1.0, Code, KEY_SEMICOLON, &layouts[ComposePunctuation] },
+  {"/", ">", 1.0, Code, KEY_SLASH,  &layouts[ComposePunctuation] },
+  {"Tab", "Tab", 1.0, Code, KEY_TAB, .scheme = 1},
+  {"", "", 0.0, EndRow},
+
+  {"1", "!", 1.0, Code, KEY_1},
+  {"2", "@", 1.0, Code, KEY_2},
+  {"3", "#", 1.0, Code, KEY_3},
+  {"4", "$", 1.0, Code, KEY_4},
+  {"5", "%", 1.0, Code, KEY_5},
+  {"6", "^", 1.0, Code, KEY_6},
+  {"7", "&", 1.0, Code, KEY_7},
+  {"8", "*", 1.0, Code, KEY_8},
+  {"9", "(", 1.0, Code, KEY_9, &layouts[ComposeBracket]},
+  {"0", ")", 1.0, Code, KEY_0, &layouts[ComposeBracket]},
+  {"-", "_", 1.0, Code, KEY_MINUS, &layouts[ComposeMath] },
+  {"=", "+", 1.0, Code, KEY_EQUAL, &layouts[ComposeMath] },
   {"", "", 0.0, EndRow},
 
   {"q", "Q", 1.0, Code, KEY_Q, &layouts[Emoji]},
@@ -1080,25 +1156,27 @@ static struct key keys_nav[] = {
 };
 
 static struct key keys_index[] = {
-  {"Full", "Full", 1.0, Layout, 0, &layouts[Full]},
-  {"Landscape", "Landscape", 1.5, Layout, 0,  &layouts[Landscape]},
-  {"Simple", "Simple", 1.0, Layout, 0, &layouts[Simple]},
-  {"SimpleG", "SimpleG", 1.0, Layout, 0, &layouts[SimpleGrid]},
+  {"Full", "Full", 1.0, Layout, 0, &layouts[Full], .scheme = 1},
+  {"Wide", "Wide", 0.75, Layout, 0, &layouts[Full]},
+  {"Landscape", "Landscape", 1.5, Layout, 0,  &layouts[Landscape], .scheme = 1},
+  {"Simple", "Simple", 1.0, Layout, 0, &layouts[Simple], .scheme = 1},
+  {"Grid", "Grid", 0.75, Layout, 0, &layouts[SimpleGrid]},
   {"", "", 0.0, EndRow},
 
-  {"Symbols", "Symbols", 2.0, Layout, 0, &layouts[Special]},
-  {"SpecPad", "SpecPad", 1.5, Layout, 0, &layouts[SpecialPad]},
-  {"Nav", "Nav", 1.0, Layout, 0, &layouts[Nav]},
-  {"123", "123", 1.0, Layout, 0, &layouts[Dialer]},
-  {"🙂", "🙂", 1.0, Layout, 0, &layouts[Emoji]},
+  {"Special", "Special", 1.5, Layout, 0, &layouts[Special], .scheme = 1},
+  {"LandSc", "LandSc", 1.0, Layout, 0, &layouts[LandscapeSpecial]},
+  {"Pad", "Pad", 1.0, Layout, 0, &layouts[SpecialPad]},
+  {"Nav", "Nav", 1.0, Layout, 0, &layouts[Nav], .scheme = 1},
+  {"123", "123", 1.0, Layout, 0, &layouts[Dialer], .scheme = 1},
+  {"🙂", "🙂", 1.0, Layout, 0, &layouts[Emoji], .scheme = 1},
   {"", "", 0.0, EndRow},
 
-  {"Абв", "Абв", 1.0, Layout, 0, &layouts[Cyrillic]},
-  {"αβγ", "αβγ", 1.0, Layout, 0, &layouts[Greek]},
-  {"ابج", "ابج", 1.0, Layout, 0, &layouts[Arabic]},
-  {"فر", "فر", 1.0, Layout, 0, &layouts[Persian]},
-  {"აბგ", "აბგ", 1.0, Layout, 0, &layouts[Georgian]},
-  {"א", "א", 1.0, Layout, 0, &layouts[Hebrew]},
+  {"Абв", "Абв", 1.0, Layout, 0, &layouts[Cyrillic], .scheme = 1},
+  {"αβγ", "αβγ", 1.0, Layout, 0, &layouts[Greek], .scheme = 1},
+  {"ابج", "ابج", 1.0, Layout, 0, &layouts[Arabic], .scheme = 1},
+  {"فر", "فر", 1.0, Layout, 0, &layouts[Persian], .scheme = 1},
+  {"აბგ", "აბგ", 1.0, Layout, 0, &layouts[Georgian], .scheme = 1},
+  {"א", "א", 1.0, Layout, 0, &layouts[Hebrew], .scheme = 1},
   {"", "", 0.0, Last},
 };
 
