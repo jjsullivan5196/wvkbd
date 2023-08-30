@@ -271,8 +271,14 @@ kbd_unpress_key(struct kbd *kb, uint32_t time) {
 			zwp_virtual_keyboard_v1_key(kb->vkbd, time, 127, // COMP key
 			                            WL_KEYBOARD_KEY_STATE_RELEASED);
 		} else {
-			zwp_virtual_keyboard_v1_key(kb->vkbd, time, kb->last_press->code,
-			                            WL_KEYBOARD_KEY_STATE_RELEASED);
+			if ((kb->last_press->code == KEY_SPACE) && (unlatch_shift)) {
+				//shift + space is tab
+				zwp_virtual_keyboard_v1_key(kb->vkbd, time, KEY_TAB,
+											WL_KEYBOARD_KEY_STATE_RELEASED);
+			} else {
+				zwp_virtual_keyboard_v1_key(kb->vkbd, time, kb->last_press->code,
+											WL_KEYBOARD_KEY_STATE_RELEASED);
+			}
 		}
 
 		if (kb->compose >= 2) {
@@ -361,8 +367,15 @@ kbd_press_key(struct kbd *kb, struct key *k, uint32_t time) {
 		}
 		kb->last_swipe = kb->last_press = k;
 		kbd_draw_key(kb, k, Press);
-		zwp_virtual_keyboard_v1_key(kb->vkbd, time, kb->last_press->code,
-		                            WL_KEYBOARD_KEY_STATE_PRESSED);
+		if ((k->code == KEY_SPACE) && (kb->mods & Shift)) {
+			//shift space is tab
+			zwp_virtual_keyboard_v1_modifiers(kb->vkbd, 0, 0, 0, 0);
+			zwp_virtual_keyboard_v1_key(kb->vkbd, time, KEY_TAB,
+										WL_KEYBOARD_KEY_STATE_PRESSED);
+		} else {
+			zwp_virtual_keyboard_v1_key(kb->vkbd, time, kb->last_press->code,
+										WL_KEYBOARD_KEY_STATE_PRESSED);
+		}
 		if (kb->print || kb->print_intersect)
 			kbd_print_key_stdout(kb, k);
 		if (kb->compose) {
