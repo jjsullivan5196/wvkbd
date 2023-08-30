@@ -24,7 +24,7 @@ OBJECTS = $(SOURCES:.c=.o)
 
 all: ${BIN}
 
-config.h: config.def.h
+config.h:
 	cp config.def.h config.h
 
 proto/%-client-protocol.c: proto/%.xml
