@@ -2,7 +2,7 @@
 #define config_def_h_INCLUDED
 
 static const char *default_font = "Sans 14";
-static const int transparency = 225;
+static const int transparency = 255;
 
 struct clr_scheme scheme = {
   /* colors */
