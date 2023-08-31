@@ -49,13 +49,13 @@ drw_draw_text(struct drwsurf *d, Color color, uint32_t x, uint32_t y,
 	if (width < (w - (b*2))) {
 		cairo_rel_move_to(d->cairo, - width / 2, 0);
 	} else {
-		cairo_rel_move_to(d->cairo, - w / 2 + b, 0);
+		cairo_rel_move_to(d->cairo, - (w / 2) + b, 0);
 	}
 
 	if (height < (h - (b*2))) {
 		cairo_rel_move_to(d->cairo, 0, - height / 2);
 	} else {
-		cairo_rel_move_to(d->cairo, 0, - h / 2);
+		cairo_rel_move_to(d->cairo, 0, - (h / 2) + b);
 	}
 
 	pango_cairo_show_layout(d->cairo, d->layout);

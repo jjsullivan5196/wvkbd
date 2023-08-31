@@ -521,13 +521,10 @@ kbd_draw_key(struct kbd *kb, struct key *k, enum key_draw_type type) {
 	drw_draw_text(d, scheme->text, k->x, k->y, k->w, k->h, KBD_KEY_BORDER, label);
 
 	// cleanup cairo mess right side if words too long
-	uint32_t right_part_x = k->x + k->w - 2 * KBD_KEY_BORDER;
-	drw_do_rectangle(d, kb->scheme.bg, right_part_x, k->y,
-		kb->w - right_part_x, k->h, false);
-
-	uint32_t bottom_part_y = k->y + k->h - 1 * KBD_KEY_BORDER;
-	drw_do_rectangle(d, kb->scheme.bg, k->x, bottom_part_y,
-		kb->h - bottom_part_y, k->w, false);
+	drw_do_rectangle(d, kb->scheme.bg, k->x + k->w - KBD_KEY_BORDER, k->y,
+		kb->w, k->h, false);
+	drw_do_rectangle(d, kb->scheme.bg, k->x, k->y + k->h - KBD_KEY_BORDER,
+		kb->h, k->w, false);
 
 	wl_surface_damage(d->surf, k->x, k->y, k->w, k->h);
 }
