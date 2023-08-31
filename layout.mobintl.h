@@ -1675,7 +1675,7 @@ static struct key keys_compose_punctuation[] = {
   {"…", "…", 1, Copy, 0x2026, 0, 0x2026},
   {":", ":", 1, Code, KEY_SEMICOLON, 0, Shift},
   {";", ";", 1, Code, KEY_SEMICOLON, 0},
-  {"¤", "¤", 1, Copy, 0x00A0, 0, 0x00A0},
+  {"⍽", "⍽", 1, Copy, 0x202F, 0, 0x00A0},
   {"", "", 0.5, Pad},
   {"", "", 0.0, EndRow},
   {"⇧", "⇫", 1.5, Mod, Shift, .scheme = 1},
