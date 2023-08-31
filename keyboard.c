@@ -504,6 +504,7 @@ kbd_draw_key(struct kbd *kb, struct key *k, enum key_draw_type type) {
 		fprintf(stderr, "Draw key +%d+%d %dx%d -> %s\n", k->x, k->y, k->w, k->h,
 		        label);
 	struct clr_scheme *scheme = (k->scheme == 0) ? &(kb->scheme) : &(kb->scheme1);
+
 	switch (type) {
 	case Unpress:
 		draw_inset(d, k->x, k->y, k->w, k->h, KBD_KEY_BORDER, scheme->fg);
@@ -515,7 +516,15 @@ kbd_draw_key(struct kbd *kb, struct key *k, enum key_draw_type type) {
 		draw_over_inset(d, k->x, k->y, k->w, k->h, KBD_KEY_BORDER, scheme->swipe);
 		break;
 	}
-	drw_draw_text(d, scheme->text, k->x, k->y, k->w, k->h, label);
+
+	drw_draw_text(d, scheme->text, k->x, k->y, k->w, k->h, KBD_KEY_BORDER, label);
+
+	// cleanup cairo mess right side if words too long
+	uint32_t right_part_x = k->x + k->w - 2 * KBD_KEY_BORDER;
+	drw_do_rectangle(d, kb->scheme.bg, right_part_x, k->y,
+		kb->w - right_part_x, kb->h, false);
+
+	wl_surface_damage(d->surf, k->x, k->y, k->w, k->h);
 }
 
 void
@@ -540,6 +549,7 @@ kbd_draw_layout(struct kbd *kb) {
 		}
 		next_key++;
 	}
+	wl_surface_damage(d->surf, 0, 0, kb->w, kb->h);
 }
 
 void

@@ -28,26 +28,32 @@ drwsurf_flip(struct drwsurf *ds) {
 
 void
 drw_draw_text(struct drwsurf *d, Color color, uint32_t x, uint32_t y,
-              uint32_t w, uint32_t h, const char *label) {
+              uint32_t w, uint32_t h, uint32_t b, const char *label) {
 
 	cairo_save(d->cairo);
 
 	cairo_set_source_rgba(
 	  d->cairo, color.bgra[2] / (double)255, color.bgra[1] / (double)255,
-	  color.bgra[0] / (double)255, color.bgra[3] / (double)255);
-	cairo_move_to(d->cairo, x + (double)w / 2.0, y + (double)h / 2.0);
+	  color.bgra[0] / (double)255, color.bgra[3] / (double)255
+	);
+	cairo_move_to(d->cairo, x + w / 2, y + h / 2);
 
 	pango_layout_set_text(d->layout, label, -1);
+	pango_layout_set_width(d->layout, (w - (b*2)) * PANGO_SCALE);
+	pango_layout_set_height(d->layout, (h - (b*2)) * PANGO_SCALE);
 
 	int width, height;
-	pango_layout_get_size(d->layout, &width, &height);
+	pango_layout_get_pixel_size(d->layout, &width, &height);
 
-	cairo_rel_move_to(d->cairo, -((double)width / PANGO_SCALE) / 2,
-	                  -((double)height / PANGO_SCALE) / 2);
+	// if a word is too long, cairo let it, and ignore our width
+	if (width < (w - (b*2))) {
+		cairo_rel_move_to(d->cairo, - width / 2, - height / 2);
+	} else {
+		cairo_rel_move_to(d->cairo, - w / 2 + b, - height / 2);
+	}
+
 	pango_cairo_show_layout(d->cairo, d->layout);
 	cairo_restore(d->cairo);
-
-	wl_surface_damage(d->surf, x, y, w, h);
 }
 
 void
@@ -68,8 +74,6 @@ drw_do_rectangle(struct drwsurf *d, Color color, uint32_t x, uint32_t y,
 	cairo_fill(d->cairo);
 
 	cairo_restore(d->cairo);
-
-	wl_surface_damage(d->surf, x, y, w, h);
 }
 
 void
@@ -117,6 +121,8 @@ setup_buffer(struct drwsurf *drwsurf) {
 	drwsurf->layout = pango_cairo_create_layout(drwsurf->cairo);
 	pango_layout_set_font_description(drwsurf->layout,
 	                                  drwsurf->ctx->font_description);
+	pango_layout_set_ellipsize(drwsurf->layout, PANGO_ELLIPSIZE_END);
+	pango_layout_set_auto_dir(drwsurf->layout, false);
 	cairo_save(drwsurf->cairo);
 
 	wl_surface_set_buffer_scale(drwsurf->surf, drwsurf->scale);
