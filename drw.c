@@ -121,7 +121,6 @@ setup_buffer(struct drwsurf *drwsurf) {
 	drwsurf->layout = pango_cairo_create_layout(drwsurf->cairo);
 	pango_layout_set_font_description(drwsurf->layout,
 	                                  drwsurf->ctx->font_description);
-	pango_layout_set_ellipsize(drwsurf->layout, PANGO_ELLIPSIZE_END);
 	pango_layout_set_auto_dir(drwsurf->layout, false);
 	cairo_save(drwsurf->cairo);
 
