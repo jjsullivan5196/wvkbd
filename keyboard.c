@@ -388,6 +388,12 @@ kbd_press_key(struct kbd *kb, struct key *k, uint32_t time) {
 		kb->mods ^= k->code;
 		if (k->code == Shift) {
 			kbd_draw_layout(kb);
+		} else {
+			if (kb->mods & k->code) {
+				kbd_draw_key(kb, k, Press);
+			} else {
+				kbd_draw_key(kb, k, Unpress);
+			}
 		}
 		zwp_virtual_keyboard_v1_modifiers(kb->vkbd, kb->mods, 0, 0, 0);
 		break;
