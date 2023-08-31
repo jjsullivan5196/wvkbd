@@ -470,7 +470,7 @@ static struct key keys_simple[] = {
   {"Cmp", "Cmp", 1.0, Compose, .scheme = 1},
   {"Ctr", "Ctr", 1.0, Mod, Ctrl, .scheme = 1},
   {"-", "_", 0.75, Code, KEY_MINUS, &layouts[ComposeMath]},
-  {",", "'", 0.75, Code, KEY_COMMA, &layouts[ComposePunctuation]},
+  {",", "'", 0.75, Code, KEY_COMMA, &layouts[ComposeBracket]},
   {"", "Tab", 3.0, Code, KEY_SPACE},
   {".", "?", 1.0, Code, KEY_DOT, &layouts[ComposePunctuation]},
   {"Enter", "Enter", 1.5, Code, KEY_ENTER, .scheme = 1},
