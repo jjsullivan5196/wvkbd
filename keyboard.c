@@ -389,11 +389,6 @@ kbd_press_key(struct kbd *kb, struct key *k, uint32_t time) {
 		if (k->code == Shift) {
 			kbd_draw_layout(kb);
 		}
-		if (kb->mods & k->code) {
-			kbd_draw_key(kb, k, Press);
-		} else {
-			kbd_draw_key(kb, k, Unpress);
-		}
 		zwp_virtual_keyboard_v1_modifiers(kb->vkbd, kb->mods, 0, 0, 0);
 		break;
 	case Layout:
@@ -522,7 +517,7 @@ kbd_draw_key(struct kbd *kb, struct key *k, enum key_draw_type type) {
 	// cleanup cairo mess right side if words too long
 	uint32_t right_part_x = k->x + k->w - 2 * KBD_KEY_BORDER;
 	drw_do_rectangle(d, kb->scheme.bg, right_part_x, k->y,
-		kb->w - right_part_x, kb->h, false);
+		kb->w - right_part_x, k->h, false);
 
 	wl_surface_damage(d->surf, k->x, k->y, k->w, k->h);
 }
