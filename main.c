@@ -427,6 +427,7 @@ usage(char *argv0) {
 	fprintf(stderr, "  -L [int]    - Landscape height in pixels\n");
 	fprintf(stderr, "  --fn [font] - Set font (e.g: DejaVu Sans 20)\n");
 	fprintf(stderr, "  --hidden    - Start hidden (send SIGUSR2 to show)\n");
+	fprintf(stderr, "  --alpha [int]          - Set alpha value for all colors [0-255]\n");
 	fprintf(stderr, "  --bg [rrggbb|aa]       - Set color of background\n");
 	fprintf(stderr, "  --fg [rrggbb|aa]       - Set color of keys\n");
 	fprintf(stderr, "  --fg-sp [rrggbb|aa]    - Set color of special keys\n");
@@ -547,6 +548,9 @@ main(int argc, char **argv) {
 	keyboard.scheme1 = scheme1;
 	keyboard.scale =  1;
 
+	uint8_t alpha = 0;
+	bool alpha_defined = false;
+
 	int i;
 	for (i = 1; argv[i]; i++) {
 		if ((!strcmp(argv[i], "-v")) || (!strcmp(argv[i], "--version"))) {
@@ -578,6 +582,13 @@ main(int argc, char **argv) {
 				exit(1);
 			}
 			set_kbd_colors(keyboard.scheme.bg.bgra, argv[++i]);
+		} else if ((!strcmp(argv[i], "-alpha")) || (!strcmp(argv[i], "--alpha"))) {
+			if (i >= argc - 1) {
+				usage(argv[0]);
+				exit(1);
+			}
+			alpha = atoi(argv[++i]);
+			alpha_defined = true;
 		} else if ((!strcmp(argv[i], "-fg")) || (!strcmp(argv[i], "--fg"))) {
 			if (i >= argc - 1) {
 				usage(argv[0]);
@@ -662,6 +673,15 @@ main(int argc, char **argv) {
 			usage(argv[0]);
 			exit(1);
 		}
+	}
+
+	if (alpha_defined) {
+		keyboard.scheme.bg.bgra[3] = alpha;
+		keyboard.scheme.fg.bgra[3] = alpha;
+		keyboard.scheme.high.bgra[3] = alpha;
+		keyboard.scheme1.bg.bgra[3] = alpha;
+		keyboard.scheme1.fg.bgra[3] = alpha;
+		keyboard.scheme1.high.bgra[3] = alpha;
 	}
 
 	if (!fc_font_pattern) {
