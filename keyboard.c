@@ -525,6 +525,10 @@ kbd_draw_key(struct kbd *kb, struct key *k, enum key_draw_type type) {
 	drw_do_rectangle(d, kb->scheme.bg, right_part_x, k->y,
 		kb->w - right_part_x, k->h, false);
 
+	uint32_t bottom_part_y = k->y + k->h - 1 * KBD_KEY_BORDER;
+	drw_do_rectangle(d, kb->scheme.bg, k->x, bottom_part_y,
+		kb->h - bottom_part_y, k->w, false);
+
 	wl_surface_damage(d->surf, k->x, k->y, k->w, k->h);
 }
 
