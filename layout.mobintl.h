@@ -15,7 +15,6 @@ enum layout_id {
 	Special,
 	SpecialPad,
 	Simple,
-	SimpleGrid,
 	Dialer,
 	Cyrillic,
 	Arabic,
@@ -69,7 +68,7 @@ enum layout_id {
 	NumLayouts,
 };
 
-static struct key keys_full[], keys_full_wide[], keys_special[], keys_specialpad[], keys_simple[], keys_simplegrid[],
+static struct key keys_full[], keys_full_wide[], keys_special[], keys_specialpad[], keys_simple[],
   keys_cyrillic[], keys_arabic[], keys_persian[], keys_georgian[], keys_greek[], keys_hebrew[],
   keys_emoji[], keys_nav[], keys_landscape[], keys_landscape_special[], keys_compose_a[],
   keys_compose_e[], keys_compose_y[], keys_compose_u[], keys_compose_i[],
@@ -92,7 +91,6 @@ static struct layout layouts[NumLayouts] = {
   [Special] = {keys_special, "latin", "special", false},
   [SpecialPad] = {keys_specialpad, "latin", "specialpad", false},
   [Simple] = {keys_simple, "latin", "simple", true},
-  [SimpleGrid] = {keys_simplegrid, "latin", "simplegrid", true},
   [Cyrillic] = {keys_cyrillic, "cyrillic", "cyrillic", true},
   [Dialer] = {keys_dialer, "latin", "dialer", false},
   [Arabic] = {keys_arabic, "arabic", "arabic", true},
@@ -503,55 +501,6 @@ static struct key keys_dialer[] = {
   {"#", "#", 1.0, Code, KEY_3, 0, Shift},
   {"", "", 0.0, EndRow},
   {"⌨͕", "⌨͔", 1.0, NextLayer, .scheme = 1},
-  {"Enter", "Enter", 2.0, Code, KEY_ENTER, .scheme = 1},
-
-  /* end of layout */
-  {"", "", 0.0, Last},
-};
-
-static struct key keys_simplegrid[] = {
-  {"q", "Q", 1.0, Code, KEY_Q, &layouts[Emoji]},
-  {"w", "W", 1.0, Code, KEY_W, &layouts[ComposeW]},
-  {"e", "E", 1.0, Code, KEY_E, &layouts[ComposeE]},
-  {"r", "R", 1.0, Code, KEY_R, &layouts[ComposeR]},
-  {"t", "T", 1.0, Code, KEY_T, &layouts[ComposeT]},
-  {"y", "Y", 1.0, Code, KEY_Y, &layouts[ComposeY]},
-  {"u", "U", 1.0, Code, KEY_U, &layouts[ComposeU]},
-  {"i", "I", 1.0, Code, KEY_I, &layouts[ComposeI]},
-  {"o", "O", 1.0, Code, KEY_O, &layouts[ComposeO]},
-  {"p", "P", 1.0, Code, KEY_P, &layouts[ComposeP]},
-  {"", "", 0.0, EndRow},
-
-  {"a", "A", 1.0, Code, KEY_A, &layouts[ComposeA]},
-  {"s", "S", 1.0, Code, KEY_S, &layouts[ComposeS]},
-  {"d", "D", 1.0, Code, KEY_D, &layouts[ComposeD]},
-  {"f", "F", 1.0, Code, KEY_F, &layouts[ComposeF]},
-  {"g", "G", 1.0, Code, KEY_G, &layouts[ComposeG]},
-  {"h", "H", 1.0, Code, KEY_H, &layouts[ComposeH]},
-  {"j", "J", 1.0, Code, KEY_J, &layouts[ComposeJ]},
-  {"k", "K", 1.0, Code, KEY_K, &layouts[ComposeK]},
-  {"l", "L", 1.0, Code, KEY_L, &layouts[ComposeL]},
-  {"'", "\"", 1.0, Code, KEY_APOSTROPHE, &layouts[ComposeBracket]},
-  {"", "", 0.0, EndRow},
-
-  {"⇧", "⇫", 1.0, Mod, Shift, .scheme = 1},
-  {"z", "Z", 1.0, Code, KEY_Z, &layouts[ComposeZ]},
-  {"x", "X", 1.0, Code, KEY_X, &layouts[ComposeX]},
-  {"c", "C", 1.0, Code, KEY_C, &layouts[ComposeC]},
-  {"v", "V", 1.0, Code, KEY_V, &layouts[ComposeV]},
-  {"b", "B", 1.0, Code, KEY_B, &layouts[ComposeB]},
-  {"n", "N", 1.0, Code, KEY_N, &layouts[ComposeN]},
-  {"m", "M", 1.0, Code, KEY_M, &layouts[ComposeM]},
-  {"Tab", "Tab", 1.0, Code, KEY_TAB, .scheme = 1},
-  {"⌫", "⌫", 1.0, Code, KEY_BACKSPACE, .scheme = 1},
-  {"", "", 0.0, EndRow},
-
-  {"⌨͕", "⌨͔", 1.0, NextLayer, .scheme = 1},
-  {"Ctr", "Ctr", 1.0, Mod, Ctrl, .scheme = 1},
-  {"-", "_", 1.0, Code, KEY_MINUS, &layouts[ComposeMath]},
-  {"Cmp", "Cmp", 1.0, Compose, .scheme = 1},
-  {"", "Tab", 3.0, Code, KEY_SPACE},
-  {".", "?", 1.0, Code, KEY_DOT, &layouts[ComposePunctuation]},
   {"Enter", "Enter", 2.0, Code, KEY_ENTER, .scheme = 1},
 
   /* end of layout */
@@ -1132,7 +1081,7 @@ static struct key keys_index[] = {
   {"Wide", "Wide", 0.75, Layout, 0, &layouts[Full]},
   {"Landscape", "Landscape", 1.5, Layout, 0,  &layouts[Landscape], .scheme = 1},
   {"Simple", "Simple", 1.0, Layout, 0, &layouts[Simple], .scheme = 1},
-  {"Grid", "Grid", 0.75, Layout, 0, &layouts[SimpleGrid]},
+  {"Dial", "Dial", 0.75, Layout, 0, &layouts[Dialer]},
   {"", "", 0.0, EndRow},
 
   {"Special", "Special", 1.5, Layout, 0, &layouts[Special], .scheme = 1},
