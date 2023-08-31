@@ -1704,6 +1704,7 @@ static struct key keys_compose_bracket[] = {
   {"", "", 3.5, Pad},
   {"", "", 0.0, EndRow},
   {"Abc", "Abc", 1.0, BackLayer, .scheme = 1},
-  {"", "", 9, Pad},
+  {"Ctr", "Ctr", 1.0, Mod, Ctrl, .scheme = 1},
+  {"", "", 8, Pad},
   {"", "", 0.0, Last},
 };
