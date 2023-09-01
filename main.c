@@ -276,12 +276,24 @@ void
 seat_handle_capabilities(void *data, struct wl_seat *wl_seat,
                          enum wl_seat_capability caps) {
 	if ((caps & WL_SEAT_CAPABILITY_POINTER)) {
-		pointer = wl_seat_get_pointer(wl_seat);
-		wl_pointer_add_listener(pointer, &pointer_listener, NULL);
+		if (pointer == NULL) {
+			pointer = wl_seat_get_pointer(wl_seat);
+			wl_pointer_add_listener(pointer, &pointer_listener, NULL);
+		}
+	} else {
+		if (pointer != NULL) {
+			wl_pointer_destroy(pointer);
+		}
 	}
 	if ((caps & WL_SEAT_CAPABILITY_TOUCH)) {
-		touch = wl_seat_get_touch(wl_seat);
-		wl_touch_add_listener(touch, &touch_listener, NULL);
+		if (touch == NULL) {
+			touch = wl_seat_get_touch(wl_seat);
+			wl_touch_add_listener(touch, &touch_listener, NULL);
+		}
+	} else {
+		if (touch != NULL) {
+			wl_touch_destroy(touch);
+		}
 	}
 }
 
