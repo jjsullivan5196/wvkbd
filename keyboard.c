@@ -520,12 +520,6 @@ kbd_draw_key(struct kbd *kb, struct key *k, enum key_draw_type type) {
 
 	drw_draw_text(d, scheme->text, k->x, k->y, k->w, k->h, KBD_KEY_BORDER, label);
 
-	// cleanup cairo mess right side if words too long
-	drw_do_rectangle(d, kb->scheme.bg, k->x + k->w - KBD_KEY_BORDER, k->y,
-		kb->w, k->h, false);
-	drw_do_rectangle(d, kb->scheme.bg, k->x, k->y + k->h - KBD_KEY_BORDER,
-		kb->h, k->w, false);
-
 	wl_surface_damage(d->surf, k->x, k->y, k->w, k->h);
 }
 
