@@ -66,19 +66,19 @@ kbd_next_layer(struct kbd *kb, struct key *k, bool invert) {
 	} else {
 		// normal behaviour: switch to the next layout in the layer sequence
 		layer_index++;
-		size_t layercount = 0;
-		for (size_t i = 0; layercount == 0; i++) {
-			if (kb->landscape) {
-				if (kb->landscape_layers[i] == NumLayouts) layercount = i;
-			} else {
-				if (kb->layers[i] == NumLayouts) layercount = i;
-			}
+	}
+	size_t layercount = 0;
+	for (size_t i = 0; layercount == 0; i++) {
+		if (kb->landscape) {
+			if (kb->landscape_layers[i] == NumLayouts) layercount = i;
+		} else {
+			if (kb->layers[i] == NumLayouts) layercount = i;
 		}
-		if (layer_index >= layercount) {
-			if (kb->debug)
-				fprintf(stderr, "wrapping layer_index back to start\n");
-			layer_index = 0;
-		}
+	}
+	if (layer_index >= layercount) {
+		if (kb->debug)
+			fprintf(stderr, "wrapping layer_index back to start\n");
+		layer_index = 0;
 	}
 	enum layout_id layer;
 	if (kb->landscape) {
