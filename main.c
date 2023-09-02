@@ -277,6 +277,7 @@ seat_handle_capabilities(void *data, struct wl_seat *wl_seat,
 	} else {
 		if (pointer != NULL) {
 			wl_pointer_destroy(pointer);
+			pointer = NULL;
 		}
 	}
 	if ((caps & WL_SEAT_CAPABILITY_TOUCH)) {
@@ -287,6 +288,7 @@ seat_handle_capabilities(void *data, struct wl_seat *wl_seat,
 	} else {
 		if (touch != NULL) {
 			wl_touch_destroy(touch);
+			touch = NULL;
 		}
 	}
 }
