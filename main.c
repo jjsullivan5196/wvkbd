@@ -326,7 +326,6 @@ display_handle_geometry(void *data, struct wl_output *wl_output, int x, int y,
 	if (layer_surface) {
 		zwlr_layer_surface_v1_set_size(layer_surface, 0, height);
 		zwlr_layer_surface_v1_set_exclusive_zone(layer_surface, height);
-		wl_surface_commit(draw_surf.surf);
 	}
 }
 
@@ -484,10 +483,6 @@ show() {
 	zwlr_layer_surface_v1_add_listener(layer_surface, &layer_surface_listener,
 	                                   NULL);
 	wl_surface_commit(draw_surf.surf);
-
-	wl_display_roundtrip(display);
-	kbd_resize(&keyboard, layouts, NumLayouts);
-	drwsurf_flip(&draw_surf);
 
 	hidden = false;
 }
