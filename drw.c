@@ -52,6 +52,18 @@ drw_draw_text(struct drwsurf *d, Color color, uint32_t x, uint32_t y,
 }
 
 void
+drw_do_clear(struct drwsurf *d, uint32_t x, uint32_t y,
+                 uint32_t w, uint32_t h) {
+	cairo_save(d->cairo);
+
+	cairo_set_operator(d->cairo, CAIRO_OPERATOR_CLEAR);
+	cairo_rectangle(d->cairo, x, y, w, h);
+	cairo_fill(d->cairo);
+
+	cairo_restore(d->cairo);
+}
+
+void
 drw_do_rectangle(struct drwsurf *d, Color color, uint32_t x, uint32_t y,
                  uint32_t w, uint32_t h, bool over) {
 	cairo_save(d->cairo);

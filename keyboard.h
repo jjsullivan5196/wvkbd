@@ -42,7 +42,8 @@ enum key_modifier_type {
 };
 
 enum key_draw_type {
-	Unpress = 0,
+	None = 0,
+	Unpress,
 	Press,
 	Swipe,
 };
@@ -110,7 +111,10 @@ struct kbd {
 	enum layout_id *landscape_layers;
 
 	struct drwsurf *surf;
+	struct drwsurf *popup_surf;
 	struct zwp_virtual_keyboard_v1 *vkbd;
+
+	uint32_t last_popup_x, last_popup_y, last_popup_w, last_popup_h;
 };
 
 void draw_inset(struct drwsurf *ds, uint32_t x, uint32_t y, uint32_t width,
@@ -128,6 +132,7 @@ void kbd_release_key(struct kbd *kb, uint32_t time);
 void kbd_motion_key(struct kbd *kb, uint32_t time, uint32_t x, uint32_t y);
 void kbd_press_key(struct kbd *kb, struct key *k, uint32_t time);
 void kbd_print_key_stdout(struct kbd *kb, struct key *k);
+void kbd_clear_last_popup(struct kbd *kb);
 void kbd_draw_key(struct kbd *kb, struct key *k, enum key_draw_type);
 void kbd_draw_layout(struct kbd *kb);
 void kbd_resize(struct kbd *kb, struct layout *layouts, uint8_t layoutcount);

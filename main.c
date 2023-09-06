@@ -1,5 +1,6 @@
 #include "proto/virtual-keyboard-unstable-v1-client-protocol.h"
 #include "proto/wlr-layer-shell-unstable-v1-client-protocol.h"
+#include "proto/xdg-shell-client-protocol.h"
 #include <linux/input-event-codes.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -27,8 +28,13 @@ static struct wl_compositor *compositor;
 static struct wl_seat *seat;
 static struct wl_pointer *pointer;
 static struct wl_touch *touch;
+static struct wl_region *empty_region;
 static struct zwlr_layer_shell_v1 *layer_shell;
 static struct zwlr_layer_surface_v1 *layer_surface;
+static struct xdg_wm_base *wm_base;
+static struct xdg_surface *popup_xdg_surface;
+static struct xdg_popup *popup_xdg_popup;
+static struct xdg_positioner *popup_xdg_positioner;
 static struct zwp_virtual_keyboard_manager_v1 *vkbd_mgr;
 
 struct Output {
@@ -43,7 +49,7 @@ static int           wl_outputs_size;
 
 /* drawing */
 static struct drw draw_ctx;
-static struct drwsurf draw_surf;
+static struct drwsurf draw_surf, popup_draw_surf;
 
 /* layer surface parameters */
 static uint32_t layer = ZWLR_LAYER_SHELL_V1_LAYER_TOP;
@@ -348,6 +354,16 @@ static const struct wl_output_listener output_listener = {
   .done = display_handle_done,
   .scale = display_handle_scale};
 
+static void
+xdg_wm_base_ping(void *data, struct xdg_wm_base *xdg_wm_base, uint32_t serial)
+{
+	xdg_wm_base_pong(xdg_wm_base, serial);
+}
+
+static const struct xdg_wm_base_listener xdg_wm_base_listener = {
+	.ping = xdg_wm_base_ping,
+};
+
 void
 handle_global(void *data, struct wl_registry *registry, uint32_t name,
               const char *interface, uint32_t version) {
@@ -370,6 +386,10 @@ handle_global(void *data, struct wl_registry *registry, uint32_t name,
 	} else if (strcmp(interface, zwlr_layer_shell_v1_interface.name) == 0) {
 		layer_shell =
 		  wl_registry_bind(registry, name, &zwlr_layer_shell_v1_interface, 1);
+	} else if (strcmp(interface, xdg_wm_base_interface.name) == 0) {
+		wm_base =
+		  wl_registry_bind(registry, name, &xdg_wm_base_interface, 1);
+		xdg_wm_base_add_listener(wm_base, &xdg_wm_base_listener, NULL);
 	} else if (strcmp(interface,
 	                  zwp_virtual_keyboard_manager_v1_interface.name) == 0) {
 		vkbd_mgr = wl_registry_bind(registry, name,
@@ -391,18 +411,64 @@ handle_global_remove(void *data, struct wl_registry *registry, uint32_t name) {
     }
 }
 
+static void
+xdg_popup_surface_configure(void *data,
+	struct xdg_surface *xdg_surface, uint32_t serial)
+{
+	xdg_surface_ack_configure(xdg_surface, serial);
+	drwsurf_flip(&popup_draw_surf);
+}
+
+static const struct xdg_surface_listener xdg_popup_surface_listener = {
+    .configure = xdg_popup_surface_configure,
+};
+
+
+static void
+xdg_popup_configure(void *data,
+	struct xdg_popup *xdg_popup,
+	int32_t x, int32_t y,
+	int32_t width, int32_t height)
+{
+	kbd_resize(&keyboard, layouts, NumLayouts);
+
+	drwsurf_flip(&draw_surf);
+}
+
+static void
+xdg_popup_done(void *data, struct xdg_popup *xdg_popup) {
+}
+
+static const struct xdg_popup_listener xdg_popup_listener = {
+	.configure = xdg_popup_configure,
+	.popup_done = xdg_popup_done,
+};
+
 void
 layer_surface_configure(void *data, struct zwlr_layer_surface_v1 *surface,
                         uint32_t serial, uint32_t w, uint32_t h) {
 	if (keyboard.w != w || keyboard.h != h) {
 		keyboard.w = w;
 		keyboard.h = h;
-		kbd_resize(&keyboard, layouts, NumLayouts);
+
+		xdg_positioner_set_size(popup_xdg_positioner, w, h*2);
+		xdg_positioner_set_anchor_rect(popup_xdg_positioner, 0, -h, w, h*2);
+
+		if (popup_xdg_popup) {
+			xdg_popup_destroy(popup_xdg_popup);
+		}
+
+		popup_draw_surf.surf = wl_compositor_create_surface(compositor);
+		wl_surface_set_input_region(popup_draw_surf.surf, empty_region);
+		popup_xdg_surface = xdg_wm_base_get_xdg_surface(wm_base, popup_draw_surf.surf);
+		xdg_surface_add_listener(popup_xdg_surface, &xdg_popup_surface_listener, NULL);
+		popup_xdg_popup = xdg_surface_get_popup(popup_xdg_surface, NULL, popup_xdg_positioner);
+		xdg_popup_add_listener(popup_xdg_popup, &xdg_popup_listener, NULL);
+		zwlr_layer_surface_v1_get_popup(layer_surface, popup_xdg_popup);
+		wl_surface_commit(popup_draw_surf.surf);
 	}
 
 	zwlr_layer_surface_v1_ack_configure(surface, serial);
-
-	drwsurf_flip(&draw_surf);
 }
 
 void
@@ -689,7 +755,9 @@ main(int argc, char **argv) {
 	}
 
 	draw_surf.ctx = &draw_ctx;
+	popup_draw_surf.ctx = &draw_ctx;
 	keyboard.surf = &draw_surf;
+	keyboard.popup_surf = &popup_draw_surf;
 
 	struct wl_registry *registry = wl_display_get_registry(display);
 	wl_registry_add_listener(registry, &registry_listener, NULL);
@@ -704,9 +772,15 @@ main(int argc, char **argv) {
 	if (layer_shell == NULL) {
 		die("layer_shell not available\n");
 	}
+	if (wm_base == NULL) {
+		die("wm_base not available\n");
+	}
 	if (vkbd_mgr == NULL) {
 		die("virtual_keyboard_manager not available\n");
 	}
+
+	empty_region = wl_compositor_create_region(compositor);
+	popup_xdg_positioner = xdg_wm_base_create_positioner(wm_base);
 
 	keyboard.vkbd =
 	  zwp_virtual_keyboard_manager_v1_create_virtual_keyboard(vkbd_mgr, seat);

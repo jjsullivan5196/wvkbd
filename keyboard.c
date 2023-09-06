@@ -306,6 +306,9 @@ kbd_release_key(struct kbd *kb, uint32_t time) {
 	}
 
 	drwsurf_flip(kb->surf);
+
+	kbd_clear_last_popup(kb);
+	drwsurf_flip(kb->popup_surf);
 }
 
 void
@@ -331,6 +334,9 @@ kbd_motion_key(struct kbd *kb, uint32_t time, uint32_t x, uint32_t y) {
 	}
 
 	drwsurf_flip(kb->surf);
+
+	kbd_clear_last_popup(kb);
+	drwsurf_flip(kb->popup_surf);
 }
 
 void
@@ -456,6 +462,7 @@ kbd_press_key(struct kbd *kb, struct key *k, uint32_t time) {
 	}
 
 	drwsurf_flip(kb->surf);
+	drwsurf_flip(kb->popup_surf);
 }
 
 void
@@ -498,8 +505,17 @@ kbd_print_key_stdout(struct kbd *kb, struct key *k) {
 }
 
 void
+kbd_clear_last_popup(struct kbd *kb) {
+	if (kb->last_popup_w && kb->last_popup_h) {
+		drw_do_clear(kb->popup_surf, kb->last_popup_x, kb->last_popup_y, kb->last_popup_w, kb->last_popup_h);
+		wl_surface_damage(kb->popup_surf->surf, kb->last_popup_x, kb->last_popup_y, kb->last_popup_w, kb->last_popup_h);
+
+		kb->last_popup_w = kb->last_popup_h = 0;
+	}
+}
+
+void
 kbd_draw_key(struct kbd *kb, struct key *k, enum key_draw_type type) {
-	struct drwsurf *d = kb->surf;
 	const char *label = (kb->mods & Shift) ? k->shift_label : k->label;
 	if (kb->debug)
 		fprintf(stderr, "Draw key +%d+%d %dx%d -> %s\n", k->x, k->y, k->w, k->h,
@@ -507,20 +523,34 @@ kbd_draw_key(struct kbd *kb, struct key *k, enum key_draw_type type) {
 	struct clr_scheme *scheme = (k->scheme == 0) ? &(kb->scheme) : &(kb->scheme1);
 
 	switch (type) {
+	case None:
 	case Unpress:
-		draw_inset(d, k->x, k->y, k->w, k->h, KBD_KEY_BORDER, scheme->fg);
+		draw_inset(kb->surf, k->x, k->y, k->w, k->h, KBD_KEY_BORDER, scheme->fg);
 		break;
 	case Press:
-		draw_inset(d, k->x, k->y, k->w, k->h, KBD_KEY_BORDER, scheme->high);
+		draw_inset(kb->surf, k->x, k->y, k->w, k->h, KBD_KEY_BORDER, scheme->high);
 		break;
 	case Swipe:
-		draw_over_inset(d, k->x, k->y, k->w, k->h, KBD_KEY_BORDER, scheme->swipe);
+		draw_over_inset(kb->surf, k->x, k->y, k->w, k->h, KBD_KEY_BORDER, scheme->swipe);
 		break;
 	}
 
-	drw_draw_text(d, scheme->text, k->x, k->y, k->w, k->h, KBD_KEY_BORDER, label);
+	drw_draw_text(kb->surf, scheme->text, k->x, k->y, k->w, k->h, KBD_KEY_BORDER, label);
+	wl_surface_damage(kb->surf->surf, k->x, k->y, k->w, k->h);
 
-	wl_surface_damage(d->surf, k->x, k->y, k->w, k->h);
+	if (type == Press || type == Unpress) {
+		kbd_clear_last_popup(kb);
+
+		kb->last_popup_x = k->x;
+		kb->last_popup_y = kb->h + k->y - k->h;
+		kb->last_popup_w = k->w;
+		kb->last_popup_h = k->h;
+
+		drw_fill_rectangle(kb->popup_surf, kb->scheme.bg, k->x, kb->last_popup_y, k->w, k->h);
+		draw_inset(kb->popup_surf, k->x, kb->last_popup_y, k->w, k->h, KBD_KEY_BORDER, scheme->high);
+		drw_draw_text(kb->popup_surf, scheme->text, k->x, kb->last_popup_y, k->w, k->h, KBD_KEY_BORDER, label);
+		wl_surface_damage(kb->popup_surf->surf, k->x, kb->last_popup_y, k->w, k->h);
+	}
 }
 
 void
@@ -541,7 +571,7 @@ kbd_draw_layout(struct kbd *kb) {
 			(next_key->type == Compose && kb->compose)) {
 			kbd_draw_key(kb, next_key, Press);
 		} else {
-			kbd_draw_key(kb, next_key, Unpress);
+			kbd_draw_key(kb, next_key, None);
 		}
 		next_key++;
 	}
@@ -550,12 +580,11 @@ kbd_draw_layout(struct kbd *kb) {
 
 void
 kbd_resize(struct kbd *kb, struct layout *layouts, uint8_t layoutcount) {
-	struct drwsurf *d = kb->surf;
-
 	fprintf(stderr, "Resize %dx%d %d, %d layouts\n", kb->w, kb->h, kb->scale,
 	        layoutcount);
 
-	drwsurf_resize(d, kb->w, kb->h, kb->scale);
+	drwsurf_resize(kb->surf, kb->w, kb->h, kb->scale);
+	drwsurf_resize(kb->popup_surf, kb->w, kb->h*2, kb->scale);
 	for (int i = 0; i < layoutcount; i++) {
 		if (kb->debug) {
 	  		if (layouts[i].name)
