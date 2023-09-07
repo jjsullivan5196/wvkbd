@@ -45,9 +45,11 @@ static struct wp_viewporter *viewporter;
 
 struct Output {
     uint32_t name;
-    uint32_t scale;
+    uint32_t w, h;
+    double scale;
     struct wl_output *data;
 };
+static struct Output *current_output;
 
 #define WL_OUTPUTS_LIMIT 8
 static struct Output wl_outputs[WL_OUTPUTS_LIMIT];
@@ -121,6 +123,7 @@ static void layer_surface_configure(void *data,
                                     uint32_t serial, uint32_t w, uint32_t h);
 static void layer_surface_closed(void *data,
                                  struct zwlr_layer_surface_v1 *surface);
+static void resize();
 
 /* event handlers */
 static const struct wl_pointer_listener pointer_listener = {
@@ -311,18 +314,22 @@ seat_handle_name(void *data, struct wl_seat *wl_seat, const char *name) {}
 void
 wl_surface_enter(void *data, struct wl_surface *wl_surface,
                  struct wl_output *wl_output) {
-    for(int i = 0; i < WL_OUTPUTS_LIMIT; i += 1) {
-        if(wl_outputs[i].data == wl_output) {
-            keyboard.scale = wl_outputs[i].scale;
-            return;
-        }
-    }
+	for(int i = 0; i < WL_OUTPUTS_LIMIT; i += 1) {
+		if(wl_outputs[i].data == wl_output) {
+			current_output = &wl_outputs[i];
+			break;
+		}
+	}
+
+	resize();
 }
 
 static void
 display_handle_geometry(void *data, struct wl_output *wl_output, int x, int y,
                         int physical_width, int physical_height, int subpixel,
                         const char *make, const char *model, int transform) {
+	struct Output *output = data;
+
 	// Swap width and height on rotated displays
 	if (transform % 2 != 0) {
 		int tmp = physical_width;
@@ -330,29 +337,12 @@ display_handle_geometry(void *data, struct wl_output *wl_output, int x, int y,
 		physical_height = tmp;
 	}
 
-	bool landscape = physical_width > physical_height;
-	if (landscape == keyboard.landscape) return;
-	keyboard.landscape = landscape;
+	output->w = physical_width;
+	output->h = physical_height;
 
-	enum layout_id layer;
-	if (keyboard.landscape) {
-		layer = keyboard.landscape_layers[0];
-		height = landscape_height;
-	} else {
-		layer = keyboard.layers[0];
-		height = normal_height;
-	}
-
-	keyboard.layout = &keyboard.layouts[layer];
-	keyboard.layer_index = 0;
-	keyboard.prevlayout = keyboard.layout;
-	keyboard.last_abc_layout = keyboard.layout;
-	keyboard.last_abc_index = 0;
-
-	if (layer_surface) {
-		zwlr_layer_surface_v1_set_size(layer_surface, 0, height);
-		zwlr_layer_surface_v1_set_exclusive_zone(layer_surface, height);
-	}
+	if (current_output == output) {
+		resize();
+	};
 }
 
 static void
@@ -360,12 +350,12 @@ display_handle_done(void *data, struct wl_output *wl_output) {}
 
 static void
 display_handle_scale(void *data, struct wl_output *wl_output, int32_t scale) {
-	((struct Output*)data)->scale = scale;
-	if (wfs_mgr && viewporter) {
-		return;
-	}
-	keyboard.scale = scale;
-	wl_surface_set_buffer_scale(draw_surf.surf, scale);
+	struct Output *output = data;
+	output->scale = scale;
+
+	if (current_output == output) {
+		resize();
+	};
 }
 
 static void
@@ -479,7 +469,7 @@ wp_fractional_scale_prefered_scale(void *data,
 	struct wp_fractional_scale_v1 *wp_fractional_scale_v1,
 	uint32_t scale)
 {
-	keyboard.scale = (double)scale / 120;
+	keyboard.pending_scale = (double)scale / 120;
 }
 
 static const struct wp_fractional_scale_v1_listener wp_fractional_scale_listener = {
@@ -487,11 +477,42 @@ static const struct wp_fractional_scale_v1_listener wp_fractional_scale_listener
 };
 
 void
+resize() {
+	keyboard.landscape = current_output->w > current_output->h;
+
+	enum layout_id layer;
+	if (keyboard.landscape) {
+		layer = keyboard.landscape_layers[0];
+		height = landscape_height;
+	} else {
+		layer = keyboard.layers[0];
+		height = normal_height;
+	}
+
+	keyboard.layout = &keyboard.layouts[layer];
+	keyboard.layer_index = 0;
+	keyboard.prevlayout = keyboard.layout;
+	keyboard.last_abc_layout = keyboard.layout;
+	keyboard.last_abc_index = 0;
+
+	if (!wfs_mgr || !viewporter) {
+		keyboard.pending_scale = current_output->scale;
+	}
+
+	if (layer_surface) {
+		zwlr_layer_surface_v1_set_size(layer_surface, 0, height);
+		zwlr_layer_surface_v1_set_exclusive_zone(layer_surface, height);
+		wl_surface_commit(draw_surf.surf);
+	}
+}
+
+void
 layer_surface_configure(void *data, struct zwlr_layer_surface_v1 *surface,
                         uint32_t serial, uint32_t w, uint32_t h) {
-	if (keyboard.w != w || keyboard.h != h) {
+	if (keyboard.w != w || keyboard.h != h || keyboard.scale != keyboard.pending_scale) {
 		keyboard.w = w;
 		keyboard.h = h;
+		keyboard.scale = keyboard.pending_scale;
 
 		if (wfs_mgr && viewporter) {
 			if (!wfs_draw_surf) {
@@ -677,7 +698,7 @@ main(int argc, char **argv) {
 	keyboard.scheme = scheme;
 	keyboard.layer_index = 0;
 	keyboard.scheme1 = scheme1;
-	keyboard.scale =  1;
+	keyboard.pending_scale = 1;
 
 	uint8_t alpha = 0;
 	bool alpha_defined = false;
