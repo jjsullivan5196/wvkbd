@@ -125,6 +125,7 @@ setup_buffer(struct drwsurf *drwsurf) {
 
 	drwsurf->cairo = cairo_create(s);
 	cairo_scale(drwsurf->cairo, drwsurf->scale, drwsurf->scale);
+	cairo_set_antialias(drwsurf->cairo, CAIRO_ANTIALIAS_NONE);
 	drwsurf->layout = pango_cairo_create_layout(drwsurf->cairo);
 	pango_layout_set_font_description(drwsurf->layout,
 	                                  drwsurf->ctx->font_description);
