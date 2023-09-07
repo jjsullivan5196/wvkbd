@@ -6,7 +6,7 @@
 #include "shm_open.h"
 
 void
-drwsurf_resize(struct drwsurf *ds, uint32_t w, uint32_t h, uint32_t s) {
+drwsurf_resize(struct drwsurf *ds, uint32_t w, uint32_t h, double s) {
 	if (ds->buf) {
 		munmap(ds->pool_data, ds->size);
 		wl_buffer_destroy(ds->buf);
@@ -130,8 +130,6 @@ setup_buffer(struct drwsurf *drwsurf) {
 	                                  drwsurf->ctx->font_description);
 	pango_layout_set_auto_dir(drwsurf->layout, false);
 	cairo_save(drwsurf->cairo);
-
-	wl_surface_set_buffer_scale(drwsurf->surf, drwsurf->scale);
 
 	return 0;
 }

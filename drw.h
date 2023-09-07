@@ -9,7 +9,8 @@ struct drw {
 	PangoFontDescription *font_description;
 };
 struct drwsurf {
-	uint32_t width, height, scale, size;
+	uint32_t width, height, size;
+	double scale;
 
 	struct drw *ctx;
 	struct wl_surface *surf;
@@ -22,7 +23,7 @@ struct drwsurf {
 };
 struct kbd;
 
-void drwsurf_resize(struct drwsurf *ds, uint32_t w, uint32_t h, uint32_t s);
+void drwsurf_resize(struct drwsurf *ds, uint32_t w, uint32_t h, double s);
 void drwsurf_flip(struct drwsurf *ds);
 
 typedef union {

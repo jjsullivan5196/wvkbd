@@ -580,7 +580,7 @@ kbd_draw_layout(struct kbd *kb) {
 
 void
 kbd_resize(struct kbd *kb, struct layout *layouts, uint8_t layoutcount) {
-	fprintf(stderr, "Resize %dx%d %d, %d layouts\n", kb->w, kb->h, kb->scale,
+	fprintf(stderr, "Resize %dx%d %f, %d layouts\n", kb->w, kb->h, kb->scale,
 	        layoutcount);
 
 	drwsurf_resize(kb->surf, kb->w, kb->h, kb->scale);

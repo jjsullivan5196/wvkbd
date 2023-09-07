@@ -1,6 +1,8 @@
 #include "proto/virtual-keyboard-unstable-v1-client-protocol.h"
 #include "proto/wlr-layer-shell-unstable-v1-client-protocol.h"
 #include "proto/xdg-shell-client-protocol.h"
+#include "proto/fractional-scale-v1-client-protocol.h"
+#include "proto/viewporter-client-protocol.h"
 #include <linux/input-event-codes.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -36,6 +38,10 @@ static struct xdg_surface *popup_xdg_surface;
 static struct xdg_popup *popup_xdg_popup;
 static struct xdg_positioner *popup_xdg_positioner;
 static struct zwp_virtual_keyboard_manager_v1 *vkbd_mgr;
+static struct wp_fractional_scale_v1 *wfs_draw_surf;
+static struct wp_fractional_scale_manager_v1 *wfs_mgr;
+static struct wp_viewport *draw_surf_viewport, *popup_draw_surf_viewport;
+static struct wp_viewporter *viewporter;
 
 struct Output {
     uint32_t name;
@@ -355,7 +361,11 @@ display_handle_done(void *data, struct wl_output *wl_output) {}
 static void
 display_handle_scale(void *data, struct wl_output *wl_output, int32_t scale) {
 	((struct Output*)data)->scale = scale;
+	if (wfs_mgr && viewporter) {
+		return;
+	}
 	keyboard.scale = scale;
+	wl_surface_set_buffer_scale(draw_surf.surf, scale);
 }
 
 static void
@@ -404,6 +414,12 @@ handle_global(void *data, struct wl_registry *registry, uint32_t name,
 		wm_base =
 		  wl_registry_bind(registry, name, &xdg_wm_base_interface, 1);
 		xdg_wm_base_add_listener(wm_base, &xdg_wm_base_listener, NULL);
+	} else if (strcmp(interface, wp_fractional_scale_manager_v1_interface.name) == 0) {
+		wfs_mgr =
+		  wl_registry_bind(registry, name, &wp_fractional_scale_manager_v1_interface, 1);
+	} else if (strcmp(interface, wp_viewporter_interface.name) == 0) {
+		viewporter =
+		  wl_registry_bind(registry, name, &wp_viewporter_interface, 1);
 	} else if (strcmp(interface,
 	                  zwp_virtual_keyboard_manager_v1_interface.name) == 0) {
 		vkbd_mgr = wl_registry_bind(registry, name,
@@ -458,6 +474,18 @@ static const struct xdg_popup_listener xdg_popup_listener = {
 	.popup_done = xdg_popup_done,
 };
 
+static void
+wp_fractional_scale_prefered_scale(void *data,
+	struct wp_fractional_scale_v1 *wp_fractional_scale_v1,
+	uint32_t scale)
+{
+	keyboard.scale = (double)scale / 120;
+}
+
+static const struct wp_fractional_scale_v1_listener wp_fractional_scale_listener = {
+	.preferred_scale = wp_fractional_scale_prefered_scale,
+};
+
 void
 layer_surface_configure(void *data, struct zwlr_layer_surface_v1 *surface,
                         uint32_t serial, uint32_t w, uint32_t h) {
@@ -465,20 +493,48 @@ layer_surface_configure(void *data, struct zwlr_layer_surface_v1 *surface,
 		keyboard.w = w;
 		keyboard.h = h;
 
-		xdg_positioner_set_size(popup_xdg_positioner, w, h*2);
-		xdg_positioner_set_anchor_rect(popup_xdg_positioner, 0, -h, w, h*2);
+		if (wfs_mgr && viewporter) {
+			if (!wfs_draw_surf) {
+				wfs_draw_surf = wp_fractional_scale_manager_v1_get_fractional_scale(wfs_mgr, draw_surf.surf);
+				wp_fractional_scale_v1_add_listener(wfs_draw_surf, &wp_fractional_scale_listener, NULL);
+			}
+			if (!draw_surf_viewport) {
+				draw_surf_viewport = wp_viewporter_get_viewport(viewporter, draw_surf.surf);
+			}
+			wp_viewport_set_destination(draw_surf_viewport, keyboard.w, keyboard.h);
+		} else {
+			wl_surface_set_buffer_scale(draw_surf.surf, keyboard.scale);
+		}
 
 		if (popup_xdg_popup) {
 			xdg_popup_destroy(popup_xdg_popup);
 		}
+		if (popup_xdg_surface) {
+			xdg_surface_destroy(popup_xdg_surface);
+		}
+		if (popup_draw_surf.surf) {
+			wl_surface_destroy(popup_draw_surf.surf);
+		}
 
 		popup_draw_surf.surf = wl_compositor_create_surface(compositor);
+
+		xdg_positioner_set_size(popup_xdg_positioner, w, h*2);
+		xdg_positioner_set_anchor_rect(popup_xdg_positioner, 0, -h, w, h*2);
+
 		wl_surface_set_input_region(popup_draw_surf.surf, empty_region);
 		popup_xdg_surface = xdg_wm_base_get_xdg_surface(wm_base, popup_draw_surf.surf);
 		xdg_surface_add_listener(popup_xdg_surface, &xdg_popup_surface_listener, NULL);
 		popup_xdg_popup = xdg_surface_get_popup(popup_xdg_surface, NULL, popup_xdg_positioner);
 		xdg_popup_add_listener(popup_xdg_popup, &xdg_popup_listener, NULL);
 		zwlr_layer_surface_v1_get_popup(layer_surface, popup_xdg_popup);
+
+		if (wfs_mgr && viewporter) {
+			popup_draw_surf_viewport = wp_viewporter_get_viewport(viewporter, popup_draw_surf.surf);
+			wp_viewport_set_destination(popup_draw_surf_viewport, keyboard.w, keyboard.h * 2);
+		} else {
+			wl_surface_set_buffer_scale(popup_draw_surf.surf, keyboard.scale);
+		}
+
 		wl_surface_commit(popup_draw_surf.surf);
 	}
 
