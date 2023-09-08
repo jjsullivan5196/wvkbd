@@ -44,16 +44,16 @@ static struct wp_viewport *draw_surf_viewport, *popup_draw_surf_viewport;
 static struct wp_viewporter *viewporter;
 
 struct Output {
-    uint32_t name;
-    uint32_t w, h;
-    double scale;
-    struct wl_output *data;
+	uint32_t name;
+	uint32_t w, h;
+	double scale;
+	struct wl_output *data;
 };
 static struct Output *current_output;
 
 #define WL_OUTPUTS_LIMIT 8
 static struct Output wl_outputs[WL_OUTPUTS_LIMIT];
-static int           wl_outputs_size;
+static int wl_outputs_size;
 
 /* drawing */
 static struct drw draw_ctx;
@@ -86,7 +86,7 @@ static void wl_pointer_button(void *data, struct wl_pointer *wl_pointer,
                               uint32_t serial, uint32_t time, uint32_t button,
                               uint32_t state);
 static void wl_pointer_axis(void *data, struct wl_pointer *wl_pointer,
-                  uint32_t time, uint32_t axis, wl_fixed_t value);
+                            uint32_t time, uint32_t axis, wl_fixed_t value);
 
 static void wl_touch_down(void *data, struct wl_touch *wl_touch,
                           uint32_t serial, uint32_t time,
@@ -269,14 +269,15 @@ wl_pointer_button(void *data, struct wl_pointer *wl_pointer, uint32_t serial,
 			kbd_press_key(&keyboard, next_key, time);
 		} else if (keyboard.compose) {
 			keyboard.compose = 0;
-			kbd_switch_layout(&keyboard, keyboard.prevlayout, keyboard.last_abc_index);
+			kbd_switch_layout(&keyboard, keyboard.prevlayout,
+			                  keyboard.last_abc_index);
 		}
 	}
 }
 
 void
-wl_pointer_axis(void *data, struct wl_pointer *wl_pointer,
-                  uint32_t time, uint32_t axis, wl_fixed_t value) {
+wl_pointer_axis(void *data, struct wl_pointer *wl_pointer, uint32_t time,
+                uint32_t axis, wl_fixed_t value) {
 	kbd_next_layer(&keyboard, NULL, (value >= 0));
 	drwsurf_flip(keyboard.surf);
 }
@@ -314,8 +315,8 @@ seat_handle_name(void *data, struct wl_seat *wl_seat, const char *name) {}
 void
 wl_surface_enter(void *data, struct wl_surface *wl_surface,
                  struct wl_output *wl_output) {
-	for(int i = 0; i < WL_OUTPUTS_LIMIT; i += 1) {
-		if(wl_outputs[i].data == wl_output) {
+	for (int i = 0; i < WL_OUTPUTS_LIMIT; i += 1) {
+		if (wl_outputs[i].data == wl_output) {
 			current_output = &wl_outputs[i];
 			break;
 		}
@@ -369,13 +370,12 @@ static const struct wl_output_listener output_listener = {
   .scale = display_handle_scale};
 
 static void
-xdg_wm_base_ping(void *data, struct xdg_wm_base *xdg_wm_base, uint32_t serial)
-{
+xdg_wm_base_ping(void *data, struct xdg_wm_base *xdg_wm_base, uint32_t serial) {
 	xdg_wm_base_pong(xdg_wm_base, serial);
 }
 
 static const struct xdg_wm_base_listener xdg_wm_base_listener = {
-	.ping = xdg_wm_base_ping,
+  .ping = xdg_wm_base_ping,
 };
 
 void
@@ -386,7 +386,7 @@ handle_global(void *data, struct wl_registry *registry, uint32_t name,
 	} else if (strcmp(interface, wl_shm_interface.name) == 0) {
 		draw_ctx.shm = wl_registry_bind(registry, name, &wl_shm_interface, 1);
 	} else if (strcmp(interface, "wl_output") == 0) {
-		if(wl_outputs_size < WL_OUTPUTS_LIMIT) {
+		if (wl_outputs_size < WL_OUTPUTS_LIMIT) {
 			struct Output *output = &wl_outputs[wl_outputs_size];
 			output->data = wl_registry_bind(registry, name, &wl_output_interface, 2);
 			output->name = name;
@@ -401,15 +401,14 @@ handle_global(void *data, struct wl_registry *registry, uint32_t name,
 		layer_shell =
 		  wl_registry_bind(registry, name, &zwlr_layer_shell_v1_interface, 1);
 	} else if (strcmp(interface, xdg_wm_base_interface.name) == 0) {
-		wm_base =
-		  wl_registry_bind(registry, name, &xdg_wm_base_interface, 1);
+		wm_base = wl_registry_bind(registry, name, &xdg_wm_base_interface, 1);
 		xdg_wm_base_add_listener(wm_base, &xdg_wm_base_listener, NULL);
-	} else if (strcmp(interface, wp_fractional_scale_manager_v1_interface.name) == 0) {
-		wfs_mgr =
-		  wl_registry_bind(registry, name, &wp_fractional_scale_manager_v1_interface, 1);
+	} else if (strcmp(interface, wp_fractional_scale_manager_v1_interface.name) ==
+	           0) {
+		wfs_mgr = wl_registry_bind(registry, name,
+		                           &wp_fractional_scale_manager_v1_interface, 1);
 	} else if (strcmp(interface, wp_viewporter_interface.name) == 0) {
-		viewporter =
-		  wl_registry_bind(registry, name, &wp_viewporter_interface, 1);
+		viewporter = wl_registry_bind(registry, name, &wp_viewporter_interface, 1);
 	} else if (strcmp(interface,
 	                  zwp_virtual_keyboard_manager_v1_interface.name) == 0) {
 		vkbd_mgr = wl_registry_bind(registry, name,
@@ -419,61 +418,55 @@ handle_global(void *data, struct wl_registry *registry, uint32_t name,
 
 void
 handle_global_remove(void *data, struct wl_registry *registry, uint32_t name) {
-    for(int i = 0; i < WL_OUTPUTS_LIMIT; i += 1) {
-        if(wl_outputs[i].name == name) {
-            wl_output_destroy(wl_outputs[i].data);
-            for(; i < WL_OUTPUTS_LIMIT - 1; i += 1) {
-                wl_outputs[i] = wl_outputs[i + 1];
-            }
-            wl_outputs_size -= 1;
-            break;
-        }
-    }
+	for (int i = 0; i < WL_OUTPUTS_LIMIT; i += 1) {
+		if (wl_outputs[i].name == name) {
+			wl_output_destroy(wl_outputs[i].data);
+			for (; i < WL_OUTPUTS_LIMIT - 1; i += 1) {
+				wl_outputs[i] = wl_outputs[i + 1];
+			}
+			wl_outputs_size -= 1;
+			break;
+		}
+	}
 }
 
 static void
-xdg_popup_surface_configure(void *data,
-	struct xdg_surface *xdg_surface, uint32_t serial)
-{
+xdg_popup_surface_configure(void *data, struct xdg_surface *xdg_surface,
+                            uint32_t serial) {
 	xdg_surface_ack_configure(xdg_surface, serial);
 	drwsurf_flip(&popup_draw_surf);
 }
 
 static const struct xdg_surface_listener xdg_popup_surface_listener = {
-    .configure = xdg_popup_surface_configure,
+  .configure = xdg_popup_surface_configure,
 };
 
-
 static void
-xdg_popup_configure(void *data,
-	struct xdg_popup *xdg_popup,
-	int32_t x, int32_t y,
-	int32_t width, int32_t height)
-{
+xdg_popup_configure(void *data, struct xdg_popup *xdg_popup, int32_t x,
+                    int32_t y, int32_t width, int32_t height) {
 	kbd_resize(&keyboard, layouts, NumLayouts);
 
 	drwsurf_flip(&draw_surf);
 }
 
 static void
-xdg_popup_done(void *data, struct xdg_popup *xdg_popup) {
-}
+xdg_popup_done(void *data, struct xdg_popup *xdg_popup) {}
 
 static const struct xdg_popup_listener xdg_popup_listener = {
-	.configure = xdg_popup_configure,
-	.popup_done = xdg_popup_done,
+  .configure = xdg_popup_configure,
+  .popup_done = xdg_popup_done,
 };
 
 static void
-wp_fractional_scale_prefered_scale(void *data,
-	struct wp_fractional_scale_v1 *wp_fractional_scale_v1,
-	uint32_t scale)
-{
+wp_fractional_scale_prefered_scale(
+  void *data, struct wp_fractional_scale_v1 *wp_fractional_scale_v1,
+  uint32_t scale) {
 	keyboard.pending_scale = (double)scale / 120;
 }
 
-static const struct wp_fractional_scale_v1_listener wp_fractional_scale_listener = {
-	.preferred_scale = wp_fractional_scale_prefered_scale,
+static const struct wp_fractional_scale_v1_listener
+  wp_fractional_scale_listener = {
+    .preferred_scale = wp_fractional_scale_prefered_scale,
 };
 
 void
@@ -509,18 +502,22 @@ resize() {
 void
 layer_surface_configure(void *data, struct zwlr_layer_surface_v1 *surface,
                         uint32_t serial, uint32_t w, uint32_t h) {
-	if (keyboard.w != w || keyboard.h != h || keyboard.scale != keyboard.pending_scale) {
+	if (keyboard.w != w || keyboard.h != h ||
+	    keyboard.scale != keyboard.pending_scale) {
 		keyboard.w = w;
 		keyboard.h = h;
 		keyboard.scale = keyboard.pending_scale;
 
 		if (wfs_mgr && viewporter) {
 			if (!wfs_draw_surf) {
-				wfs_draw_surf = wp_fractional_scale_manager_v1_get_fractional_scale(wfs_mgr, draw_surf.surf);
-				wp_fractional_scale_v1_add_listener(wfs_draw_surf, &wp_fractional_scale_listener, NULL);
+				wfs_draw_surf = wp_fractional_scale_manager_v1_get_fractional_scale(
+				  wfs_mgr, draw_surf.surf);
+				wp_fractional_scale_v1_add_listener(
+				  wfs_draw_surf, &wp_fractional_scale_listener, NULL);
 			}
 			if (!draw_surf_viewport) {
-				draw_surf_viewport = wp_viewporter_get_viewport(viewporter, draw_surf.surf);
+				draw_surf_viewport =
+				  wp_viewporter_get_viewport(viewporter, draw_surf.surf);
 			}
 			wp_viewport_set_destination(draw_surf_viewport, keyboard.w, keyboard.h);
 		} else {
@@ -539,19 +536,24 @@ layer_surface_configure(void *data, struct zwlr_layer_surface_v1 *surface,
 
 		popup_draw_surf.surf = wl_compositor_create_surface(compositor);
 
-		xdg_positioner_set_size(popup_xdg_positioner, w, h*2);
-		xdg_positioner_set_anchor_rect(popup_xdg_positioner, 0, -h, w, h*2);
+		xdg_positioner_set_size(popup_xdg_positioner, w, h * 2);
+		xdg_positioner_set_anchor_rect(popup_xdg_positioner, 0, -h, w, h * 2);
 
 		wl_surface_set_input_region(popup_draw_surf.surf, empty_region);
-		popup_xdg_surface = xdg_wm_base_get_xdg_surface(wm_base, popup_draw_surf.surf);
-		xdg_surface_add_listener(popup_xdg_surface, &xdg_popup_surface_listener, NULL);
-		popup_xdg_popup = xdg_surface_get_popup(popup_xdg_surface, NULL, popup_xdg_positioner);
+		popup_xdg_surface =
+		  xdg_wm_base_get_xdg_surface(wm_base, popup_draw_surf.surf);
+		xdg_surface_add_listener(popup_xdg_surface, &xdg_popup_surface_listener,
+		                         NULL);
+		popup_xdg_popup =
+		  xdg_surface_get_popup(popup_xdg_surface, NULL, popup_xdg_positioner);
 		xdg_popup_add_listener(popup_xdg_popup, &xdg_popup_listener, NULL);
 		zwlr_layer_surface_v1_get_popup(layer_surface, popup_xdg_popup);
 
 		if (wfs_mgr && viewporter) {
-			popup_draw_surf_viewport = wp_viewporter_get_viewport(viewporter, popup_draw_surf.surf);
-			wp_viewport_set_destination(popup_draw_surf_viewport, keyboard.w, keyboard.h * 2);
+			popup_draw_surf_viewport =
+			  wp_viewporter_get_viewport(viewporter, popup_draw_surf.surf);
+			wp_viewport_set_destination(popup_draw_surf_viewport, keyboard.w,
+			                            keyboard.h * 2);
 		} else {
 			wl_surface_set_buffer_scale(popup_draw_surf.surf, keyboard.scale);
 		}
@@ -578,24 +580,34 @@ usage(char *argv0) {
 	fprintf(stderr, "Options:\n");
 	fprintf(stderr, "  -D          - Enable debug\n");
 	fprintf(stderr, "  -o          - Print pressed keys to standard output\n");
-	fprintf(stderr, "  -O          - Print intersected keys to standard output\n");
+	fprintf(stderr,
+	        "  -O          - Print intersected keys to standard output\n");
 	fprintf(stderr, "  -H [int]    - Height in pixels\n");
 	fprintf(stderr, "  -L [int]    - Landscape height in pixels\n");
 	fprintf(stderr, "  --fn [font] - Set font (e.g: DejaVu Sans 20)\n");
 	fprintf(stderr, "  --hidden    - Start hidden (send SIGUSR2 to show)\n");
-	fprintf(stderr, "  --alpha [int]          - Set alpha value for all colors [0-255]\n");
+	fprintf(
+	  stderr,
+	  "  --alpha [int]          - Set alpha value for all colors [0-255]\n");
 	fprintf(stderr, "  --bg [rrggbb|aa]       - Set color of background\n");
 	fprintf(stderr, "  --fg [rrggbb|aa]       - Set color of keys\n");
 	fprintf(stderr, "  --fg-sp [rrggbb|aa]    - Set color of special keys\n");
 	fprintf(stderr, "  --press [rrggbb|aa]     - Set color of pressed keys\n");
-	fprintf(stderr, "  --press-sp [rrggbb|aa]  - Set color of pressed special keys\n");
+	fprintf(stderr,
+	        "  --press-sp [rrggbb|aa]  - Set color of pressed special keys\n");
 	fprintf(stderr, "  --swipe [rrggbb|aa]    - Set color of swiped keys\n");
-	fprintf(stderr, "  --swipe-sp [rrggbb|aa] - Set color of swiped special keys\n");
+	fprintf(stderr,
+	        "  --swipe-sp [rrggbb|aa] - Set color of swiped special keys\n");
 	fprintf(stderr, "  --text [rrggbb|aa]     - Set color of text on keys\n");
-	fprintf(stderr, "  --text-sp [rrggbb|aa]  - Set color of text on special keys\n");
-	fprintf(stderr, "  --list-layers          - Print the list of available layers\n");
-	fprintf(stderr, "  -l                     - Comma separated list of layers\n");
-	fprintf(stderr, "  --landscape-layers     - Comma separated list of landscape layers\n");
+	fprintf(stderr,
+	        "  --text-sp [rrggbb|aa]  - Set color of text on special keys\n");
+	fprintf(stderr,
+	        "  --list-layers          - Print the list of available layers\n");
+	fprintf(stderr,
+	        "  -l                     - Comma separated list of layers\n");
+	fprintf(
+	  stderr,
+	  "  --landscape-layers     - Comma separated list of landscape layers\n");
 }
 
 void
@@ -646,8 +658,10 @@ show() {
 
 void
 toggle_visibility() {
-	if (hidden) show();
-	else hide();
+	if (hidden)
+		show();
+	else
+		hide();
 }
 
 void
@@ -656,19 +670,19 @@ pipewarn() {
 }
 
 void
-set_kbd_colors(uint8_t * bgra, char * hex) {
+set_kbd_colors(uint8_t *bgra, char *hex) {
 	// bg, fg, text, high, swipe
 	int length = strlen(hex);
 	if (length == 6 || length == 8) {
 		char subhex[2];
 		memcpy(subhex, hex, 2);
 		bgra[2] = (int)strtol(subhex, NULL, 16);
-		memcpy(subhex, hex+2, 2);
+		memcpy(subhex, hex + 2, 2);
 		bgra[1] = (int)strtol(subhex, NULL, 16);
-		memcpy(subhex, hex+4, 2);
+		memcpy(subhex, hex + 4, 2);
 		bgra[0] = (int)strtol(subhex, NULL, 16);
 		if (length == 8) {
-			memcpy(subhex, hex+6, 2);
+			memcpy(subhex, hex + 6, 2);
 			bgra[3] = (int)strtol(subhex, NULL, 16);
 		}
 	}
@@ -720,7 +734,7 @@ main(int argc, char **argv) {
 				free(layer_names_list);
 			layer_names_list = estrdup(argv[++i]);
 		} else if ((!strcmp(argv[i], "-landscape-layers")) ||
-				   (!strcmp(argv[i], "--landscape-layers"))) {
+		           (!strcmp(argv[i], "--landscape-layers"))) {
 			if (i >= argc - 1) {
 				usage(argv[0]);
 				exit(1);
@@ -759,7 +773,8 @@ main(int argc, char **argv) {
 				exit(1);
 			}
 			set_kbd_colors(keyboard.scheme.high.bgra, argv[++i]);
-		} else if ((!strcmp(argv[i], "-press-sp")) || (!strcmp(argv[i], "--press-sp"))) {
+		} else if ((!strcmp(argv[i], "-press-sp")) ||
+		           (!strcmp(argv[i], "--press-sp"))) {
 			if (i >= argc - 1) {
 				usage(argv[0]);
 				exit(1);
@@ -771,7 +786,8 @@ main(int argc, char **argv) {
 				exit(1);
 			}
 			set_kbd_colors(keyboard.scheme.swipe.bgra, argv[++i]);
-		} else if ((!strcmp(argv[i], "-swipe-sp")) || (!strcmp(argv[i], "--swipe-sp"))) {
+		} else if ((!strcmp(argv[i], "-swipe-sp")) ||
+		           (!strcmp(argv[i], "--swipe-sp"))) {
 			if (i >= argc - 1) {
 				usage(argv[0]);
 				exit(1);
@@ -783,7 +799,8 @@ main(int argc, char **argv) {
 				exit(1);
 			}
 			set_kbd_colors(keyboard.scheme.text.bgra, argv[++i]);
-		} else if ((!strcmp(argv[i], "-text-sp")) || (!strcmp(argv[i], "--text-sp"))) {
+		} else if ((!strcmp(argv[i], "-text-sp")) ||
+		           (!strcmp(argv[i], "--text-sp"))) {
 			if (i >= argc - 1) {
 				usage(argv[0]);
 				exit(1);
@@ -879,13 +896,14 @@ main(int argc, char **argv) {
 		die("failed to init virtual keyboard_manager\n");
 	}
 
-	kbd_init(&keyboard, (struct layout *)&layouts,
-			 layer_names_list, landscape_layer_names_list);
+	kbd_init(&keyboard, (struct layout *)&layouts, layer_names_list,
+	         landscape_layer_names_list);
 
 	draw_ctx.font_description =
 	  pango_font_description_from_string(fc_font_pattern);
 
-	if (!hidden) show();
+	if (!hidden)
+		show();
 
 	struct pollfd fds[2];
 	int WAYLAND_FD = 0;
@@ -925,10 +943,14 @@ main(int argc, char **argv) {
 
 			if (read(fds[SIGNAL_FD].fd, &si, sizeof(si)) != sizeof(si))
 				fprintf(stderr, "Signal read error: %d", errno);
-			else if (si.ssi_signo == SIGUSR1) hide();
-			else if (si.ssi_signo == SIGUSR2) show();
-			else if (si.ssi_signo == SIGRTMIN) toggle_visibility();
-			else if (si.ssi_signo == SIGPIPE) pipewarn();
+			else if (si.ssi_signo == SIGUSR1)
+				hide();
+			else if (si.ssi_signo == SIGUSR2)
+				show();
+			else if (si.ssi_signo == SIGRTMIN)
+				toggle_visibility();
+			else if (si.ssi_signo == SIGPIPE)
+				pipewarn();
 		}
 	}
 

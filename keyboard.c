@@ -29,9 +29,10 @@ kbd_switch_layout(struct kbd *kb, struct layout *l, size_t layer_index) {
 	kb->layer_index = layer_index;
 	kb->layout = l;
 	if (kb->debug)
-		fprintf(stderr, "Switching to layout %s, layer_index %ld\n", kb->layout->name, layer_index);
-	if (!l->keymap_name) 
-		fprintf(stderr,"Layout has no keymap!"); //sanity check
+		fprintf(stderr, "Switching to layout %s, layer_index %ld\n",
+		        kb->layout->name, layer_index);
+	if (!l->keymap_name)
+		fprintf(stderr, "Layout has no keymap!"); // sanity check
 	if ((!kb->prevlayout) ||
 	    (strcmp(kb->prevlayout->keymap_name, kb->layout->keymap_name) != 0)) {
 		fprintf(stderr, "Switching to keymap %s\n", kb->layout->keymap_name);
@@ -43,26 +44,31 @@ kbd_switch_layout(struct kbd *kb, struct layout *l, size_t layer_index) {
 void
 kbd_next_layer(struct kbd *kb, struct key *k, bool invert) {
 	size_t layer_index = kb->layer_index;
-	if ((kb->mods & Ctrl) || (kb->mods & Alt) || (kb->mods & AltGr) || ((bool)kb->compose)) {
+	if ((kb->mods & Ctrl) || (kb->mods & Alt) || (kb->mods & AltGr) ||
+	    ((bool)kb->compose)) {
 		// with modifiers ctrl/alt/altgr: switch to the first layer
 		layer_index = 0;
 		kb->mods = 0;
 	} else if ((kb->mods & Shift) || (kb->mods & CapsLock) || (invert)) {
-		// with modifiers shift/capslock or invert set: switch to the previous layout in the layer sequence
+		// with modifiers shift/capslock or invert set: switch to the previous
+		// layout in the layer sequence
 		if (layer_index > 0) {
 			layer_index--;
 		} else {
 			size_t layercount = 0;
 			for (size_t i = 0; layercount == 0; i++) {
 				if (kb->landscape) {
-					if (kb->landscape_layers[i] == NumLayouts) layercount = i;
+					if (kb->landscape_layers[i] == NumLayouts)
+						layercount = i;
 				} else {
-					if (kb->layers[i] == NumLayouts) layercount = i;
+					if (kb->layers[i] == NumLayouts)
+						layercount = i;
 				}
 			}
 			layer_index = layercount - 1;
 		}
-		if (!invert) kb->mods ^= Shift;
+		if (!invert)
+			kb->mods ^= Shift;
 	} else {
 		// normal behaviour: switch to the next layout in the layer sequence
 		layer_index++;
@@ -70,9 +76,11 @@ kbd_next_layer(struct kbd *kb, struct key *k, bool invert) {
 	size_t layercount = 0;
 	for (size_t i = 0; layercount == 0; i++) {
 		if (kb->landscape) {
-			if (kb->landscape_layers[i] == NumLayouts) layercount = i;
+			if (kb->landscape_layers[i] == NumLayouts)
+				layercount = i;
 		} else {
-			if (kb->layers[i] == NumLayouts) layercount = i;
+			if (kb->layers[i] == NumLayouts)
+				layercount = i;
 		}
 	}
 	if (layer_index >= layercount) {
@@ -146,8 +154,8 @@ kbd_init_layers(char *layer_names_list) {
 }
 
 void
-kbd_init(struct kbd *kb, struct layout *layouts,
-         char *layer_names_list, char *landscape_layer_names_list) {
+kbd_init(struct kbd *kb, struct layout *layouts, char *layer_names_list,
+         char *landscape_layer_names_list) {
 	int i;
 
 	fprintf(stderr, "Initializing keyboard\n");
@@ -272,12 +280,12 @@ kbd_unpress_key(struct kbd *kb, uint32_t time) {
 			                            WL_KEYBOARD_KEY_STATE_RELEASED);
 		} else {
 			if ((kb->last_press->code == KEY_SPACE) && (unlatch_shift)) {
-				//shift + space is tab
+				// shift + space is tab
 				zwp_virtual_keyboard_v1_key(kb->vkbd, time, KEY_TAB,
-											WL_KEYBOARD_KEY_STATE_RELEASED);
+				                            WL_KEYBOARD_KEY_STATE_RELEASED);
 			} else {
 				zwp_virtual_keyboard_v1_key(kb->vkbd, time, kb->last_press->code,
-											WL_KEYBOARD_KEY_STATE_RELEASED);
+				                            WL_KEYBOARD_KEY_STATE_RELEASED);
 			}
 		}
 
@@ -342,7 +350,8 @@ kbd_motion_key(struct kbd *kb, uint32_t time, uint32_t x, uint32_t y) {
 void
 kbd_press_key(struct kbd *kb, struct key *k, uint32_t time) {
 	if ((kb->compose == 1) && (k->type != Compose) && (k->type != Mod)) {
-		if ((k->type == NextLayer) || (k->type == BackLayer) || ((k->type == Code) && (k->code == KEY_SPACE))) {
+		if ((k->type == NextLayer) || (k->type == BackLayer) ||
+		    ((k->type == Code) && (k->code == KEY_SPACE))) {
 			kb->compose = 0;
 			if (kb->debug)
 				fprintf(stderr, "showing layout index\n");
@@ -374,13 +383,13 @@ kbd_press_key(struct kbd *kb, struct key *k, uint32_t time) {
 		kb->last_swipe = kb->last_press = k;
 		kbd_draw_key(kb, k, Press);
 		if ((k->code == KEY_SPACE) && (kb->mods & Shift)) {
-			//shift space is tab
+			// shift space is tab
 			zwp_virtual_keyboard_v1_modifiers(kb->vkbd, 0, 0, 0, 0);
 			zwp_virtual_keyboard_v1_key(kb->vkbd, time, KEY_TAB,
-										WL_KEYBOARD_KEY_STATE_PRESSED);
+			                            WL_KEYBOARD_KEY_STATE_PRESSED);
 		} else {
 			zwp_virtual_keyboard_v1_key(kb->vkbd, time, kb->last_press->code,
-										WL_KEYBOARD_KEY_STATE_PRESSED);
+			                            WL_KEYBOARD_KEY_STATE_PRESSED);
 		}
 		if (kb->print || kb->print_intersect)
 			kbd_print_key_stdout(kb, k);
@@ -406,7 +415,7 @@ kbd_press_key(struct kbd *kb, struct key *k, uint32_t time) {
 	case Layout:
 		// switch to the layout determined by the key
 		kbd_switch_layout(kb, k->layout, kbd_get_layer_index(kb, k->layout));
-		//reset previous layout to default/first so we don't get any weird cycles
+		// reset previous layout to default/first so we don't get any weird cycles
 		kb->last_abc_index = 0;
 		if (kb->landscape) {
 			kb->last_abc_layout = &kb->layouts[kb->landscape_layers[0]];
@@ -427,15 +436,16 @@ kbd_press_key(struct kbd *kb, struct key *k, uint32_t time) {
 			kbd_draw_key(kb, k, Unpress);
 		}
 		break;
-	case NextLayer: //(also handles previous layer when shift modifier is on, or "first layer" with other modifiers)
+	case NextLayer: //(also handles previous layer when shift modifier is on, or
+	                //"first layer" with other modifiers)
 		kbd_next_layer(kb, k, false);
 		break;
-	case BackLayer: //triggered when "Abc" keys are pressed
+	case BackLayer: // triggered when "Abc" keys are pressed
 		// switch to the last active alphabetical layout
 		if (kb->last_abc_layout) {
 			kb->compose = 0;
 			kbd_switch_layout(kb, kb->last_abc_layout, kb->last_abc_index);
-			//reset previous layout to default/first so we don't get any weird cycles
+			// reset previous layout to default/first so we don't get any weird cycles
 			kb->last_abc_index = 0;
 			if (kb->landscape) {
 				kb->last_abc_layout = &kb->layouts[kb->landscape_layers[0]];
@@ -507,8 +517,10 @@ kbd_print_key_stdout(struct kbd *kb, struct key *k) {
 void
 kbd_clear_last_popup(struct kbd *kb) {
 	if (kb->last_popup_w && kb->last_popup_h) {
-		drw_do_clear(kb->popup_surf, kb->last_popup_x, kb->last_popup_y, kb->last_popup_w, kb->last_popup_h);
-		wl_surface_damage(kb->popup_surf->surf, kb->last_popup_x, kb->last_popup_y, kb->last_popup_w, kb->last_popup_h);
+		drw_do_clear(kb->popup_surf, kb->last_popup_x, kb->last_popup_y,
+		             kb->last_popup_w, kb->last_popup_h);
+		wl_surface_damage(kb->popup_surf->surf, kb->last_popup_x, kb->last_popup_y,
+		                  kb->last_popup_w, kb->last_popup_h);
 
 		kb->last_popup_w = kb->last_popup_h = 0;
 	}
@@ -531,11 +543,13 @@ kbd_draw_key(struct kbd *kb, struct key *k, enum key_draw_type type) {
 		draw_inset(kb->surf, k->x, k->y, k->w, k->h, KBD_KEY_BORDER, scheme->high);
 		break;
 	case Swipe:
-		draw_over_inset(kb->surf, k->x, k->y, k->w, k->h, KBD_KEY_BORDER, scheme->swipe);
+		draw_over_inset(kb->surf, k->x, k->y, k->w, k->h, KBD_KEY_BORDER,
+		                scheme->swipe);
 		break;
 	}
 
-	drw_draw_text(kb->surf, scheme->text, k->x, k->y, k->w, k->h, KBD_KEY_BORDER, label);
+	drw_draw_text(kb->surf, scheme->text, k->x, k->y, k->w, k->h, KBD_KEY_BORDER,
+	              label);
 	wl_surface_damage(kb->surf->surf, k->x, k->y, k->w, k->h);
 
 	if (type == Press || type == Unpress) {
@@ -546,9 +560,12 @@ kbd_draw_key(struct kbd *kb, struct key *k, enum key_draw_type type) {
 		kb->last_popup_w = k->w;
 		kb->last_popup_h = k->h;
 
-		drw_fill_rectangle(kb->popup_surf, kb->scheme.bg, k->x, kb->last_popup_y, k->w, k->h);
-		draw_inset(kb->popup_surf, k->x, kb->last_popup_y, k->w, k->h, KBD_KEY_BORDER, scheme->high);
-		drw_draw_text(kb->popup_surf, scheme->text, k->x, kb->last_popup_y, k->w, k->h, KBD_KEY_BORDER, label);
+		drw_fill_rectangle(kb->popup_surf, kb->scheme.bg, k->x, kb->last_popup_y,
+		                   k->w, k->h);
+		draw_inset(kb->popup_surf, k->x, kb->last_popup_y, k->w, k->h,
+		           KBD_KEY_BORDER, scheme->high);
+		drw_draw_text(kb->popup_surf, scheme->text, k->x, kb->last_popup_y, k->w,
+		              k->h, KBD_KEY_BORDER, label);
 		wl_surface_damage(kb->popup_surf->surf, k->x, kb->last_popup_y, k->w, k->h);
 	}
 }
@@ -568,7 +585,7 @@ kbd_draw_layout(struct kbd *kb) {
 			continue;
 		}
 		if ((next_key->type == Mod && kb->mods & next_key->code) ||
-			(next_key->type == Compose && kb->compose)) {
+		    (next_key->type == Compose && kb->compose)) {
 			kbd_draw_key(kb, next_key, Press);
 		} else {
 			kbd_draw_key(kb, next_key, None);
@@ -584,13 +601,15 @@ kbd_resize(struct kbd *kb, struct layout *layouts, uint8_t layoutcount) {
 	        layoutcount);
 
 	drwsurf_resize(kb->surf, kb->w, kb->h, kb->scale);
-	drwsurf_resize(kb->popup_surf, kb->w, kb->h*2, kb->scale);
+	drwsurf_resize(kb->popup_surf, kb->w, kb->h * 2, kb->scale);
 	for (int i = 0; i < layoutcount; i++) {
 		if (kb->debug) {
-	  		if (layouts[i].name)
-				fprintf(stderr, "Initialising layout %s, keymap %s\n", layouts[i].name, layouts[i].keymap_name);
-			else 
-				fprintf(stderr, "Initialising unnamed layout %d, keymap %s\n", i, layouts[i].keymap_name);
+			if (layouts[i].name)
+				fprintf(stderr, "Initialising layout %s, keymap %s\n", layouts[i].name,
+				        layouts[i].keymap_name);
+			else
+				fprintf(stderr, "Initialising unnamed layout %d, keymap %s\n", i,
+				        layouts[i].keymap_name);
 		}
 		kbd_init_layout(&layouts[i], kb->w, kb->h);
 	}

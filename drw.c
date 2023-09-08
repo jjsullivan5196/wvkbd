@@ -34,26 +34,25 @@ drw_draw_text(struct drwsurf *d, Color color, uint32_t x, uint32_t y,
 
 	cairo_set_source_rgba(
 	  d->cairo, color.bgra[2] / (double)255, color.bgra[1] / (double)255,
-	  color.bgra[0] / (double)255, color.bgra[3] / (double)255
-	);
+	  color.bgra[0] / (double)255, color.bgra[3] / (double)255);
 	cairo_move_to(d->cairo, x + w / 2, y + h / 2);
 
 	pango_layout_set_text(d->layout, label, -1);
-	pango_layout_set_width(d->layout, (w - (b*2)) * PANGO_SCALE);
-	pango_layout_set_height(d->layout, (h - (b*2)) * PANGO_SCALE);
+	pango_layout_set_width(d->layout, (w - (b * 2)) * PANGO_SCALE);
+	pango_layout_set_height(d->layout, (h - (b * 2)) * PANGO_SCALE);
 
 	int width, height;
 	pango_layout_get_pixel_size(d->layout, &width, &height);
 
-	cairo_rel_move_to(d->cairo, - width / 2, - height / 2);
+	cairo_rel_move_to(d->cairo, -width / 2, -height / 2);
 
 	pango_cairo_show_layout(d->cairo, d->layout);
 	cairo_restore(d->cairo);
 }
 
 void
-drw_do_clear(struct drwsurf *d, uint32_t x, uint32_t y,
-                 uint32_t w, uint32_t h) {
+drw_do_clear(struct drwsurf *d, uint32_t x, uint32_t y, uint32_t w,
+             uint32_t h) {
 	cairo_save(d->cairo);
 
 	cairo_set_operator(d->cairo, CAIRO_OPERATOR_CLEAR);
