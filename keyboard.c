@@ -1,11 +1,11 @@
-#include "keyboard.h"
-#include "drw.h"
-#include "os-compatibility.h"
 #include "proto/virtual-keyboard-unstable-v1-client-protocol.h"
 #include <linux/input-event-codes.h>
 #include <stddef.h>
 #include <stdio.h>
 #include <sys/mman.h>
+#include "keyboard.h"
+#include "drw.h"
+#include "os-compatibility.h"
 
 #define MAX_LAYERS 25
 
@@ -52,8 +52,8 @@ kbd_next_layer(struct kbd *kb, struct key *k, bool invert)
         layer_index = 0;
         kb->mods = 0;
     } else if ((kb->mods & Shift) || (kb->mods & CapsLock) || (invert)) {
-        // with modifiers shift/capslock or invert set: switch to the
-        // previous layout in the layer sequence
+        // with modifiers shift/capslock or invert set: switch to the previous
+        // layout in the layer sequence
         if (layer_index > 0) {
             layer_index--;
         } else {
@@ -72,8 +72,7 @@ kbd_next_layer(struct kbd *kb, struct key *k, bool invert)
         if (!invert)
             kb->mods ^= Shift;
     } else {
-        // normal behaviour: switch to the next layout in the layer
-        // sequence
+        // normal behaviour: switch to the next layout in the layer sequence
         layer_index++;
     }
     size_t layercount = 0;
@@ -443,8 +442,7 @@ kbd_press_key(struct kbd *kb, struct key *k, uint32_t time)
         }
         break;
     case Compose:
-        // switch to the associated layout determined by the *next*
-        // keypress
+        // switch to the associated layout determined by the *next* keypress
         if (kb->compose == 0) {
             kb->compose = 1;
         } else {
@@ -456,8 +454,8 @@ kbd_press_key(struct kbd *kb, struct key *k, uint32_t time)
             kbd_draw_key(kb, k, Unpress);
         }
         break;
-    case NextLayer: //(also handles previous layer when shift modifier is
-                    // on, or "first layer" with other modifiers)
+    case NextLayer: //(also handles previous layer when shift modifier is on, or
+                    //"first layer" with other modifiers)
         kbd_next_layer(kb, k, false);
         break;
     case BackLayer: // triggered when "Abc" keys are pressed
@@ -465,8 +463,8 @@ kbd_press_key(struct kbd *kb, struct key *k, uint32_t time)
         if (kb->last_abc_layout) {
             kb->compose = 0;
             kbd_switch_layout(kb, kb->last_abc_layout, kb->last_abc_index);
-            // reset previous layout to default/first so we don't get
-            // any weird cycles
+            // reset previous layout to default/first so we don't get any weird
+            // cycles
             kb->last_abc_index = 0;
             if (kb->landscape) {
                 kb->last_abc_layout = &kb->layouts[kb->landscape_layers[0]];

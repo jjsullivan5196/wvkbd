@@ -1,22 +1,22 @@
-#include "proto/fractional-scale-v1-client-protocol.h"
-#include "proto/viewporter-client-protocol.h"
 #include "proto/virtual-keyboard-unstable-v1-client-protocol.h"
 #include "proto/wlr-layer-shell-unstable-v1-client-protocol.h"
 #include "proto/xdg-shell-client-protocol.h"
+#include "proto/fractional-scale-v1-client-protocol.h"
+#include "proto/viewporter-client-protocol.h"
 #include <linux/input-event-codes.h>
-#include <poll.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/mman.h>
 #include <sys/signalfd.h>
+#include <poll.h>
 #include <unistd.h>
 #include <wayland-client-protocol.h>
 #include <wayland-client.h>
 #include <wchar.h>
 
-#include "config.h"
 #include "keyboard.h"
+#include "config.h"
 
 /* lazy die macro */
 #define die(...)                                                               \
