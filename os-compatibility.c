@@ -34,7 +34,9 @@
 
 #include "os-compatibility.h"
 
-int os_fd_set_cloexec(int fd) {
+int
+os_fd_set_cloexec(int fd)
+{
     long flags;
 
     if (fd == -1)
@@ -50,7 +52,9 @@ int os_fd_set_cloexec(int fd) {
     return 0;
 }
 
-static int set_cloexec_or_close(int fd) {
+static int
+set_cloexec_or_close(int fd)
+{
     if (os_fd_set_cloexec(fd) != 0) {
         close(fd);
         return -1;
@@ -58,7 +62,9 @@ static int set_cloexec_or_close(int fd) {
     return fd;
 }
 
-int os_socketpair_cloexec(int domain, int type, int protocol, int *sv) {
+int
+os_socketpair_cloexec(int domain, int type, int protocol, int *sv)
+{
     int ret;
 
 #ifdef SOCK_CLOEXEC
@@ -82,7 +88,9 @@ int os_socketpair_cloexec(int domain, int type, int protocol, int *sv) {
     return -1;
 }
 
-int os_epoll_create_cloexec(void) {
+int
+os_epoll_create_cloexec(void)
+{
     int fd;
 
 #ifdef EPOLL_CLOEXEC
@@ -97,7 +105,9 @@ int os_epoll_create_cloexec(void) {
     return set_cloexec_or_close(fd);
 }
 
-static int create_tmpfile_cloexec(char *tmpname) {
+static int
+create_tmpfile_cloexec(char *tmpname)
+{
     int fd;
 
 #ifdef HAVE_MKOSTEMP
@@ -136,7 +146,9 @@ static int create_tmpfile_cloexec(char *tmpname) {
  * If posix_fallocate() is not supported, program may receive
  * SIGBUS on accessing mmap()'ed file contents instead.
  */
-int os_create_anonymous_file(off_t size) {
+int
+os_create_anonymous_file(off_t size)
+{
     static const char template[] = "/weston-shared-XXXXXX";
     const char *path;
     char *name;
@@ -186,7 +198,9 @@ int os_create_anonymous_file(off_t size) {
 }
 
 #ifndef MISSING_STRCHRNUL
-char *strchrnul(const char *s, int c) {
+char *
+strchrnul(const char *s, int c)
+{
     while (*s && *s != c)
         s++;
     return (char *)s;

@@ -19,7 +19,9 @@
 #endif
 #include KEYMAP
 
-void kbd_switch_layout(struct kbd *kb, struct layout *l, size_t layer_index) {
+void
+kbd_switch_layout(struct kbd *kb, struct layout *l, size_t layer_index)
+{
     kb->prevlayout = kb->layout;
     if ((kb->layer_index != kb->last_abc_index) && (kb->layout->abc)) {
         kb->last_abc_layout = kb->layout;
@@ -40,7 +42,9 @@ void kbd_switch_layout(struct kbd *kb, struct layout *l, size_t layer_index) {
     kbd_draw_layout(kb);
 }
 
-void kbd_next_layer(struct kbd *kb, struct key *k, bool invert) {
+void
+kbd_next_layer(struct kbd *kb, struct key *k, bool invert)
+{
     size_t layer_index = kb->layer_index;
     if ((kb->mods & Ctrl) || (kb->mods & Alt) || (kb->mods & AltGr) ||
         ((bool)kb->compose)) {
@@ -100,7 +104,9 @@ void kbd_next_layer(struct kbd *kb, struct key *k, bool invert) {
     kbd_switch_layout(kb, &kb->layouts[layer], layer_index);
 }
 
-uint8_t kbd_get_rows(struct layout *l) {
+uint8_t
+kbd_get_rows(struct layout *l)
+{
     uint8_t rows = 0;
     struct key *k = l->keys;
     while (k->type != Last) {
@@ -112,7 +118,9 @@ uint8_t kbd_get_rows(struct layout *l) {
     return rows + 1;
 }
 
-enum layout_id *kbd_init_layers(char *layer_names_list) {
+enum layout_id *
+kbd_init_layers(char *layer_names_list)
+{
     enum layout_id *layers;
     uint8_t numlayers = 0;
     bool found;
@@ -150,8 +158,10 @@ enum layout_id *kbd_init_layers(char *layer_names_list) {
     return layers;
 }
 
-void kbd_init(struct kbd *kb, struct layout *layouts, char *layer_names_list,
-              char *landscape_layer_names_list) {
+void
+kbd_init(struct kbd *kb, struct layout *layouts, char *layer_names_list,
+         char *landscape_layer_names_list)
+{
     int i;
 
     fprintf(stderr, "Initializing keyboard\n");
@@ -191,7 +201,9 @@ void kbd_init(struct kbd *kb, struct layout *layouts, char *layer_names_list,
     create_and_upload_keymap(kb, kb->layout->keymap_name, 0, 0);
 }
 
-void kbd_init_layout(struct layout *l, uint32_t width, uint32_t height) {
+void
+kbd_init_layout(struct layout *l, uint32_t width, uint32_t height)
+{
     uint32_t x = 0, y = 0;
     uint8_t rows = kbd_get_rows(l);
 
@@ -222,7 +234,9 @@ void kbd_init_layout(struct layout *l, uint32_t width, uint32_t height) {
     }
 }
 
-double kbd_get_row_length(struct key *k) {
+double
+kbd_get_row_length(struct key *k)
+{
     double l = 0.0;
     while ((k->type != Last) && (k->type != EndRow)) {
         l += k->width;
@@ -231,7 +245,9 @@ double kbd_get_row_length(struct key *k) {
     return l;
 }
 
-struct key *kbd_get_key(struct kbd *kb, uint32_t x, uint32_t y) {
+struct key *
+kbd_get_key(struct kbd *kb, uint32_t x, uint32_t y)
+{
     struct layout *l = kb->layout;
     struct key *k = l->keys;
     if (kb->debug)
@@ -247,7 +263,9 @@ struct key *kbd_get_key(struct kbd *kb, uint32_t x, uint32_t y) {
     return NULL;
 }
 
-size_t kbd_get_layer_index(struct kbd *kb, struct layout *l) {
+size_t
+kbd_get_layer_index(struct kbd *kb, struct layout *l)
+{
     for (size_t i = 0; i < NumLayouts - 1; i++) {
         if (l == &kb->layouts[i]) {
             return i;
@@ -256,7 +274,9 @@ size_t kbd_get_layer_index(struct kbd *kb, struct layout *l) {
     return 0;
 }
 
-void kbd_unpress_key(struct kbd *kb, uint32_t time) {
+void
+kbd_unpress_key(struct kbd *kb, uint32_t time)
+{
     bool unlatch_shift = false;
 
     if (kb->last_press) {
@@ -295,7 +315,9 @@ void kbd_unpress_key(struct kbd *kb, uint32_t time) {
     }
 }
 
-void kbd_release_key(struct kbd *kb, uint32_t time) {
+void
+kbd_release_key(struct kbd *kb, uint32_t time)
+{
     kbd_unpress_key(kb, time);
     if (kb->print_intersect && kb->last_swipe) {
         printf("\n");
@@ -311,7 +333,9 @@ void kbd_release_key(struct kbd *kb, uint32_t time) {
     drwsurf_flip(kb->popup_surf);
 }
 
-void kbd_motion_key(struct kbd *kb, uint32_t time, uint32_t x, uint32_t y) {
+void
+kbd_motion_key(struct kbd *kb, uint32_t time, uint32_t x, uint32_t y)
+{
     // Output intersecting keys
     // (for external 'swiping'-based accelerators).
     if (kb->print_intersect) {
@@ -338,7 +362,9 @@ void kbd_motion_key(struct kbd *kb, uint32_t time, uint32_t x, uint32_t y) {
     drwsurf_flip(kb->popup_surf);
 }
 
-void kbd_press_key(struct kbd *kb, struct key *k, uint32_t time) {
+void
+kbd_press_key(struct kbd *kb, struct key *k, uint32_t time)
+{
     if ((kb->compose == 1) && (k->type != Compose) && (k->type != Mod)) {
         if ((k->type == NextLayer) || (k->type == BackLayer) ||
             ((k->type == Code) && (k->code == KEY_SPACE))) {
@@ -471,7 +497,9 @@ void kbd_press_key(struct kbd *kb, struct key *k, uint32_t time) {
     drwsurf_flip(kb->popup_surf);
 }
 
-void kbd_print_key_stdout(struct kbd *kb, struct key *k) {
+void
+kbd_print_key_stdout(struct kbd *kb, struct key *k)
+{
     /* printed keys may slightly differ from the actual output
      * we generally print what is on the key LABEL and only support the normal
      * and shift layers. Other modifiers produce no output (Ctrl,Alt)
@@ -509,7 +537,9 @@ void kbd_print_key_stdout(struct kbd *kb, struct key *k) {
     fflush(stdout);
 }
 
-void kbd_clear_last_popup(struct kbd *kb) {
+void
+kbd_clear_last_popup(struct kbd *kb)
+{
     if (kb->last_popup_w && kb->last_popup_h) {
         drw_do_clear(kb->popup_surf, kb->last_popup_x, kb->last_popup_y,
                      kb->last_popup_w, kb->last_popup_h);
@@ -520,7 +550,9 @@ void kbd_clear_last_popup(struct kbd *kb) {
     }
 }
 
-void kbd_draw_key(struct kbd *kb, struct key *k, enum key_draw_type type) {
+void
+kbd_draw_key(struct kbd *kb, struct key *k, enum key_draw_type type)
+{
     const char *label = (kb->mods & Shift) ? k->shift_label : k->label;
     if (kb->debug)
         fprintf(stderr, "Draw key +%d+%d %dx%d -> %s\n", k->x, k->y, k->w, k->h,
@@ -567,7 +599,9 @@ void kbd_draw_key(struct kbd *kb, struct key *k, enum key_draw_type type) {
     }
 }
 
-void kbd_draw_layout(struct kbd *kb) {
+void
+kbd_draw_layout(struct kbd *kb)
+{
     struct drwsurf *d = kb->surf;
     struct key *next_key = kb->layout->keys;
     if (kb->debug)
@@ -591,7 +625,9 @@ void kbd_draw_layout(struct kbd *kb) {
     wl_surface_damage(d->surf, 0, 0, kb->w, kb->h);
 }
 
-void kbd_resize(struct kbd *kb, struct layout *layouts, uint8_t layoutcount) {
+void
+kbd_resize(struct kbd *kb, struct layout *layouts, uint8_t layoutcount)
+{
     fprintf(stderr, "Resize %dx%d %f, %d layouts\n", kb->w, kb->h, kb->scale,
             layoutcount);
 
@@ -611,20 +647,25 @@ void kbd_resize(struct kbd *kb, struct layout *layouts, uint8_t layoutcount) {
     kbd_draw_layout(kb);
 }
 
-void draw_inset(struct drwsurf *ds, uint32_t x, uint32_t y, uint32_t width,
-                uint32_t height, uint32_t border, Color color) {
+void
+draw_inset(struct drwsurf *ds, uint32_t x, uint32_t y, uint32_t width,
+           uint32_t height, uint32_t border, Color color)
+{
     drw_fill_rectangle(ds, color, x + border, y + border, width - (border * 2),
                        height - (border * 2));
 }
-void draw_over_inset(struct drwsurf *ds, uint32_t x, uint32_t y, uint32_t width,
-                     uint32_t height, uint32_t border, Color color) {
+void
+draw_over_inset(struct drwsurf *ds, uint32_t x, uint32_t y, uint32_t width,
+                uint32_t height, uint32_t border, Color color)
+{
     drw_over_rectangle(ds, color, x + border, y + border, width - (border * 2),
                        height - (border * 2));
 }
 
-void create_and_upload_keymap(struct kbd *kb, const char *name,
-                              uint32_t comp_unichr,
-                              uint32_t comp_shift_unichr) {
+void
+create_and_upload_keymap(struct kbd *kb, const char *name, uint32_t comp_unichr,
+                         uint32_t comp_shift_unichr)
+{
     int keymap_index = -1;
     for (int i = 0; i < NUMKEYMAPS; i++) {
         if (!strcmp(keymap_names[i], name)) {

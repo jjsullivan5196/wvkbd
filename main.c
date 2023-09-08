@@ -165,7 +165,9 @@ static const struct zwlr_layer_surface_v1_listener layer_surface_listener = {
 
 /* configuration, allows nested code to access above variables */
 
-char *estrdup(const char *s) {
+char *
+estrdup(const char *s)
+{
     char *p;
 
     if (!(p = strdup(s))) {
@@ -176,9 +178,11 @@ char *estrdup(const char *s) {
     return p;
 }
 
-void wl_touch_down(void *data, struct wl_touch *wl_touch, uint32_t serial,
-                   uint32_t time, struct wl_surface *surface, int32_t id,
-                   wl_fixed_t x, wl_fixed_t y) {
+void
+wl_touch_down(void *data, struct wl_touch *wl_touch, uint32_t serial,
+              uint32_t time, struct wl_surface *surface, int32_t id,
+              wl_fixed_t x, wl_fixed_t y)
+{
     struct key *next_key;
     uint32_t touch_x, touch_y;
 
@@ -197,13 +201,17 @@ void wl_touch_down(void *data, struct wl_touch *wl_touch, uint32_t serial,
     }
 }
 
-void wl_touch_up(void *data, struct wl_touch *wl_touch, uint32_t serial,
-                 uint32_t time, int32_t id) {
+void
+wl_touch_up(void *data, struct wl_touch *wl_touch, uint32_t serial,
+            uint32_t time, int32_t id)
+{
     kbd_release_key(&keyboard, time);
 }
 
-void wl_touch_motion(void *data, struct wl_touch *wl_touch, uint32_t time,
-                     int32_t id, wl_fixed_t x, wl_fixed_t y) {
+void
+wl_touch_motion(void *data, struct wl_touch *wl_touch, uint32_t time,
+                int32_t id, wl_fixed_t x, wl_fixed_t y)
+{
     uint32_t touch_x, touch_y;
 
     touch_x = wl_fixed_to_int(x);
@@ -212,27 +220,46 @@ void wl_touch_motion(void *data, struct wl_touch *wl_touch, uint32_t time,
     kbd_motion_key(&keyboard, time, touch_x, touch_y);
 }
 
-void wl_touch_frame(void *data, struct wl_touch *wl_touch) {}
+void
+wl_touch_frame(void *data, struct wl_touch *wl_touch)
+{
+}
 
-void wl_touch_cancel(void *data, struct wl_touch *wl_touch) {}
+void
+wl_touch_cancel(void *data, struct wl_touch *wl_touch)
+{
+}
 
-void wl_touch_shape(void *data, struct wl_touch *wl_touch, int32_t id,
-                    wl_fixed_t major, wl_fixed_t minor) {}
+void
+wl_touch_shape(void *data, struct wl_touch *wl_touch, int32_t id,
+               wl_fixed_t major, wl_fixed_t minor)
+{
+}
 
-void wl_touch_orientation(void *data, struct wl_touch *wl_touch, int32_t id,
-                          wl_fixed_t orientation) {}
+void
+wl_touch_orientation(void *data, struct wl_touch *wl_touch, int32_t id,
+                     wl_fixed_t orientation)
+{
+}
 
-void wl_pointer_enter(void *data, struct wl_pointer *wl_pointer,
-                      uint32_t serial, struct wl_surface *surface,
-                      wl_fixed_t surface_x, wl_fixed_t surface_y) {}
+void
+wl_pointer_enter(void *data, struct wl_pointer *wl_pointer, uint32_t serial,
+                 struct wl_surface *surface, wl_fixed_t surface_x,
+                 wl_fixed_t surface_y)
+{
+}
 
-void wl_pointer_leave(void *data, struct wl_pointer *wl_pointer,
-                      uint32_t serial, struct wl_surface *surface) {
+void
+wl_pointer_leave(void *data, struct wl_pointer *wl_pointer, uint32_t serial,
+                 struct wl_surface *surface)
+{
     cur_x = cur_y = -1;
 }
 
-void wl_pointer_motion(void *data, struct wl_pointer *wl_pointer, uint32_t time,
-                       wl_fixed_t surface_x, wl_fixed_t surface_y) {
+void
+wl_pointer_motion(void *data, struct wl_pointer *wl_pointer, uint32_t time,
+                  wl_fixed_t surface_x, wl_fixed_t surface_y)
+{
     cur_x = wl_fixed_to_int(surface_x);
     cur_y = wl_fixed_to_int(surface_y);
 
@@ -241,9 +268,10 @@ void wl_pointer_motion(void *data, struct wl_pointer *wl_pointer, uint32_t time,
     }
 }
 
-void wl_pointer_button(void *data, struct wl_pointer *wl_pointer,
-                       uint32_t serial, uint32_t time, uint32_t button,
-                       uint32_t state) {
+void
+wl_pointer_button(void *data, struct wl_pointer *wl_pointer, uint32_t serial,
+                  uint32_t time, uint32_t button, uint32_t state)
+{
     struct key *next_key;
     cur_press = state == WL_POINTER_BUTTON_STATE_PRESSED;
 
@@ -265,14 +293,18 @@ void wl_pointer_button(void *data, struct wl_pointer *wl_pointer,
     }
 }
 
-void wl_pointer_axis(void *data, struct wl_pointer *wl_pointer, uint32_t time,
-                     uint32_t axis, wl_fixed_t value) {
+void
+wl_pointer_axis(void *data, struct wl_pointer *wl_pointer, uint32_t time,
+                uint32_t axis, wl_fixed_t value)
+{
     kbd_next_layer(&keyboard, NULL, (value >= 0));
     drwsurf_flip(keyboard.surf);
 }
 
-void seat_handle_capabilities(void *data, struct wl_seat *wl_seat,
-                              enum wl_seat_capability caps) {
+void
+seat_handle_capabilities(void *data, struct wl_seat *wl_seat,
+                         enum wl_seat_capability caps)
+{
     if ((caps & WL_SEAT_CAPABILITY_POINTER)) {
         if (pointer == NULL) {
             pointer = wl_seat_get_pointer(wl_seat);
@@ -297,10 +329,15 @@ void seat_handle_capabilities(void *data, struct wl_seat *wl_seat,
     }
 }
 
-void seat_handle_name(void *data, struct wl_seat *wl_seat, const char *name) {}
+void
+seat_handle_name(void *data, struct wl_seat *wl_seat, const char *name)
+{
+}
 
-void wl_surface_enter(void *data, struct wl_surface *wl_surface,
-                      struct wl_output *wl_output) {
+void
+wl_surface_enter(void *data, struct wl_surface *wl_surface,
+                 struct wl_output *wl_output)
+{
     for (int i = 0; i < WL_OUTPUTS_LIMIT; i += 1) {
         if (wl_outputs[i].data == wl_output) {
             current_output = &wl_outputs[i];
@@ -311,11 +348,11 @@ void wl_surface_enter(void *data, struct wl_surface *wl_surface,
     resize();
 }
 
-static void display_handle_geometry(void *data, struct wl_output *wl_output,
-                                    int x, int y, int physical_width,
-                                    int physical_height, int subpixel,
-                                    const char *make, const char *model,
-                                    int transform) {
+static void
+display_handle_geometry(void *data, struct wl_output *wl_output, int x, int y,
+                        int physical_width, int physical_height, int subpixel,
+                        const char *make, const char *model, int transform)
+{
     struct Output *output = data;
 
     // Swap width and height on rotated displays
@@ -333,10 +370,14 @@ static void display_handle_geometry(void *data, struct wl_output *wl_output,
     };
 }
 
-static void display_handle_done(void *data, struct wl_output *wl_output) {}
+static void
+display_handle_done(void *data, struct wl_output *wl_output)
+{
+}
 
-static void display_handle_scale(void *data, struct wl_output *wl_output,
-                                 int32_t scale) {
+static void
+display_handle_scale(void *data, struct wl_output *wl_output, int32_t scale)
+{
     struct Output *output = data;
     output->scale = scale;
 
@@ -345,9 +386,11 @@ static void display_handle_scale(void *data, struct wl_output *wl_output,
     };
 }
 
-static void display_handle_mode(void *data, struct wl_output *wl_output,
-                                uint32_t flags, int width, int height,
-                                int refresh) {}
+static void
+display_handle_mode(void *data, struct wl_output *wl_output, uint32_t flags,
+                    int width, int height, int refresh)
+{
+}
 
 static const struct wl_output_listener output_listener = {
     .geometry = display_handle_geometry,
@@ -355,8 +398,9 @@ static const struct wl_output_listener output_listener = {
     .done = display_handle_done,
     .scale = display_handle_scale};
 
-static void xdg_wm_base_ping(void *data, struct xdg_wm_base *xdg_wm_base,
-                             uint32_t serial) {
+static void
+xdg_wm_base_ping(void *data, struct xdg_wm_base *xdg_wm_base, uint32_t serial)
+{
     xdg_wm_base_pong(xdg_wm_base, serial);
 }
 
@@ -364,8 +408,10 @@ static const struct xdg_wm_base_listener xdg_wm_base_listener = {
     .ping = xdg_wm_base_ping,
 };
 
-void handle_global(void *data, struct wl_registry *registry, uint32_t name,
-                   const char *interface, uint32_t version) {
+void
+handle_global(void *data, struct wl_registry *registry, uint32_t name,
+              const char *interface, uint32_t version)
+{
     if (strcmp(interface, wl_compositor_interface.name) == 0) {
         compositor =
             wl_registry_bind(registry, name, &wl_compositor_interface, 3);
@@ -404,8 +450,9 @@ void handle_global(void *data, struct wl_registry *registry, uint32_t name,
     }
 }
 
-void handle_global_remove(void *data, struct wl_registry *registry,
-                          uint32_t name) {
+void
+handle_global_remove(void *data, struct wl_registry *registry, uint32_t name)
+{
     for (int i = 0; i < WL_OUTPUTS_LIMIT; i += 1) {
         if (wl_outputs[i].name == name) {
             wl_output_destroy(wl_outputs[i].data);
@@ -418,9 +465,10 @@ void handle_global_remove(void *data, struct wl_registry *registry,
     }
 }
 
-static void xdg_popup_surface_configure(void *data,
-                                        struct xdg_surface *xdg_surface,
-                                        uint32_t serial) {
+static void
+xdg_popup_surface_configure(void *data, struct xdg_surface *xdg_surface,
+                            uint32_t serial)
+{
     xdg_surface_ack_configure(xdg_surface, serial);
     drwsurf_flip(&popup_draw_surf);
 }
@@ -429,24 +477,30 @@ static const struct xdg_surface_listener xdg_popup_surface_listener = {
     .configure = xdg_popup_surface_configure,
 };
 
-static void xdg_popup_configure(void *data, struct xdg_popup *xdg_popup,
-                                int32_t x, int32_t y, int32_t width,
-                                int32_t height) {
+static void
+xdg_popup_configure(void *data, struct xdg_popup *xdg_popup, int32_t x,
+                    int32_t y, int32_t width, int32_t height)
+{
     kbd_resize(&keyboard, layouts, NumLayouts);
 
     drwsurf_flip(&draw_surf);
 }
 
-static void xdg_popup_done(void *data, struct xdg_popup *xdg_popup) {}
+static void
+xdg_popup_done(void *data, struct xdg_popup *xdg_popup)
+{
+}
 
 static const struct xdg_popup_listener xdg_popup_listener = {
     .configure = xdg_popup_configure,
     .popup_done = xdg_popup_done,
 };
 
-static void wp_fractional_scale_prefered_scale(
+static void
+wp_fractional_scale_prefered_scale(
     void *data, struct wp_fractional_scale_v1 *wp_fractional_scale_v1,
-    uint32_t scale) {
+    uint32_t scale)
+{
     keyboard.pending_scale = (double)scale / 120;
 }
 
@@ -455,7 +509,9 @@ static const struct wp_fractional_scale_v1_listener
         .preferred_scale = wp_fractional_scale_prefered_scale,
 };
 
-void resize() {
+void
+resize()
+{
     keyboard.landscape = current_output->w > current_output->h;
 
     enum layout_id layer;
@@ -484,8 +540,10 @@ void resize() {
     }
 }
 
-void layer_surface_configure(void *data, struct zwlr_layer_surface_v1 *surface,
-                             uint32_t serial, uint32_t w, uint32_t h) {
+void
+layer_surface_configure(void *data, struct zwlr_layer_surface_v1 *surface,
+                        uint32_t serial, uint32_t w, uint32_t h)
+{
     if (keyboard.w != w || keyboard.h != h ||
         keyboard.scale != keyboard.pending_scale) {
         keyboard.w = w;
@@ -550,13 +608,17 @@ void layer_surface_configure(void *data, struct zwlr_layer_surface_v1 *surface,
     zwlr_layer_surface_v1_ack_configure(surface, serial);
 }
 
-void layer_surface_closed(void *data, struct zwlr_layer_surface_v1 *surface) {
+void
+layer_surface_closed(void *data, struct zwlr_layer_surface_v1 *surface)
+{
     zwlr_layer_surface_v1_destroy(surface);
     wl_surface_destroy(draw_surf.surf);
     run_display = false;
 }
 
-void usage(char *argv0) {
+void
+usage(char *argv0)
+{
     fprintf(stderr,
             "usage: %s [-hov] [-H height] [-L landscape height] [-fn font] [-l "
             "layers]\n",
@@ -593,7 +655,9 @@ void usage(char *argv0) {
                     "landscape layers\n");
 }
 
-void list_layers() {
+void
+list_layers()
+{
     int i;
     for (i = 0; i < NumLayouts - 1; i++) {
         if (layouts[i].name) {
@@ -602,7 +666,9 @@ void list_layers() {
     }
 }
 
-void hide() {
+void
+hide()
+{
     if (!layer_surface) {
         return;
     }
@@ -613,7 +679,9 @@ void hide() {
     hidden = true;
 }
 
-void show() {
+void
+show()
+{
     if (layer_surface) {
         return;
     }
@@ -636,16 +704,24 @@ void show() {
     hidden = false;
 }
 
-void toggle_visibility() {
+void
+toggle_visibility()
+{
     if (hidden)
         show();
     else
         hide();
 }
 
-void pipewarn() { fprintf(stderr, "wvkbd: cannot pipe data out.\n"); }
+void
+pipewarn()
+{
+    fprintf(stderr, "wvkbd: cannot pipe data out.\n");
+}
 
-void set_kbd_colors(uint8_t *bgra, char *hex) {
+void
+set_kbd_colors(uint8_t *bgra, char *hex)
+{
     // bg, fg, text, high, swipe
     int length = strlen(hex);
     if (length == 6 || length == 8) {
@@ -663,7 +739,9 @@ void set_kbd_colors(uint8_t *bgra, char *hex) {
     }
 }
 
-int main(int argc, char **argv) {
+int
+main(int argc, char **argv)
+{
     /* parse command line arguments */
     char *layer_names_list = NULL, *landscape_layer_names_list = NULL;
     const char *fc_font_pattern = NULL;

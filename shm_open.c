@@ -5,7 +5,9 @@
 #include <time.h>
 #include <unistd.h>
 
-static void randname(char *buf) {
+static void
+randname(char *buf)
+{
     struct timespec ts;
     long r;
     clock_gettime(CLOCK_REALTIME, &ts);
@@ -16,7 +18,9 @@ static void randname(char *buf) {
     }
 }
 
-static int create_shm_file(void) {
+static int
+create_shm_file(void)
+{
     int retries = 100;
     int fd;
     do {
@@ -32,7 +36,9 @@ static int create_shm_file(void) {
     return -1;
 }
 
-int allocate_shm_file(size_t size) {
+int
+allocate_shm_file(size_t size)
+{
     int fd = create_shm_file();
     int ret;
     if (fd < 0)

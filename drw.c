@@ -5,7 +5,9 @@
 #include "drw.h"
 #include "shm_open.h"
 
-void drwsurf_resize(struct drwsurf *ds, uint32_t w, uint32_t h, double s) {
+void
+drwsurf_resize(struct drwsurf *ds, uint32_t w, uint32_t h, double s)
+{
     if (ds->buf) {
         munmap(ds->pool_data, ds->size);
         wl_buffer_destroy(ds->buf);
@@ -19,13 +21,17 @@ void drwsurf_resize(struct drwsurf *ds, uint32_t w, uint32_t h, double s) {
     setup_buffer(ds);
 }
 
-void drwsurf_flip(struct drwsurf *ds) {
+void
+drwsurf_flip(struct drwsurf *ds)
+{
     wl_surface_attach(ds->surf, ds->buf, 0, 0);
     wl_surface_commit(ds->surf);
 }
 
-void drw_draw_text(struct drwsurf *d, Color color, uint32_t x, uint32_t y,
-                   uint32_t w, uint32_t h, uint32_t b, const char *label) {
+void
+drw_draw_text(struct drwsurf *d, Color color, uint32_t x, uint32_t y,
+              uint32_t w, uint32_t h, uint32_t b, const char *label)
+{
 
     cairo_save(d->cairo);
 
@@ -47,8 +53,9 @@ void drw_draw_text(struct drwsurf *d, Color color, uint32_t x, uint32_t y,
     cairo_restore(d->cairo);
 }
 
-void drw_do_clear(struct drwsurf *d, uint32_t x, uint32_t y, uint32_t w,
-                  uint32_t h) {
+void
+drw_do_clear(struct drwsurf *d, uint32_t x, uint32_t y, uint32_t w, uint32_t h)
+{
     cairo_save(d->cairo);
 
     cairo_set_operator(d->cairo, CAIRO_OPERATOR_CLEAR);
@@ -58,8 +65,10 @@ void drw_do_clear(struct drwsurf *d, uint32_t x, uint32_t y, uint32_t w,
     cairo_restore(d->cairo);
 }
 
-void drw_do_rectangle(struct drwsurf *d, Color color, uint32_t x, uint32_t y,
-                      uint32_t w, uint32_t h, bool over) {
+void
+drw_do_rectangle(struct drwsurf *d, Color color, uint32_t x, uint32_t y,
+                 uint32_t w, uint32_t h, bool over)
+{
     cairo_save(d->cairo);
 
     if (over) {
@@ -77,17 +86,23 @@ void drw_do_rectangle(struct drwsurf *d, Color color, uint32_t x, uint32_t y,
     cairo_restore(d->cairo);
 }
 
-void drw_fill_rectangle(struct drwsurf *d, Color color, uint32_t x, uint32_t y,
-                        uint32_t w, uint32_t h) {
+void
+drw_fill_rectangle(struct drwsurf *d, Color color, uint32_t x, uint32_t y,
+                   uint32_t w, uint32_t h)
+{
     drw_do_rectangle(d, color, x, y, w, h, false);
 }
 
-void drw_over_rectangle(struct drwsurf *d, Color color, uint32_t x, uint32_t y,
-                        uint32_t w, uint32_t h) {
+void
+drw_over_rectangle(struct drwsurf *d, Color color, uint32_t x, uint32_t y,
+                   uint32_t w, uint32_t h)
+{
     drw_do_rectangle(d, color, x, y, w, h, true);
 }
 
-uint32_t setup_buffer(struct drwsurf *drwsurf) {
+uint32_t
+setup_buffer(struct drwsurf *drwsurf)
+{
     int stride = drwsurf->width * 4;
     drwsurf->size = stride * drwsurf->height;
 
