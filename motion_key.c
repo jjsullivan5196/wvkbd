@@ -194,28 +194,56 @@ swp_determine_shape()
     }
 }
 
+static struct key*
+mk_get_key_from_dir(struct key* key, enum swipe_dir dir)
+{
+    switch(dir) {
+    case UNDEFINED_DIR:
+        return NULL;
+    case NORTH:
+        return key->north;
+    case NORTH_EAST:
+        return key->north_east;
+    case EAST:
+        return key->east;
+    case SOUTH_EAST:
+        return key->south_east;
+    case SOUTH:
+        return key->south;
+    case SOUTH_WEST:
+        return key->south_west;
+    case WEST:
+        return key->west;
+    case NORTH_WEST:
+        return key->north_west;
+    }
+    return NULL;
+}
+
 static void
 swp_handle_shape(uint32_t time)
 {
-    struct key *next_key;
+    struct key *next_key = kbd_get_key(&keyboard, p0.x, p0.y);
 
     switch (curr_shape) {
     case UNDETERMINED_SHAPE:
         printf("Undetermined\n");
         break;
     case TAP:
-        next_key = kbd_get_key(&keyboard, p0.x, p0.y);
         kbd_press_key(&keyboard, next_key, time);
         kbd_release_key(&keyboard, time);
         break;
     case CIRCLE:
-        next_key = kbd_get_key(&keyboard, p0.x, p0.y);
         keyboard.mods ^= Shift;
         kbd_press_key(&keyboard, next_key, time);
         kbd_release_key(&keyboard, time);
         break;
     case LINE:
-        printf("Line from %d, %d, direction %d\n", p0.x, p0.y, line_dir);
+        next_key = mk_get_key_from_dir(next_key, line_dir);
+        if (next_key) {
+            kbd_press_key(&keyboard, next_key, time);
+            kbd_release_key(&keyboard, time);
+        }
         break;
     case BACK_FORTH:
         printf("Back-and-forth at %d, %d, direction %d\n", p0.x, p0.y,
