@@ -545,23 +545,14 @@ layer_surface_configure(void *data, struct zwlr_layer_surface_v1 *surface,
                         uint32_t serial, uint32_t w, uint32_t h)
 {
     if (keyboard.w != w || keyboard.h != h ||
-        keyboard.scale != keyboard.pending_scale) {
+        keyboard.scale != keyboard.pending_scale || hidden) {
+
         keyboard.w = w;
         keyboard.h = h;
         keyboard.scale = keyboard.pending_scale;
+        hidden = false;
 
         if (wfs_mgr && viewporter) {
-            if (!wfs_draw_surf) {
-                wfs_draw_surf =
-                    wp_fractional_scale_manager_v1_get_fractional_scale(
-                        wfs_mgr, draw_surf.surf);
-                wp_fractional_scale_v1_add_listener(
-                    wfs_draw_surf, &wp_fractional_scale_listener, NULL);
-            }
-            if (!draw_surf_viewport) {
-                draw_surf_viewport =
-                    wp_viewporter_get_viewport(viewporter, draw_surf.surf);
-            }
             wp_viewport_set_destination(draw_surf_viewport, keyboard.w,
                                         keyboard.h);
         } else {
@@ -690,6 +681,15 @@ show()
 
     draw_surf.surf = wl_compositor_create_surface(compositor);
     wl_surface_add_listener(draw_surf.surf, &surface_listener, NULL);
+    if (wfs_mgr && viewporter) {
+        wfs_draw_surf = wp_fractional_scale_manager_v1_get_fractional_scale(
+            wfs_mgr, draw_surf.surf);
+        wp_fractional_scale_v1_add_listener(
+            wfs_draw_surf, &wp_fractional_scale_listener, NULL);
+        draw_surf_viewport =
+            wp_viewporter_get_viewport(viewporter, draw_surf.surf);
+    }
+
     layer_surface = zwlr_layer_shell_v1_get_layer_surface(
         layer_shell, draw_surf.surf, NULL, layer, namespace);
 
@@ -700,8 +700,6 @@ show()
     zwlr_layer_surface_v1_add_listener(layer_surface, &layer_surface_listener,
                                        NULL);
     wl_surface_commit(draw_surf.surf);
-
-    hidden = false;
 }
 
 void
