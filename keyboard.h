@@ -96,7 +96,8 @@ struct kbd {
 	bool print;
 	bool print_intersect;
 	uint32_t w, h;
-	double scale, pending_scale;
+	double scale;
+	double preferred_scale, preferred_fractional_scale;
 	bool landscape;
 	uint8_t mods;
 	uint8_t compose;

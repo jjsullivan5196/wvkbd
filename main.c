@@ -123,7 +123,7 @@ static void layer_surface_configure(void *data,
                                     uint32_t serial, uint32_t w, uint32_t h);
 static void layer_surface_closed(void *data,
                                  struct zwlr_layer_surface_v1 *surface);
-static void resize();
+static void flip_landscape();
 
 /* event handlers */
 static const struct wl_pointer_listener pointer_listener = {
@@ -345,7 +345,9 @@ wl_surface_enter(void *data, struct wl_surface *wl_surface,
         }
     }
 
-    resize();
+    keyboard.preferred_scale = current_output->scale;
+
+    flip_landscape();
 }
 
 static void
@@ -366,7 +368,7 @@ display_handle_geometry(void *data, struct wl_output *wl_output, int x, int y,
     output->h = physical_height;
 
     if (current_output == output) {
-        resize();
+        flip_landscape();
     };
 }
 
@@ -382,7 +384,8 @@ display_handle_scale(void *data, struct wl_output *wl_output, int32_t scale)
     output->scale = scale;
 
     if (current_output == output) {
-        resize();
+        keyboard.preferred_scale = scale;
+        flip_landscape();
     };
 }
 
@@ -497,20 +500,20 @@ static const struct xdg_popup_listener xdg_popup_listener = {
 };
 
 static void
-wp_fractional_scale_prefered_scale(
+wp_fractional_scale_preferred_scale(
     void *data, struct wp_fractional_scale_v1 *wp_fractional_scale_v1,
     uint32_t scale)
 {
-    keyboard.pending_scale = (double)scale / 120;
+    keyboard.preferred_fractional_scale = (double)scale / 120;
 }
 
 static const struct wp_fractional_scale_v1_listener
     wp_fractional_scale_listener = {
-        .preferred_scale = wp_fractional_scale_prefered_scale,
+        .preferred_scale = wp_fractional_scale_preferred_scale,
 };
 
 void
-resize()
+flip_landscape()
 {
     keyboard.landscape = current_output->w > current_output->h;
 
@@ -529,10 +532,6 @@ resize()
     keyboard.last_abc_layout = keyboard.layout;
     keyboard.last_abc_index = 0;
 
-    if (!wfs_mgr || !viewporter) {
-        keyboard.pending_scale = current_output->scale;
-    }
-
     if (layer_surface) {
         zwlr_layer_surface_v1_set_size(layer_surface, 0, height);
         zwlr_layer_surface_v1_set_exclusive_zone(layer_surface, height);
@@ -544,12 +543,17 @@ void
 layer_surface_configure(void *data, struct zwlr_layer_surface_v1 *surface,
                         uint32_t serial, uint32_t w, uint32_t h)
 {
-    if (keyboard.w != w || keyboard.h != h ||
-        keyboard.scale != keyboard.pending_scale || hidden) {
+    double scale = keyboard.preferred_scale;
+    if (keyboard.preferred_fractional_scale) {
+        scale = keyboard.preferred_fractional_scale;
+    }
+
+    if (keyboard.w != w || keyboard.h != h || keyboard.scale != scale ||
+        hidden) {
 
         keyboard.w = w;
         keyboard.h = h;
-        keyboard.scale = keyboard.pending_scale;
+        keyboard.scale = scale;
         hidden = false;
 
         if (wfs_mgr && viewporter) {
@@ -762,7 +766,8 @@ main(int argc, char **argv)
     keyboard.scheme = scheme;
     keyboard.layer_index = 0;
     keyboard.scheme1 = scheme1;
-    keyboard.pending_scale = 1;
+    keyboard.preferred_scale = 0;
+    keyboard.preferred_fractional_scale = 0;
 
     uint8_t alpha = 0;
     bool alpha_defined = false;
