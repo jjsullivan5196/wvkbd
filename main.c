@@ -3,6 +3,7 @@
 #include "proto/xdg-shell-client-protocol.h"
 #include "proto/fractional-scale-v1-client-protocol.h"
 #include "proto/viewporter-client-protocol.h"
+#include <errno.h>
 #include <linux/input-event-codes.h>
 #include <stdio.h>
 #include <stdlib.h>
