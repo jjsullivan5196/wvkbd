@@ -767,7 +767,7 @@ main(int argc, char **argv)
     keyboard.scheme = scheme;
     keyboard.layer_index = 0;
     keyboard.scheme1 = scheme1;
-    keyboard.preferred_scale = 0;
+    keyboard.preferred_scale = 1;
     keyboard.preferred_fractional_scale = 0;
 
     uint8_t alpha = 0;
