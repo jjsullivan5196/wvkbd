@@ -13,7 +13,6 @@
 #include <stdbool.h>
 #include <stdio.h>
 
-#include <linux/input-event-codes.h>
 
 #include "keyboard.h"
 #include "motion_key.h"
@@ -246,8 +245,12 @@ swp_handle_shape(uint32_t time)
         }
         break;
     case BACK_FORTH:
-        printf("Back-and-forth at %d, %d, direction %d\n", p0.x, p0.y,
-               line_dir);
+        next_key = mk_get_key_from_dir(next_key, line_dir);
+        if (next_key) {
+            keyboard.mods ^= Shift;
+            kbd_press_key(&keyboard, next_key, time);
+            kbd_release_key(&keyboard, time);
+        }
         break;
     }
     p0.x = -1;
