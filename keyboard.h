@@ -97,6 +97,17 @@ struct key {
 	bool reset_mod;          /* reset modifiers when clicked */
 	const enum key_shape shape;
 
+#ifdef MOTION_KEYS
+	struct key *north;
+	struct key *north_east;
+	struct key *east;
+	struct key *south_east;
+	struct key *south;
+	struct key *south_west;
+	struct key *west;
+	struct key *north_west;
+#endif
+
 	// actual coordinates on the surface (pixels), will be computed automatically
 	// for all keys
 	uint32_t x, y, w, h;
