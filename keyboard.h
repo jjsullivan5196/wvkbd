@@ -41,6 +41,25 @@ enum key_modifier_type {
 	AltGr = 128,
 };
 
+/* The shape of the key can either be:
+ *  - Dynamic, i.e. the relative size is given directly in the width member of
+ *    struct key. The size given in width is relative to the other keys of the
+ *    same row.
+ *  - A multiple [1..3] of a square: The key has the form of a square, i.e. it's
+ *    width is calculated based on the height of the row. This means the width
+ *    member is calculated during runtime, because it depends on the screen
+ *    width.
+ *
+ * NOTE: The acutal values of the Square enums is used by kbd_get_row_length()
+ *       and therefore new values must be added to the end of the list.
+ */
+enum key_shape {
+	Dynamic      = 0,
+	OneSquare    = 1,
+	TwoSquares   = 2,
+	ThreeSquares = 3,
+};
+
 enum key_draw_type {
 	None = 0,
 	Unpress,
@@ -62,7 +81,7 @@ struct clr_scheme {
 struct key {
 	const char *label;       // primary label
 	const char *shift_label; // secondary label
-	const double width;      // relative width (1.0)
+	double width;            // relative width (1.0)
 	const enum key_type type;
 
 	const uint32_t
@@ -75,6 +94,7 @@ struct key {
 	const uint32_t code_mod; /* modifier to force when this key is pressed */
 	uint8_t scheme;          // index of the scheme to use
 	bool reset_mod;          /* reset modifiers when clicked */
+	const enum key_shape shape;
 
 	// actual coordinates on the surface (pixels), will be computed automatically
 	// for all keys
@@ -141,7 +161,7 @@ void kbd_draw_key(struct kbd *kb, struct key *k, enum key_draw_type);
 void kbd_draw_layout(struct kbd *kb);
 void kbd_resize(struct kbd *kb, struct layout *layouts, uint8_t layoutcount);
 uint8_t kbd_get_rows(struct layout *l);
-double kbd_get_row_length(struct key *k);
+double kbd_get_row_length(struct key *k_start, double width, double row_height);
 void kbd_next_layer(struct kbd *kb, struct key *k, bool invert);
 void kbd_switch_layout(struct kbd *kb, struct layout *l, size_t layer_index);
 

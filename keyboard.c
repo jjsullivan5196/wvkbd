@@ -210,14 +210,14 @@ kbd_init_layout(struct layout *l, uint32_t width, uint32_t height)
     l->keyheight = height / rows;
 
     struct key *k = l->keys;
-    double rowlength = kbd_get_row_length(k);
+    double rowlength = kbd_get_row_length(k, width, l->keyheight);
     double rowwidth = 0.0;
     while (k->type != Last) {
         if (k->type == EndRow) {
             y += l->keyheight;
             x = 0;
             rowwidth = 0.0;
-            rowlength = kbd_get_row_length(k + 1);
+            rowlength = kbd_get_row_length(k + 1, width, l->keyheight);
         } else if (k->width > 0) {
             k->x = x;
             k->y = y;
@@ -235,13 +235,34 @@ kbd_init_layout(struct layout *l, uint32_t width, uint32_t height)
 }
 
 double
-kbd_get_row_length(struct key *k)
+kbd_get_row_length(struct key *k_start, double width, double row_height)
 {
+    struct key *k = k_start;
     double l = 0.0;
+    int n = 0; /* number of square keys */
+    double w_sk; /* width of a square key */
+
     while ((k->type != Last) && (k->type != EndRow)) {
-        l += k->width;
+        if (k->shape == Dynamic)
+            l += k->width;
+        else
+            n += k->shape;
         k++;
     }
+
+    if (!n)
+        return l;
+
+    w_sk = row_height * l / (width - n * row_height);
+    l += n * w_sk;
+
+    k = k_start;
+    while ((k->type != Last) && (k->type != EndRow)) {
+        if (k->shape != Dynamic)
+            k->width = k->shape * w_sk;
+        k++;
+    }
+
     return l;
 }
 
