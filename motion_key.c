@@ -12,6 +12,7 @@
 
 #include <stdbool.h>
 #include <stdio.h>
+#include <unistd.h>
 
 
 #include "keyboard.h"
@@ -180,6 +181,7 @@ swp_start_swp(int x, int y)
     max_dist = 0.0;
     pf.x = -1;
     pf.y = -1;
+    alarm(1); // start timer for long taps
 }
 
 static void
@@ -224,6 +226,9 @@ swp_handle_shape(uint32_t time)
 {
     struct key *next_key = kbd_get_key(&keyboard, p0.x, p0.y);
 
+    if (!next_key)
+        goto out;
+
     switch (curr_shape) {
     case UNDETERMINED_SHAPE:
         printf("Undetermined\n");
@@ -253,8 +258,27 @@ swp_handle_shape(uint32_t time)
         }
         break;
     }
+
+out:
     p0.x = -1;
     p0.y = -1;
+}
+
+void
+timer_mk() {
+    // Special handling for long taps
+    if (!curr_shape && max_dist < MIN_LINE_LEN) {
+        struct key *next_key = kbd_get_key(&keyboard, p0.x, p0.y);
+        if (!next_key)
+            return;
+        next_key = next_key->long_tap;
+        if (next_key) {
+            kbd_press_key(&keyboard, next_key, /*time*/ 0);
+            kbd_release_key(&keyboard, /*time*/ 0);
+            p0.x = -1;
+            p0.y = -1;
+        }
+    }
 }
 
 void
@@ -273,6 +297,10 @@ void
 wl_touch_up_mk(void *data, struct wl_touch *wl_touch, uint32_t serial,
                uint32_t time, int32_t id)
 {
+    alarm(0); // cancel timer
+    // This happens on long tap
+    if (p0.x == -1)
+        return;
     swp_determine_shape();
     swp_handle_shape(time);
 }
@@ -282,6 +310,10 @@ wl_touch_motion_mk(void *data, struct wl_touch *wl_touch, uint32_t time,
                    int32_t id, wl_fixed_t x, wl_fixed_t y)
 {
     struct point p;
+
+    // This happens on long tap
+    if (p0.x == -1)
+        return;
 
     p.x = wl_fixed_to_int(x);
     p.y = wl_fixed_to_int(y);
@@ -306,6 +338,10 @@ wl_pointer_motion_mk(void *data, struct wl_pointer *wl_pointer, uint32_t time,
     if (cur_press) {
         struct point p;
 
+        // This happens on long tap
+        if (p0.x == -1)
+            return;
+
         p.x = cur_x;
         p.y = cur_y;
 
@@ -321,6 +357,7 @@ wl_pointer_button_mk(void *data, struct wl_pointer *wl_pointer, uint32_t serial,
     if (cur_press && cur_x >= 0 && cur_y >= 0) {
         swp_start_swp(cur_x, cur_y);
     } else if (!cur_press && p0.x >= 0 && p0.y >= 0) {
+        alarm(0); // cancel timer
         swp_determine_shape();
         swp_handle_shape(time);
     }

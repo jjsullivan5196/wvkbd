@@ -106,6 +106,7 @@ struct key {
 	struct key *south_west;
 	struct key *west;
 	struct key *north_west;
+	struct key *long_tap;
 #endif
 
 	// actual coordinates on the surface (pixels), will be computed automatically

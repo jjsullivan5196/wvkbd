@@ -21,4 +21,6 @@ void wl_pointer_button_mk(void *data, struct wl_pointer *wl_pointer,
                           uint32_t serial, uint32_t time, uint32_t button,
                           uint32_t state);
 
+void timer_mk();
+
 #endif // MOTION_KEY_H_

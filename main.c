@@ -1114,6 +1114,9 @@ main(int argc, char **argv)
     sigaddset(&signal_mask, SIGUSR2);
     sigaddset(&signal_mask, SIGRTMIN);
     sigaddset(&signal_mask, SIGPIPE);
+#ifdef MOTION_KEYS
+    sigaddset(&signal_mask, SIGALRM);
+#endif
     if (sigprocmask(SIG_BLOCK, &signal_mask, NULL) == -1) {
         die("Failed to disable handled signals: %d\n", errno);
     }
@@ -1149,6 +1152,10 @@ main(int argc, char **argv)
                 toggle_visibility();
             else if (si.ssi_signo == SIGPIPE)
                 pipewarn();
+#ifdef MOTION_KEYS
+            else if (si.ssi_signo == SIGALRM)
+                timer_mk();
+#endif
         }
     }
 
