@@ -1,3 +1,4 @@
+#include "globals.h"
 #include "proto/virtual-keyboard-unstable-v1-client-protocol.h"
 #include "proto/wlr-layer-shell-unstable-v1-client-protocol.h"
 #include "proto/xdg-shell-client-protocol.h"
@@ -186,6 +187,21 @@ estrdup(const char *s)
     }
 
     return p;
+}
+
+uint32_t
+get_current_height() {
+    return height;
+}
+
+void
+set_current_height(uint32_t height) {
+    if (keyboard.landscape)
+        landscape_height = height;
+    else
+        normal_height = height;
+
+    flip_landscape();
 }
 
 void
