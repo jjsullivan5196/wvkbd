@@ -24,6 +24,7 @@ enum key_type {
 	NextLayer, // Layout switch to the next layout in the layers sequence
 	Compose,   // Compose modifier key, switches to a specific associated layout
 	           // upon next keypress
+	Command,   // A key that executes commands, like resizing keyboard
 	EndRow,    // Incidates the end of a key row
 	Last,      // Indicated the end of a layout
 };
