@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <sys/mman.h>
 #include <ctype.h>
+#include "globals.h"
 #include "keyboard.h"
 #include "drw.h"
 #include "os-compatibility.h"
@@ -518,6 +519,10 @@ kbd_press_key(struct kbd *kb, struct key *k, uint32_t time)
                                     WL_KEYBOARD_KEY_STATE_PRESSED);
         if (kb->print || kb->print_intersect)
             kbd_print_key_stdout(kb, k);
+        break;
+    case Command:
+        handle_command(k->code);
+        kbd_draw_layout(kb);
         break;
     default:
         break;

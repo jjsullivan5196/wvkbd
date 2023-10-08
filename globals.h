@@ -6,4 +6,6 @@
 extern uint32_t get_current_height();
 void set_current_height(uint32_t height);
 
+extern void handle_command(uint32_t code);
+
 #endif // GLOBALS_H_
