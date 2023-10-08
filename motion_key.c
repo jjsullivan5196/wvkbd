@@ -238,7 +238,8 @@ swp_handle_shape(uint32_t time)
         kbd_release_key(&keyboard, time);
         break;
     case CIRCLE:
-        keyboard.mods ^= Shift;
+        if (next_key->type != Command)
+            keyboard.mods ^= Shift;
         kbd_press_key(&keyboard, next_key, time);
         kbd_release_key(&keyboard, time);
         break;
@@ -252,7 +253,8 @@ swp_handle_shape(uint32_t time)
     case BACK_FORTH:
         next_key = mk_get_key_from_dir(next_key, line_dir);
         if (next_key) {
-            keyboard.mods ^= Shift;
+            if (next_key->type != Command)
+                keyboard.mods ^= Shift;
             kbd_press_key(&keyboard, next_key, time);
             kbd_release_key(&keyboard, time);
         }
