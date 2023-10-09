@@ -764,9 +764,8 @@ main(int argc, char **argv)
     /* keyboard settings */
     keyboard.layers = (enum layout_id *)&layers;
     keyboard.landscape_layers = (enum layout_id *)&landscape_layers;
-    keyboard.scheme = scheme;
+    keyboard.schemes = schemes;
     keyboard.layer_index = 0;
-    keyboard.scheme1 = scheme1;
     keyboard.preferred_scale = 1;
     keyboard.preferred_fractional_scale = 0;
 
@@ -803,7 +802,7 @@ main(int argc, char **argv)
                 usage(argv[0]);
                 exit(1);
             }
-            set_kbd_colors(keyboard.scheme.bg.bgra, argv[++i]);
+            set_kbd_colors(keyboard.schemes[0].bg.bgra, argv[++i]);
         } else if ((!strcmp(argv[i], "-alpha")) ||
                    (!strcmp(argv[i], "--alpha"))) {
             if (i >= argc - 1) {
@@ -817,56 +816,56 @@ main(int argc, char **argv)
                 usage(argv[0]);
                 exit(1);
             }
-            set_kbd_colors(keyboard.scheme.fg.bgra, argv[++i]);
+            set_kbd_colors(keyboard.schemes[0].fg.bgra, argv[++i]);
         } else if ((!strcmp(argv[i], "-fg-sp")) ||
                    (!strcmp(argv[i], "--fg-sp"))) {
             if (i >= argc - 1) {
                 usage(argv[0]);
                 exit(1);
             }
-            set_kbd_colors(keyboard.scheme1.fg.bgra, argv[++i]);
+            set_kbd_colors(keyboard.schemes[1].fg.bgra, argv[++i]);
         } else if ((!strcmp(argv[i], "-press")) ||
                    (!strcmp(argv[i], "--press"))) {
             if (i >= argc - 1) {
                 usage(argv[0]);
                 exit(1);
             }
-            set_kbd_colors(keyboard.scheme.high.bgra, argv[++i]);
+            set_kbd_colors(keyboard.schemes[0].high.bgra, argv[++i]);
         } else if ((!strcmp(argv[i], "-press-sp")) ||
                    (!strcmp(argv[i], "--press-sp"))) {
             if (i >= argc - 1) {
                 usage(argv[0]);
                 exit(1);
             }
-            set_kbd_colors(keyboard.scheme1.high.bgra, argv[++i]);
+            set_kbd_colors(keyboard.schemes[1].high.bgra, argv[++i]);
         } else if ((!strcmp(argv[i], "-swipe")) ||
                    (!strcmp(argv[i], "--swipe"))) {
             if (i >= argc - 1) {
                 usage(argv[0]);
                 exit(1);
             }
-            set_kbd_colors(keyboard.scheme.swipe.bgra, argv[++i]);
+            set_kbd_colors(keyboard.schemes[0].swipe.bgra, argv[++i]);
         } else if ((!strcmp(argv[i], "-swipe-sp")) ||
                    (!strcmp(argv[i], "--swipe-sp"))) {
             if (i >= argc - 1) {
                 usage(argv[0]);
                 exit(1);
             }
-            set_kbd_colors(keyboard.scheme1.swipe.bgra, argv[++i]);
+            set_kbd_colors(keyboard.schemes[1].swipe.bgra, argv[++i]);
         } else if ((!strcmp(argv[i], "-text")) ||
                    (!strcmp(argv[i], "--text"))) {
             if (i >= argc - 1) {
                 usage(argv[0]);
                 exit(1);
             }
-            set_kbd_colors(keyboard.scheme.text.bgra, argv[++i]);
+            set_kbd_colors(keyboard.schemes[0].text.bgra, argv[++i]);
         } else if ((!strcmp(argv[i], "-text-sp")) ||
                    (!strcmp(argv[i], "--text-sp"))) {
             if (i >= argc - 1) {
                 usage(argv[0]);
                 exit(1);
             }
-            set_kbd_colors(keyboard.scheme1.text.bgra, argv[++i]);
+            set_kbd_colors(keyboard.schemes[1].text.bgra, argv[++i]);
         } else if (!strcmp(argv[i], "-H")) {
             if (i >= argc - 1) {
                 usage(argv[0]);
@@ -906,12 +905,12 @@ main(int argc, char **argv)
     }
 
     if (alpha_defined) {
-        keyboard.scheme.bg.bgra[3] = alpha;
-        keyboard.scheme.fg.bgra[3] = alpha;
-        keyboard.scheme.high.bgra[3] = alpha;
-        keyboard.scheme1.bg.bgra[3] = alpha;
-        keyboard.scheme1.fg.bgra[3] = alpha;
-        keyboard.scheme1.high.bgra[3] = alpha;
+        keyboard.schemes[0].bg.bgra[3] = alpha;
+        keyboard.schemes[0].fg.bgra[3] = alpha;
+        keyboard.schemes[0].high.bgra[3] = alpha;
+        keyboard.schemes[1].bg.bgra[3] = alpha;
+        keyboard.schemes[1].fg.bgra[3] = alpha;
+        keyboard.schemes[1].high.bgra[3] = alpha;
     }
 
     if (!fc_font_pattern) {

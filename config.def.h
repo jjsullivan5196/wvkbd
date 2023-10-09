@@ -4,21 +4,23 @@
 static const char *default_font = "Sans 14";
 static const int transparency = 255;
 
-struct clr_scheme scheme = {
+struct clr_scheme schemes[] = {
+{
   /* colors */
   .bg = {.bgra = {15, 15, 15, transparency}},
   .fg = {.bgra = {45, 45, 45, transparency}},
   .high = {.bgra = {100, 100, 100, transparency}},
   .swipe = {.bgra = {100, 255, 100, 64}},
   .text = {.color = UINT32_MAX},
-};
-struct clr_scheme scheme1 = {
+},
+{
   /* colors */
   .bg = {.bgra = {15, 15, 15, transparency}},
   .fg = {.bgra = {32, 32, 32, transparency}},
   .high = {.bgra = {100, 100, 100, transparency}},
   .swipe = {.bgra = {100, 255, 100, 64}},
   .text = {.color = UINT32_MAX},
+}
 };
 
 /* layers is an ordered list of layouts, used to cycle through */

@@ -90,8 +90,7 @@ struct kbd {
 	bool debug;
 
 	struct layout *layout;
-	struct clr_scheme scheme;
-	struct clr_scheme scheme1;
+	struct clr_scheme *schemes;
 
 	bool print;
 	bool print_intersect;

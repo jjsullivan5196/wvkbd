@@ -555,8 +555,7 @@ kbd_draw_key(struct kbd *kb, struct key *k, enum key_draw_type type)
     if (kb->debug)
         fprintf(stderr, "Draw key +%d+%d %dx%d -> %s\n", k->x, k->y, k->w, k->h,
                 label);
-    struct clr_scheme *scheme =
-        (k->scheme == 0) ? &(kb->scheme) : &(kb->scheme1);
+    struct clr_scheme *scheme = &kb->schemes[k->scheme];
 
     switch (type) {
     case None:
@@ -586,7 +585,7 @@ kbd_draw_key(struct kbd *kb, struct key *k, enum key_draw_type type)
         kb->last_popup_w = k->w;
         kb->last_popup_h = k->h;
 
-        drw_fill_rectangle(kb->popup_surf, kb->scheme.bg, k->x,
+        drw_fill_rectangle(kb->popup_surf, scheme->bg, k->x,
                            kb->last_popup_y, k->w, k->h);
         draw_inset(kb->popup_surf, k->x, kb->last_popup_y, k->w, k->h,
                    KBD_KEY_BORDER, scheme->high);
@@ -605,7 +604,7 @@ kbd_draw_layout(struct kbd *kb)
     if (kb->debug)
         fprintf(stderr, "Draw layout\n");
 
-    drw_fill_rectangle(d, kb->scheme.bg, 0, 0, kb->w, kb->h);
+    drw_fill_rectangle(d, kb->schemes[0].bg, 0, 0, kb->w, kb->h);
 
     while (next_key->type != Last) {
         if ((next_key->type == Pad) || (next_key->type == EndRow)) {
