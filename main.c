@@ -76,7 +76,7 @@ static uint32_t anchor = ZWLR_LAYER_SURFACE_V1_ANCHOR_BOTTOM |
 static bool run_display = true;
 static int cur_x = -1, cur_y = -1;
 static bool cur_press = false;
-static struct kbd keyboard;
+struct kbd keyboard;
 static uint32_t height, normal_height, landscape_height;
 static int rounding = DEFAULT_ROUNDING;
 static bool hidden = false;
@@ -733,6 +733,10 @@ usage(char *argv0)
             "  -l                     - Comma separated list of layers\n");
     fprintf(stderr, "  --landscape-layers     - Comma separated list of "
                     "landscape layers\n");
+#ifdef MOTION_KEYS
+    fprintf(stderr,
+            "  --motion-keys          - Print the list of available layers\n");
+#endif
 }
 
 void
@@ -1003,6 +1007,7 @@ main(int argc, char **argv)
                    (!strcmp(argv[i], "--list-layers"))) {
             list_layers();
             exit(0);
+#ifdef MOTION_KEYS
         } else if ((!strcmp(argv[i], "-motion-keys")) ||
                    (!strcmp(argv[i], "--motion-keys"))) {
             touch_listener.up = wl_touch_up_mk;
@@ -1012,6 +1017,7 @@ main(int argc, char **argv)
             pointer_listener.button = wl_pointer_button_mk;
             pointer_listener.leave = wl_pointer_leave_mk;
             pointer_listener.motion = wl_pointer_motion_mk;
+#endif
         } else {
             fprintf(stderr, "Invalid argument: %s\n", argv[i]);
             usage(argv[0]);

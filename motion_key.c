@@ -13,6 +13,9 @@
 #include <stdbool.h>
 #include <stdio.h>
 
+#include <linux/input-event-codes.h>
+
+#include "keyboard.h"
 #include "motion_key.h"
 
 static int cur_x = -1, cur_y = -1;
@@ -65,6 +68,8 @@ static struct point pf;
 static enum swipe_dir line_dir;
 
 static double max_dist;
+
+extern struct kbd keyboard;
 
 #define MIN_LINE_LEN (15)
 #define MIN_LEN_SQUARED (MIN_LINE_LEN * MIN_LINE_LEN)
@@ -187,15 +192,27 @@ swp_determine_shape()
         else
             curr_shape = LINE;
     }
+}
+
+static void
+swp_handle_shape(uint32_t time)
+{
+    struct key *next_key;
+
     switch (curr_shape) {
     case UNDETERMINED_SHAPE:
         printf("Undetermined\n");
         break;
     case TAP:
-        printf("Tap at %d, %d\n", p0.x, p0.y);
+        next_key = kbd_get_key(&keyboard, p0.x, p0.y);
+        kbd_press_key(&keyboard, next_key, time);
+        kbd_release_key(&keyboard, time);
         break;
     case CIRCLE:
-        printf("Circle at %d, %d\n", p0.x, p0.y);
+        next_key = kbd_get_key(&keyboard, p0.x, p0.y);
+        keyboard.mods ^= Shift;
+        kbd_press_key(&keyboard, next_key, time);
+        kbd_release_key(&keyboard, time);
         break;
     case LINE:
         printf("Line from %d, %d, direction %d\n", p0.x, p0.y, line_dir);
@@ -226,6 +243,7 @@ wl_touch_up_mk(void *data, struct wl_touch *wl_touch, uint32_t serial,
                uint32_t time, int32_t id)
 {
     swp_determine_shape();
+    swp_handle_shape(time);
 }
 
 void
@@ -273,5 +291,6 @@ wl_pointer_button_mk(void *data, struct wl_pointer *wl_pointer, uint32_t serial,
         swp_start_swp(cur_x, cur_y);
     } else if (!cur_press && p0.x >= 0 && p0.y >= 0) {
         swp_determine_shape();
+        swp_handle_shape(time);
     }
 }
