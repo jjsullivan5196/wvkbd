@@ -66,7 +66,7 @@ static enum swipe_dir line_dir;
 
 static double max_dist;
 
-#define MIN_LINE_LEN (12)
+#define MIN_LINE_LEN (15)
 #define MIN_LEN_SQUARED (MIN_LINE_LEN * MIN_LINE_LEN)
 
 static void
