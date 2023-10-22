@@ -3,6 +3,7 @@
 #include <stdint.h>
 
 static bool show_tertiary = false;
+static bool show_primary_secondary = true;
 
 static void
 resize(int pixels) {
@@ -15,6 +16,21 @@ resize(int pixels) {
 }
 
 #define TERTIARY_KEYS_IDX 4
+
+static void
+toggle_primary_secondary() {
+    show_primary_secondary = !show_primary_secondary;
+    if (show_primary_secondary)
+    {
+        schemes[1].text.bgra[3] = 255;
+        schemes[2].text.bgra[3] = 255;
+        schemes[3].text.bgra[3] = 255;
+    } else {
+        schemes[1].text.bgra[3] = 0;
+        schemes[2].text.bgra[3] = 0;
+        schemes[3].text.bgra[3] = 0;
+    }
+}
 
 static void
 toggle_tertiary() {
@@ -37,6 +53,9 @@ handle_command(uint32_t code)
         break;
     case ShowHideTertiaryKeys:
         toggle_tertiary();
+        break;
+    case ShowHidePrimarySecondaryKeys:
+        toggle_primary_secondary();
         break;
     }
 }
