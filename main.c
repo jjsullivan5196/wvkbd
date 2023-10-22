@@ -1,4 +1,3 @@
-#include "globals.h"
 #include "proto/virtual-keyboard-unstable-v1-client-protocol.h"
 #include "proto/wlr-layer-shell-unstable-v1-client-protocol.h"
 #include "proto/xdg-shell-client-protocol.h"
@@ -18,6 +17,7 @@
 #include <wchar.h>
 
 #include "keyboard.h"
+#include "globals.h"
 #include "config.h"
 #include "motion_key.h"
 

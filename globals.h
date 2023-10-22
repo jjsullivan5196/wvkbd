@@ -8,4 +8,6 @@ void set_current_height(uint32_t height);
 
 extern void handle_command(uint32_t code);
 
+extern struct clr_scheme schemes[];
+
 #endif // GLOBALS_H_

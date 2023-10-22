@@ -22,6 +22,7 @@ enum layout_id {
 enum keyboard_command {
     IncreaseHeight,
     DecrecaseHeight,
+    ShowHideTertiaryKeys,
 };
 
 static struct key keys_anihortes[], keys_index[];
@@ -149,7 +150,7 @@ static struct key key_anihortes_settings_west       = UNUSED_KEY;
 static struct key key_anihortes_settings_north_west = UNUSED_KEY;
 static struct key key_anihortes_settings_long_tap   = UNUSED_KEY;
 
-static struct key key_anihortes_space_north      = UNUSED_KEY;
+static struct key key_anihortes_space_north      = {"", "", 1.0, Command, ShowHideTertiaryKeys, .scheme = 5};
 static struct key key_anihortes_space_north_east = {"Ctr", "Ctr", 1.0, Mod, Ctrl, .scheme = 1};
 static struct key key_anihortes_space_east       = {"→", "→", 1.0, Code, KEY_RIGHT, .scheme = 4};
 static struct key key_anihortes_space_south_east = {"Sup", "Sup", 1.0, Mod, Super, .scheme = 1};

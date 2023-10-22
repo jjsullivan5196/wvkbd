@@ -4,8 +4,8 @@
 #include <stdio.h>
 #include <sys/mman.h>
 #include <ctype.h>
-#include "globals.h"
 #include "keyboard.h"
+#include "globals.h"
 #include "drw.h"
 #include "os-compatibility.h"
 
