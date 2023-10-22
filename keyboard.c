@@ -525,7 +525,17 @@ kbd_press_key(struct kbd *kb, struct key *k, uint32_t time)
             kbd_print_key_stdout(kb, k);
         break;
     case Command:
+#ifdef MOTION_KEYS
+        // Special handling for shift because of drag/return
+        if (kb->mods & Shift) {
+            handle_command(k->code_mod);
+            kb->mods ^= Shift;
+        } else {
+            handle_command(k->code);
+        }
+#else
         handle_command(k->code);
+#endif
         kbd_draw_layout(kb);
         break;
     default:
