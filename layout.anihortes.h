@@ -140,11 +140,11 @@ static struct key key_anihortes_s_north_west = {"f", "F", 1.0, Code, KEY_F, .sch
 static struct key key_anihortes_s_long_tap   = {"9", "9", 1.0, Code, KEY_9};
 
 // corners of key settings key (special key on the right with hand symbol)
-static struct key key_anihortes_settings_north      = {"", "", 1.0, Command, IncreaseHeight, .scheme = 5};
+static struct key key_anihortes_settings_north      = {"", "", 1.0, Command, IncreaseHeight, 0, DecrecaseHeight, .scheme = 5};
 static struct key key_anihortes_settings_north_east = UNUSED_KEY;
 static struct key key_anihortes_settings_east       = UNUSED_KEY;
 static struct key key_anihortes_settings_south_east = UNUSED_KEY;
-static struct key key_anihortes_settings_south      = {"", "", 1.0, Command, DecrecaseHeight, .scheme = 5};
+static struct key key_anihortes_settings_south      = {"", "", 1.0, Command, DecrecaseHeight, 0, IncreaseHeight, .scheme = 5};
 static struct key key_anihortes_settings_south_west = UNUSED_KEY;
 static struct key key_anihortes_settings_west       = UNUSED_KEY;
 static struct key key_anihortes_settings_north_west = UNUSED_KEY;
