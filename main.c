@@ -24,6 +24,9 @@
     fprintf(stderr, __VA_ARGS__);                                              \
     exit(1)
 
+/* array size */
+#define countof(x) (sizeof(x) / sizeof(*x))
+
 /* client state */
 static const char *namespace = "wlroots";
 static struct wl_display *display;
@@ -747,7 +750,7 @@ main(int argc, char **argv)
 {
     /* parse command line arguments */
     char *layer_names_list = NULL, *landscape_layer_names_list = NULL;
-    const char *fc_font_pattern = NULL;
+    char *fc_font_pattern = NULL;
     height = normal_height = KBD_PIXEL_HEIGHT;
     landscape_height = KBD_PIXEL_LANDSCAPE_HEIGHT;
 
@@ -913,8 +916,9 @@ main(int argc, char **argv)
         keyboard.schemes[1].high.bgra[3] = alpha;
     }
 
-    if (!fc_font_pattern) {
-        fc_font_pattern = default_font;
+    if (fc_font_pattern) {
+        for (i = 0; i < countof(schemes); i++)
+            schemes[i].font = fc_font_pattern;
     }
 
     display = wl_display_connect(NULL);
@@ -959,8 +963,10 @@ main(int argc, char **argv)
     kbd_init(&keyboard, (struct layout *)&layouts, layer_names_list,
              landscape_layer_names_list);
 
-    draw_ctx.font_description =
-        pango_font_description_from_string(fc_font_pattern);
+    for (i = 0; i < countof(schemes); i++) {
+        schemes[i].font_description =
+            pango_font_description_from_string(schemes[i].font);
+    }
 
     if (!hidden)
         show();
@@ -1014,8 +1020,10 @@ main(int argc, char **argv)
         }
     }
 
-    if (fc_font_pattern != default_font) {
+    if (fc_font_pattern) {
         free((void *)fc_font_pattern);
+        for (i = 0; i < countof(schemes); i++)
+            schemes[i].font = NULL;
     }
 
     return 0;

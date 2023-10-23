@@ -574,7 +574,7 @@ kbd_draw_key(struct kbd *kb, struct key *k, enum key_draw_type type)
     }
 
     drw_draw_text(kb->surf, scheme->text, k->x, k->y, k->w, k->h,
-                  KBD_KEY_BORDER, label);
+                  KBD_KEY_BORDER, label, scheme->font_description);
     wl_surface_damage(kb->surf->surf, k->x, k->y, k->w, k->h);
 
     if (type == Press || type == Unpress) {
@@ -590,7 +590,8 @@ kbd_draw_key(struct kbd *kb, struct key *k, enum key_draw_type type)
         draw_inset(kb->popup_surf, k->x, kb->last_popup_y, k->w, k->h,
                    KBD_KEY_BORDER, scheme->high);
         drw_draw_text(kb->popup_surf, scheme->text, k->x, kb->last_popup_y,
-                      k->w, k->h, KBD_KEY_BORDER, label);
+                      k->w, k->h, KBD_KEY_BORDER, label,
+                      scheme->font_description);
         wl_surface_damage(kb->popup_surf->surf, k->x, kb->last_popup_y, k->w,
                           k->h);
     }

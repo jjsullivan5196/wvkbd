@@ -30,10 +30,13 @@ drwsurf_flip(struct drwsurf *ds)
 
 void
 drw_draw_text(struct drwsurf *d, Color color, uint32_t x, uint32_t y,
-              uint32_t w, uint32_t h, uint32_t b, const char *label)
+              uint32_t w, uint32_t h, uint32_t b, const char *label,
+              PangoFontDescription *font_description)
 {
 
     cairo_save(d->cairo);
+
+    pango_layout_set_font_description(d->layout, font_description);
 
     cairo_set_source_rgba(
         d->cairo, color.bgra[2] / (double)255, color.bgra[1] / (double)255,
@@ -134,8 +137,6 @@ setup_buffer(struct drwsurf *drwsurf)
     cairo_scale(drwsurf->cairo, drwsurf->scale, drwsurf->scale);
     cairo_set_antialias(drwsurf->cairo, CAIRO_ANTIALIAS_NONE);
     drwsurf->layout = pango_cairo_create_layout(drwsurf->cairo);
-    pango_layout_set_font_description(drwsurf->layout,
-                                      drwsurf->ctx->font_description);
     pango_layout_set_auto_dir(drwsurf->layout, false);
     cairo_save(drwsurf->cairo);
 
