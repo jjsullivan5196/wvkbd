@@ -485,9 +485,6 @@ static void
 xdg_popup_configure(void *data, struct xdg_popup *xdg_popup, int32_t x,
                     int32_t y, int32_t width, int32_t height)
 {
-    kbd_resize(&keyboard, layouts, NumLayouts);
-
-    drwsurf_flip(&draw_surf);
 }
 
 static void
@@ -601,6 +598,13 @@ layer_surface_configure(void *data, struct zwlr_layer_surface_v1 *surface,
         wl_surface_commit(popup_draw_surf.surf);
     }
 
+    if (keyboard.surface_configured) {
+        kbd_resize(&keyboard, layouts, NumLayouts);
+        drwsurf_flip(&draw_surf);
+    } else {
+        keyboard.surface_configured = true;
+    }
+
     zwlr_layer_surface_v1_ack_configure(surface, serial);
 }
 
@@ -694,6 +698,7 @@ show()
         draw_surf_viewport =
             wp_viewporter_get_viewport(viewporter, draw_surf.surf);
     }
+    keyboard.surface_configured = false;
 
     layer_surface = zwlr_layer_shell_v1_get_layer_surface(
         layer_shell, draw_surf.surf, NULL, layer, namespace);

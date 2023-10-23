@@ -94,6 +94,7 @@ struct kbd {
 
 	bool print;
 	bool print_intersect;
+	bool surface_configured;
 	uint32_t w, h;
 	double scale;
 	double preferred_scale, preferred_fractional_scale;
