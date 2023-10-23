@@ -421,7 +421,7 @@ handle_global(void *data, struct wl_registry *registry, uint32_t name,
             wl_registry_bind(registry, name, &wl_compositor_interface, 3);
     } else if (strcmp(interface, wl_shm_interface.name) == 0) {
         draw_ctx.shm = wl_registry_bind(registry, name, &wl_shm_interface, 1);
-    } else if (strcmp(interface, "wl_output") == 0) {
+    } else if (strcmp(interface, wl_output_interface.name) == 0) {
         if (wl_outputs_size < WL_OUTPUTS_LIMIT) {
             struct Output *output = &wl_outputs[wl_outputs_size];
             output->data =
