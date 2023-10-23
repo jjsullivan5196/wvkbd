@@ -1,6 +1,17 @@
-# wvkbd - On-screen keyboard for wlroots that sucks less
+# wvkbd-mk - On-screen keyboard for wlroots optimized for one finger input
 
-<img src="https://raw.githubusercontent.com/jjsullivan5196/wvkbd/master/contrib/wvkbd-mobintl.jpg" width=300 /> <img src="https://raw.githubusercontent.com/jjsullivan5196/wvkbd/master/contrib/wvkbd-mobintl-cyrillic.jpg" width=300 />
+wvkbd-mk is optimized for single finger input and is quite a different from other keyboards.
+It uses a 3 by 3 grid for the main input. Keys are pressed by tapping or swiping the grid.
+See section [Usage](#usage) for details.
+
+This is the layout that wvkbd-mk comes with by default:
+
+<img src="./contrib/anihortes.png" alt="wvkbd-mk anihortes layout">
+
+The [MessagEase keyboard](https://www.exideas.com/ME/index.php) inspired
+wvkbd-mk into existence.
+
+wvkbd-mk is a friendly fork of [wvkbd](https://git.sr.ht/~proycon/wvkbd).
 
 This project aims to deliver a minimal but practically usable implementation of a wlroots on-screen
 keyboard in legible C. This will **only** be a keyboard, not a feedback buzzer,
@@ -11,13 +22,10 @@ new features.
 ## Features
 
  - Typing, modifier locking, layout switching
- - Positive visual feedback on key presses
  - Custom layouts and underlying keymaps
  - On-the-fly layout and keymap switching
  - Custom color schemes
  - Proper font drawing
- - Intuitive layouts
- - International layouts (cyrillic, arabic, persian, greek, georgian)
  - Support for 'Copy' keys which are not on the keymap
  - Emoji support
  - Compose key for character variants (e.g. diacritics)
@@ -29,6 +37,10 @@ new features.
 
 There are some areas that still need work:
 
+ - Make motion keys a property of the layout, so that we can have "normal" layouts
+   together with motion key layouts.
+ - International layouts (cyrillic, arabic, persian, greek, georgian)
+ - Automatic portrait/landscape detection and subsequent layout switching
  - Make sure the virtual input method in wayland is working as best as it can
  - Support for input method protocol in wayland, ability to respond to text
    fields
@@ -46,16 +58,23 @@ You also need [scdoc](https://git.sr.ht/~sircmpwn/scdoc/) to generate the docume
 
 Make any customizations you would like in `config.def.h` and run `make`
 
-The default set of layouts is called `mobintl` *(mobile international)*, which groups various layouts aimed at mobile devices
+The default set of layouts is called `anihortes` *(name is based on the keys that are accessible by single tap)*, which groups various layouts aimed at mobile devices
 and also attempts to accommodate various international users. The resulting binary is called `wvkbd-mobintl`.
 
-You can, however, define your own layouts by copying and modifying `layout.mobintl.h` and `keymap.mobintl.h`
-(replace `mobintl` for something like `yourlayout`). Then make your layout set using `make LAYOUT=yourlayout`, and
+You can, however, define your own layouts by copying and modifying `layout.anihortes.h` and `keymap.anihortes.h`
+(replace `anihortes` for something like `yourlayout`). Then make your layout set using `make LAYOUT=yourlayout`, and
 the resulting binary will be `wvkbd-yourlayout`
 
 ## Usage
 
-Run `wvkbd-mobintl` (or the binary for your custom layout set).
+Run `wvkbd-anihortes --motion-keys` (or the binary for your custom layout set).
+
+TODO: Describe the layout, describe the handling
+ - Tap
+ - Circle
+ - Swipe
+ - Swipe and return
+ - Long tap
 
 You can switch between the layouts/layers of the keyboard by pressing the
 ⌨ key (little keyboard) the bottom-left (press shift to iterate back instead of
