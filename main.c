@@ -342,11 +342,15 @@ void
 wl_surface_enter(void *data, struct wl_surface *wl_surface,
                  struct wl_output *wl_output)
 {
+    struct Output *old_output = current_output;
     for (int i = 0; i < WL_OUTPUTS_LIMIT; i += 1) {
         if (wl_outputs[i].data == wl_output) {
             current_output = &wl_outputs[i];
             break;
         }
+    }
+    if (current_output == old_output) {
+        return;
     }
 
     keyboard.preferred_scale = current_output->scale;
