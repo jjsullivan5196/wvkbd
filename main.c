@@ -343,7 +343,7 @@ wl_surface_enter(void *data, struct wl_surface *wl_surface,
                  struct wl_output *wl_output)
 {
     struct Output *old_output = current_output;
-    for (int i = 0; i < WL_OUTPUTS_LIMIT; i += 1) {
+    for (int i = 0; i < wl_outputs_size; i += 1) {
         if (wl_outputs[i].data == wl_output) {
             current_output = &wl_outputs[i];
             break;
@@ -466,10 +466,10 @@ handle_global(void *data, struct wl_registry *registry, uint32_t name,
 void
 handle_global_remove(void *data, struct wl_registry *registry, uint32_t name)
 {
-    for (int i = 0; i < WL_OUTPUTS_LIMIT; i += 1) {
+    for (int i = 0; i < wl_outputs_size; i += 1) {
         if (wl_outputs[i].name == name) {
             wl_output_destroy(wl_outputs[i].data);
-            for (; i < WL_OUTPUTS_LIMIT - 1; i += 1) {
+            for (; i < wl_outputs_size - 1; i += 1) {
                 wl_outputs[i] = wl_outputs[i + 1];
             }
             wl_outputs_size -= 1;
