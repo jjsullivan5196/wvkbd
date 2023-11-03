@@ -679,6 +679,15 @@ hide()
         return;
     }
 
+    if(wfs_draw_surf) {
+        wp_fractional_scale_v1_destroy(wfs_draw_surf);
+        wfs_draw_surf = NULL;
+    }
+    if(draw_surf_viewport) {
+        wp_viewport_destroy(draw_surf_viewport);
+        draw_surf_viewport = NULL;
+    }
+
     zwlr_layer_surface_v1_destroy(layer_surface);
     wl_surface_destroy(draw_surf.surf);
     layer_surface = NULL;
