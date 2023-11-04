@@ -354,10 +354,6 @@ wl_surface_enter(void *data, struct wl_surface *wl_surface,
     }
 
     keyboard.preferred_scale = current_output->scale;
-
-    flip_landscape();
-    kbd_resize(&keyboard, layouts, NumLayouts);
-    drwsurf_flip(&draw_surf);
 }
 
 static void
