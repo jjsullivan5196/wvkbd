@@ -354,6 +354,7 @@ wl_surface_enter(void *data, struct wl_surface *wl_surface,
     }
 
     keyboard.preferred_scale = current_output->scale;
+    flip_landscape();
 }
 
 static void
