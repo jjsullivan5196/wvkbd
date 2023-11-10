@@ -115,6 +115,8 @@ static void seat_handle_name(void *data, struct wl_seat *wl_seat,
 
 static void wl_surface_enter(void *data, struct wl_surface *wl_surface,
                              struct wl_output *wl_output);
+static void wl_surface_leave(void *data, struct wl_surface *wl_surface,
+                             struct wl_output *wl_output);
 
 static void handle_global(void *data, struct wl_registry *registry,
                           uint32_t name, const char *interface,
@@ -155,6 +157,7 @@ static const struct wl_seat_listener seat_listener = {
 
 static const struct wl_surface_listener surface_listener = {
     .enter = wl_surface_enter,
+    .leave = wl_surface_leave,
 };
 
 static const struct wl_registry_listener registry_listener = {
@@ -356,6 +359,12 @@ wl_surface_enter(void *data, struct wl_surface *wl_surface,
     keyboard.preferred_scale = current_output->scale;
     flip_landscape();
 }
+
+void
+wl_surface_leave(void *data, struct wl_surface *wl_surface,
+                 struct wl_output *wl_output) {
+}
+
 
 static void
 display_handle_geometry(void *data, struct wl_output *wl_output, int x, int y,
