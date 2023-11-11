@@ -13,10 +13,10 @@ struct clr_scheme schemes[] = {
 {
   /* 0: special keys */
   .bg = {.bgra = {15, 15, 15, transparency}},
-  .fg = {.bgra = {164, 114, 98, transparency}}, /* dracula "comment" */
-  .high = {.bgra = {255, 255, 255, transparency}},
+  .fg = {.bgra = {90, 71, 68, transparency}}, /* dracula "comment" */
+  .high = {.bgra = {100, 100, 100, transparency}},
   .swipe = {.bgra = {255, 255, 255, 64}},
-  .text = {.bgra = {90, 71, 68, text_visible}}, /* dracula "current line" */
+  .text = {.bgra = {249, 147, 189, text_visible}}, /* dracula "current line" */
   .font = DEFAULT_FONT,
   .rounding = DEFAULT_ROUNDING,
 },
