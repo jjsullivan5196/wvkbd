@@ -66,8 +66,8 @@ static struct key key_anihortes_n_north_west = {"`", "‘", 1.0, Code, 149-8, .s
 static struct key key_anihortes_n_long_tap   = {"2", "2", 1.0, Code, KEY_2};
 
 // corners of key I (top right)
-static struct key key_anihortes_i_north      = {"↑", "⇈", 1.0, Code, 150-8, .scheme = 4};
-static struct key key_anihortes_i_north_east = {"↵", "↵", 1.0, Code, KEY_ENTER, .scheme = 4};
+static struct key key_anihortes_i_north      = {"↑", "↑", 1.0, Code, KEY_UP, .scheme = 4};
+static struct key key_anihortes_i_north_east = {"⇈", "⇈", 1.0, Code, KEY_PAGEUP, .scheme = 4};
 static struct key key_anihortes_i_east       = {"ü", "Ü", 1.0, Copy, 0x00FC, 0, 0x00DC, .scheme = 2};
 static struct key key_anihortes_i_south_east = {"€", "£", 1.0, Copy, 0x20AC, 0, 0x00A3, .scheme = 4};
 static struct key key_anihortes_i_south      = {"=", "±", 1.0, Copy, 0x003D, 0, 0x00B1, .scheme = 4};
@@ -135,8 +135,8 @@ static struct key key_anihortes_e_long_tap   = {"8", "8", 1.0, Code, KEY_8};
 static struct key key_anihortes_s_north      = {"&", "§", 1.0, Copy, 0x0026, 0, 0x00A7, .scheme = 4};
 static struct key key_anihortes_s_north_east = {"°", "°", 1.0, Code, 153-8, .scheme = 4};
 static struct key key_anihortes_s_east       = {">", "›", 1.0, Copy, 0x003E, 0, 0x203A, .scheme = 4};
-static struct key key_anihortes_s_south_east = {"", "", 1.0, Code, KEY_SPACE, .scheme = 4};
-static struct key key_anihortes_s_south      = {"↓", "⇊", 1.0, Code, 154-8, .scheme = 4};
+static struct key key_anihortes_s_south_east = {"⇊", "⇊", 1.0, Code, KEY_PAGEDOWN, .scheme = 4};
+static struct key key_anihortes_s_south      = {"↓", "↓", 1.0, Code, KEY_DOWN, .scheme = 4};
 static struct key key_anihortes_s_south_west = {";", ":", 1.0, Code, KEY_SEMICOLON, .scheme = 4};
 static struct key key_anihortes_s_west       = {"#", "¥", 1.0, Copy, 0x0023, 0, 0x00A5, .scheme = 4};
 static struct key key_anihortes_s_north_west = {"f", "F", 1.0, Code, KEY_F, .scheme = 2};

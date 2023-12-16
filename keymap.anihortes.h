@@ -1368,11 +1368,10 @@ xkb_symbols \"(unnamed)\" {\
         key <I147>               {  [ dead_circumflex,           dead_caron ] };\
         key <I148>               {  [      dead_acute, rightsinglequotemark ] };\
         key <I149>               {  [      dead_grave,  leftsinglequotemark ] };\
-        key <I150>               {  [              Up,                Prior ] };\
+        key <I150>               {	[       XF86Sleep ] };\
         key <I151>               {  [  dead_diaeresis,     dead_doubleacute ] };\
         key <I152>               {  [      asciitilde,           dead_tilde ] };\
         key <I153>               {  [  dead_abovering,               degree ] };\
-        key <I154>               {  [            Down,                 Next ] };\
         key <I155>               {	[        XF86Xfer ] };\
         key <I156>               {	[     XF86Launch1 ] };\
         key <I157>               {	[     XF86Launch2 ] };\
