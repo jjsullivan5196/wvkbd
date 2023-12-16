@@ -83,8 +83,8 @@ static struct key key_anihortes_h_east       = {"k", "K", 1.0, Code, KEY_K, .sch
 static struct key key_anihortes_h_south_east = {"_", "¬", 1.0, Copy, 0x005F, 0, 0x00AC, .scheme = 4};
 static struct key key_anihortes_h_south      = {"ç", "Ç", 1.0, Copy, 0x00E7, 0, 0x00C7, .scheme = 2};
 static struct key key_anihortes_h_south_west = {"[", "{", 1.0, Code, KEY_LEFTBRACE, .scheme = 4};
-static struct key key_anihortes_h_west       = {"(", "9", 1.0, Code, KEY_9, 0, Shift, .scheme = 4};
-static struct key key_anihortes_h_north_west = {"{", "[", 1.0, Code, KEY_LEFTBRACE, 0, Shift, .scheme = 4};
+static struct key key_anihortes_h_west       = {"⇤", "⇤", 1.0, Code, KEY_HOME, .scheme = 4};
+static struct key key_anihortes_h_north_west = {"(", "9", 1.0, Code, KEY_9, 0, Shift, .scheme = 4};
 static struct key key_anihortes_h_long_tap   = {"4", "4", 1.0, Code, KEY_4};
 
 // corners of key O (middle center)
@@ -100,8 +100,8 @@ static struct key key_anihortes_o_long_tap   = {"5", "5", 1.0, Code, KEY_5};
 
 // corners of key R (middle right)
 static struct key key_anihortes_r_north      = {"⇧", "⇧", 1.0, Mod, Shift, .scheme = 2}; // TODO: Check if drag-return can be interpreted as CapsLock
-static struct key key_anihortes_r_north_east = {"}", "]", 1.0, Code, KEY_RIGHTBRACE, 0, Shift, .scheme = 4};
-static struct key key_anihortes_r_east       = {")", "0", 1.0, Code, KEY_0, 0, Shift, .scheme = 4};
+static struct key key_anihortes_r_north_east = {")", "0", 1.0, Code, KEY_0, 0, Shift, .scheme = 4};
+static struct key key_anihortes_r_east       = {"⇥", "⇥", 1.0, Code, KEY_END, .scheme = 4};
 static struct key key_anihortes_r_south_east = {"]", "}", 1.0, Code, KEY_RIGHTBRACE, .scheme = 4};
 static struct key key_anihortes_r_south      = {"CpL", "CpL", 1.0, Mod, CapsLock, .scheme = 4};
 static struct key key_anihortes_r_south_west = {"@", "ᵃ", 1.0, Copy, 0x0040, 0 ,0x1D43, .scheme = 4};
