@@ -176,6 +176,16 @@ static struct key key_anihortes_space_west       = {"←", "←", 1.0, Code, KEY
 static struct key key_anihortes_space_north_west = {"Alt", "Alt", 1.0, Mod, Alt, .scheme = 1};
 static struct key key_anihortes_space_long_tap   = {"0", "0", 1.0, Code, KEY_0};
 
+static struct key key_anihortes_backspace_north      = {"⌦", "⌦", 1.0, Code, KEY_DELETE, .scheme = 4};
+static struct key key_anihortes_backspace_north_east = UNUSED_KEY;
+static struct key key_anihortes_backspace_east       = UNUSED_KEY;
+static struct key key_anihortes_backspace_south_east = UNUSED_KEY;
+static struct key key_anihortes_backspace_south      = UNUSED_KEY;
+static struct key key_anihortes_backspace_south_west = UNUSED_KEY;
+static struct key key_anihortes_backspace_west       = {"⌫", "⌫", 1.0, Code, KEY_BACKSPACE, 0, Ctrl, .scheme = 4};
+static struct key key_anihortes_backspace_north_west = UNUSED_KEY;
+static struct key key_anihortes_backspace_long_tap   = UNUSED_KEY;
+
 /* key layouts
  *
  * define keys like:
@@ -335,7 +345,17 @@ static struct key keys_anihortes[] = {
         .north_west = &key_anihortes_s_north_west,
         .long_tap   = &key_anihortes_s_long_tap,
     },
-    {"⌫", "⌫", -2.0, Code, KEY_BACKSPACE, .scheme = 0, .shape = OneSquare},
+    {"⌫", "⌫", -2.0, Code, KEY_BACKSPACE, .scheme = 0, .shape = OneSquare,
+        .north      = &key_anihortes_backspace_north,
+        .north_east = &key_anihortes_backspace_north_east,
+        .east       = &key_anihortes_backspace_east,
+        .south_east = &key_anihortes_backspace_south_east,
+        .south      = &key_anihortes_backspace_south,
+        .south_west = &key_anihortes_backspace_south_west,
+        .west       = &key_anihortes_backspace_west,
+        .north_west = &key_anihortes_backspace_north_west,
+        .long_tap   = &key_anihortes_backspace_long_tap,
+    },
     {"", "", 30.0, Pad},
     {"", "", 0.0, EndRow},
 
