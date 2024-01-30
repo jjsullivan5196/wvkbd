@@ -4,6 +4,7 @@
 
 #include "drw.h"
 #include "shm_open.h"
+#include "math.h"
 
 void
 drwsurf_resize(struct drwsurf *ds, uint32_t w, uint32_t h, double s)
@@ -15,8 +16,8 @@ drwsurf_resize(struct drwsurf *ds, uint32_t w, uint32_t h, double s)
     }
 
     ds->scale = s;
-    ds->width = w * s;
-    ds->height = h * s;
+    ds->width = ceil(w * s);
+    ds->height = ceil(h * s);
 
     setup_buffer(ds);
 }
