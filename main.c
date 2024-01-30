@@ -1025,6 +1025,12 @@ main(int argc, char **argv)
 
         if (fds[WAYLAND_FD].revents & POLLIN)
             wl_display_dispatch(display);
+        if (fds[WAYLAND_FD].revents & POLLERR) {
+            die("Exceptional condition on wayland socket.\n");
+        }
+        if (fds[WAYLAND_FD].revents & POLLHUP) {
+            die("Wayland socket has been disconnected.\n");
+        }
 
         if (fds[SIGNAL_FD].revents & POLLIN) {
             struct signalfd_siginfo si;
