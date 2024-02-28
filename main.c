@@ -528,7 +528,18 @@ static const struct wp_fractional_scale_v1_listener
 void
 flip_landscape()
 {
-    keyboard.landscape = current_output->w > current_output->h;
+    bool previous_landscape = keyboard.landscape;
+
+    if (current_output) {
+        keyboard.landscape = current_output->w > current_output->h;
+    } else if (wl_outputs_size) {
+        for (int i = 0; i < wl_outputs_size; i += 1) {
+            if (wl_outputs[i].w > wl_outputs[i].h) {
+                keyboard.landscape = true;
+                break;
+            }
+        }
+    }
 
     enum layout_id layer;
     if (keyboard.landscape) {
@@ -709,6 +720,8 @@ show()
 
     wl_display_sync(display);
 
+    flip_landscape();
+
     draw_surf.surf = wl_compositor_create_surface(compositor);
     wl_surface_add_listener(draw_surf.surf, &surface_listener, NULL);
     if (wfs_mgr && viewporter) {
@@ -773,8 +786,8 @@ main(int argc, char **argv)
     /* parse command line arguments */
     char *layer_names_list = NULL, *landscape_layer_names_list = NULL;
     char *fc_font_pattern = NULL;
-    height = normal_height = KBD_PIXEL_HEIGHT;
-    landscape_height = KBD_PIXEL_LANDSCAPE_HEIGHT;
+    height = landscape_height = KBD_PIXEL_LANDSCAPE_HEIGHT;
+    normal_height = KBD_PIXEL_HEIGHT;
 
     char *tmp;
     if ((tmp = getenv("WVKBD_LAYERS")))
@@ -790,6 +803,7 @@ main(int argc, char **argv)
     keyboard.layers = (enum layout_id *)&layers;
     keyboard.landscape_layers = (enum layout_id *)&landscape_layers;
     keyboard.schemes = schemes;
+    keyboard.landscape = true;
     keyboard.layer_index = 0;
     keyboard.preferred_scale = 1;
     keyboard.preferred_fractional_scale = 0;
@@ -896,13 +910,13 @@ main(int argc, char **argv)
                 usage(argv[0]);
                 exit(1);
             }
-            height = normal_height = atoi(argv[++i]);
+            normal_height = atoi(argv[++i]);
         } else if (!strcmp(argv[i], "-L")) {
             if (i >= argc - 1) {
                 usage(argv[0]);
                 exit(1);
             }
-            landscape_height = atoi(argv[++i]);
+            height = landscape_height = atoi(argv[++i]);
         } else if (!strcmp(argv[i], "-D")) {
             keyboard.debug = true;
         } else if ((!strcmp(argv[i], "-fn")) || (!strcmp(argv[i], "--fn"))) {
