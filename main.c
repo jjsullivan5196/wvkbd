@@ -733,8 +733,12 @@ show()
             wp_viewporter_get_viewport(viewporter, draw_surf.surf);
     }
 
+    struct wl_output *current_output_data = NULL;
+    if (current_output)
+        current_output_data = current_output->data;
+
     layer_surface = zwlr_layer_shell_v1_get_layer_surface(
-        layer_shell, draw_surf.surf, NULL, layer, namespace);
+        layer_shell, draw_surf.surf, current_output_data, layer, namespace);
 
     zwlr_layer_surface_v1_set_size(layer_surface, 0, height);
     zwlr_layer_surface_v1_set_anchor(layer_surface, anchor);
