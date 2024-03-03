@@ -132,6 +132,7 @@ static void layer_surface_configure(void *data,
 static void layer_surface_closed(void *data,
                                  struct zwlr_layer_surface_v1 *surface);
 static void flip_landscape();
+static void show();
 
 /* event handlers */
 static const struct wl_pointer_listener pointer_listener = {
@@ -583,10 +584,25 @@ flip_landscape()
     keyboard.last_abc_layout = keyboard.layout;
     keyboard.last_abc_index = 0;
 
-    if (layer_surface) {
-        zwlr_layer_surface_v1_set_size(layer_surface, 0, height);
-        zwlr_layer_surface_v1_set_exclusive_zone(layer_surface, height);
-        wl_surface_commit(draw_surf.surf);
+    if (layer_surface && previous_landscape != keyboard.landscape) {
+        if (popup_xdg_popup) {
+            xdg_popup_destroy(popup_xdg_popup);
+            popup_xdg_popup = NULL;
+        }
+        if (popup_xdg_surface) {
+            xdg_surface_destroy(popup_xdg_surface);
+            popup_xdg_surface = NULL;
+        }
+        if (popup_draw_surf.surf) {
+            wl_surface_destroy(popup_draw_surf.surf);
+            popup_draw_surf.surf = NULL;
+        }
+
+        zwlr_layer_surface_v1_destroy(layer_surface);
+        layer_surface = NULL;
+        wl_surface_destroy(draw_surf.surf);
+
+        show();
     }
 }
 
