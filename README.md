@@ -51,6 +51,8 @@ You can, however, define your own layouts by copying and modifying `layout.mobin
 (replace `mobintl` for something like `yourlayout`). Then make your layout set using `make LAYOUT=yourlayout`, and
 the resulting binary will be `wvkbd-yourlayout`
 
+For example there is now a desktop layout that can be built by `make LAYOUT=desktop` and installed afterwards with `make install LAYOUT=desktop` 
+
 ## Usage
 
 Run `wvkbd-mobintl` (or the binary for your custom layout set).
