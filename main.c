@@ -46,6 +46,7 @@ static struct wp_fractional_scale_v1 *wfs_draw_surf;
 static struct wp_fractional_scale_manager_v1 *wfs_mgr;
 static struct wp_viewport *draw_surf_viewport, *popup_draw_surf_viewport;
 static struct wp_viewporter *viewporter;
+static bool popup_xdg_surface_configured;
 
 struct Output {
     uint32_t name;
@@ -190,6 +191,10 @@ wl_touch_down(void *data, struct wl_touch *wl_touch, uint32_t serial,
               uint32_t time, struct wl_surface *surface, int32_t id,
               wl_fixed_t x, wl_fixed_t y)
 {
+    if(!popup_xdg_surface_configured) {
+        return;
+    }
+
     struct key *next_key;
     uint32_t touch_x, touch_y;
 
@@ -212,6 +217,10 @@ void
 wl_touch_up(void *data, struct wl_touch *wl_touch, uint32_t serial,
             uint32_t time, int32_t id)
 {
+    if(!popup_xdg_surface_configured) {
+        return;
+    }
+
     kbd_release_key(&keyboard, time);
 }
 
@@ -219,6 +228,10 @@ void
 wl_touch_motion(void *data, struct wl_touch *wl_touch, uint32_t time,
                 int32_t id, wl_fixed_t x, wl_fixed_t y)
 {
+    if(!popup_xdg_surface_configured) {
+        return;
+    }
+
     uint32_t touch_x, touch_y;
 
     touch_x = wl_fixed_to_int(x);
@@ -267,6 +280,10 @@ void
 wl_pointer_motion(void *data, struct wl_pointer *wl_pointer, uint32_t time,
                   wl_fixed_t surface_x, wl_fixed_t surface_y)
 {
+    if(!popup_xdg_surface_configured) {
+        return;
+    }
+
     cur_x = wl_fixed_to_int(surface_x);
     cur_y = wl_fixed_to_int(surface_y);
 
@@ -279,6 +296,10 @@ void
 wl_pointer_button(void *data, struct wl_pointer *wl_pointer, uint32_t serial,
                   uint32_t time, uint32_t button, uint32_t state)
 {
+    if(!popup_xdg_surface_configured) {
+        return;
+    }
+
     struct key *next_key;
     cur_press = state == WL_POINTER_BUTTON_STATE_PRESSED;
 
@@ -304,6 +325,10 @@ void
 wl_pointer_axis(void *data, struct wl_pointer *wl_pointer, uint32_t time,
                 uint32_t axis, wl_fixed_t value)
 {
+    if(!popup_xdg_surface_configured) {
+        return;
+    }
+
     kbd_next_layer(&keyboard, NULL, (value >= 0));
     drwsurf_flip(keyboard.surf);
 }
@@ -489,6 +514,7 @@ xdg_popup_surface_configure(void *data, struct xdg_surface *xdg_surface,
                             uint32_t serial)
 {
     xdg_surface_ack_configure(xdg_surface, serial);
+    popup_xdg_surface_configured = true;
     drwsurf_flip(&popup_draw_surf);
 }
 
@@ -605,6 +631,7 @@ layer_surface_configure(void *data, struct zwlr_layer_surface_v1 *surface,
         wl_surface_set_input_region(popup_draw_surf.surf, empty_region);
         popup_xdg_surface =
             xdg_wm_base_get_xdg_surface(wm_base, popup_draw_surf.surf);
+        popup_xdg_surface_configured = false;
         xdg_surface_add_listener(popup_xdg_surface, &xdg_popup_surface_listener,
                                  NULL);
         popup_xdg_popup = xdg_surface_get_popup(popup_xdg_surface, NULL,
