@@ -678,7 +678,7 @@ create_and_upload_keymap(struct kbd *kb, const char *name, uint32_t comp_unichr,
     size_t keymap_size = strlen(keymap_template) + 64;
     char *keymap_str = malloc(keymap_size);
     sprintf(keymap_str, keymap_template, comp_unichr, comp_shift_unichr);
-    keymap_size = strlen(keymap_str);
+    keymap_size = strlen(keymap_str) + 1;
     int keymap_fd = os_create_anonymous_file(keymap_size);
     if (keymap_fd < 0) {
         die("could not create keymap fd\n");
