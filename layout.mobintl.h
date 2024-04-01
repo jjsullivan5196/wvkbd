@@ -1196,7 +1196,7 @@ static struct key keys_landscape[] = {
 
   {"", "", 0.037, Pad},
   {"Ctr", "Ctr", 0.43, Mod, Ctrl, .scheme = 1},
-  {"", "'", 0.43, Mod, Super, .scheme = 1},
+  {"烈", "烈'", 0.43, Mod, Super, .scheme = 1},
   {"Alt", "Alt", 0.43, Mod, Alt, .scheme = 1},
   {"", "Tab", 5.8, Code, KEY_SPACE},
   {"←", "←", 0.462, Code, KEY_LEFT, .scheme = 1},
