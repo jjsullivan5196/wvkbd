@@ -797,7 +797,7 @@ set_kbd_colors(uint8_t *bgra, char *hex)
     // bg, fg, text, high, swipe
     int length = strlen(hex);
     if (length == 6 || length == 8) {
-        char subhex[2];
+        char subhex[3] = { 0 };
         memcpy(subhex, hex, 2);
         bgra[2] = (int)strtol(subhex, NULL, 16);
         memcpy(subhex, hex + 2, 2);
