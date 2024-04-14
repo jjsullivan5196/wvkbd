@@ -561,15 +561,15 @@ kbd_draw_key(struct kbd *kb, struct key *k, enum key_draw_type type)
     case None:
     case Unpress:
         draw_inset(kb->surf, k->x, k->y, k->w, k->h, KBD_KEY_BORDER,
-                   scheme->fg);
+                   scheme->fg, scheme->rounding);
         break;
     case Press:
         draw_inset(kb->surf, k->x, k->y, k->w, k->h, KBD_KEY_BORDER,
-                   scheme->high);
+                   scheme->high, scheme->rounding);
         break;
     case Swipe:
         draw_over_inset(kb->surf, k->x, k->y, k->w, k->h, KBD_KEY_BORDER,
-                        scheme->swipe);
+                        scheme->swipe, scheme->rounding);
         break;
     }
 
@@ -586,9 +586,9 @@ kbd_draw_key(struct kbd *kb, struct key *k, enum key_draw_type type)
         kb->last_popup_h = k->h;
 
         drw_fill_rectangle(kb->popup_surf, scheme->bg, k->x,
-                           kb->last_popup_y, k->w, k->h);
+                           kb->last_popup_y, k->w, k->h, scheme->rounding);
         draw_inset(kb->popup_surf, k->x, kb->last_popup_y, k->w, k->h,
-                   KBD_KEY_BORDER, scheme->high);
+                   KBD_KEY_BORDER, scheme->high, scheme->rounding);
         drw_draw_text(kb->popup_surf, scheme->text, k->x, kb->last_popup_y,
                       k->w, k->h, KBD_KEY_BORDER, label,
                       scheme->font_description);
@@ -605,7 +605,7 @@ kbd_draw_layout(struct kbd *kb)
     if (kb->debug)
         fprintf(stderr, "Draw layout\n");
 
-    drw_fill_rectangle(d, kb->schemes[0].bg, 0, 0, kb->w, kb->h);
+    drw_fill_rectangle(d, kb->schemes[0].bg, 0, 0, kb->w, kb->h, 0);
 
     while (next_key->type != Last) {
         if ((next_key->type == Pad) || (next_key->type == EndRow)) {
@@ -647,17 +647,17 @@ kbd_resize(struct kbd *kb, struct layout *layouts, uint8_t layoutcount)
 
 void
 draw_inset(struct drwsurf *ds, uint32_t x, uint32_t y, uint32_t width,
-           uint32_t height, uint32_t border, Color color)
+           uint32_t height, uint32_t border, Color color, int rounding)
 {
     drw_fill_rectangle(ds, color, x + border, y + border, width - (border * 2),
-                       height - (border * 2));
+                       height - (border * 2), rounding);
 }
 void
 draw_over_inset(struct drwsurf *ds, uint32_t x, uint32_t y, uint32_t width,
-                uint32_t height, uint32_t border, Color color)
+                uint32_t height, uint32_t border, Color color, int rounding)
 {
     drw_over_rectangle(ds, color, x + border, y + border, width - (border * 2),
-                       height - (border * 2));
+                       height - (border * 2), rounding);
 }
 
 void
