@@ -71,7 +71,7 @@ drw_do_clear(struct drwsurf *d, uint32_t x, uint32_t y, uint32_t w, uint32_t h)
 
 void
 drw_do_rectangle(struct drwsurf *d, Color color, uint32_t x, uint32_t y,
-                 uint32_t w, uint32_t h, bool over)
+                 uint32_t w, uint32_t h, bool over, int rounding)
 {
     cairo_save(d->cairo);
 
@@ -81,27 +81,48 @@ drw_do_rectangle(struct drwsurf *d, Color color, uint32_t x, uint32_t y,
         cairo_set_operator(d->cairo, CAIRO_OPERATOR_SOURCE);
     }
 
-    cairo_rectangle(d->cairo, x, y, w, h);
-    cairo_set_source_rgba(
-        d->cairo, color.bgra[2] / (double)255, color.bgra[1] / (double)255,
-        color.bgra[0] / (double)255, color.bgra[3] / (double)255);
-    cairo_fill(d->cairo);
+    if (rounding > 0) {
+        double radius = rounding / 1.0;
+        double degrees = M_PI / 180.0;
 
-    cairo_restore(d->cairo);
+        cairo_new_sub_path (d->cairo);
+        cairo_arc (d->cairo, x + w - radius, y + radius, radius, -90 * degrees, 0 * degrees);
+        cairo_arc (d->cairo, x + w - radius, y + h - radius, radius, 0 * degrees, 90 * degrees);
+        cairo_arc (d->cairo, x + radius, y + h - radius, radius, 90 * degrees, 180 * degrees);
+        cairo_arc (d->cairo, x + radius, y + radius, radius, 180 * degrees, 270 * degrees);
+        cairo_close_path (d->cairo);
+
+        cairo_set_source_rgba(
+          d->cairo, color.bgra[2] / (double)255, color.bgra[1] / (double)255, 
+          color.bgra[0] / (double)255, color.bgra[3] / (double)255);
+        cairo_fill (d->cairo);
+        cairo_set_source_rgba(d->cairo, 0, 0, 0, 0.9);
+        cairo_set_line_width(d->cairo, 1.0);
+        cairo_stroke(d->cairo);
+    }
+    else {
+        cairo_rectangle(d->cairo, x, y, w, h);
+        cairo_set_source_rgba(
+            d->cairo, color.bgra[2] / (double)255, color.bgra[1] / (double)255,
+            color.bgra[0] / (double)255, color.bgra[3] / (double)255);
+        cairo_fill(d->cairo);
+
+        cairo_restore(d->cairo);
+    }
 }
 
 void
 drw_fill_rectangle(struct drwsurf *d, Color color, uint32_t x, uint32_t y,
-                   uint32_t w, uint32_t h)
+                   uint32_t w, uint32_t h, int rounding)
 {
-    drw_do_rectangle(d, color, x, y, w, h, false);
+    drw_do_rectangle(d, color, x, y, w, h, false, rounding);
 }
 
 void
 drw_over_rectangle(struct drwsurf *d, Color color, uint32_t x, uint32_t y,
-                   uint32_t w, uint32_t h)
+                   uint32_t w, uint32_t h, int rounding)
 {
-    drw_do_rectangle(d, color, x, y, w, h, true);
+    drw_do_rectangle(d, color, x, y, w, h, true, rounding);
 }
 
 uint32_t

@@ -13,6 +13,7 @@ struct clr_scheme schemes[] = {
   .swipe = {.bgra = {100, 255, 100, 64}},
   .text = {.color = UINT32_MAX},
   .font = DEFAULT_FONT,
+  .rounding = 5,
 },
 {
   /* colors */
@@ -22,6 +23,7 @@ struct clr_scheme schemes[] = {
   .swipe = {.bgra = {100, 255, 100, 64}},
   .text = {.color = UINT32_MAX},
   .font = DEFAULT_FONT,
+  .rounding = 5,
 }
 };
 
