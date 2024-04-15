@@ -76,6 +76,7 @@ static int cur_x = -1, cur_y = -1;
 static bool cur_press = false;
 static struct kbd keyboard;
 static uint32_t height, normal_height, landscape_height;
+static int rounding = DEFAULT_ROUNDING;
 static bool hidden = false;
 
 /* event handler prototypes */
@@ -680,6 +681,7 @@ usage(char *argv0)
             "  -O          - Print intersected keys to standard output\n");
     fprintf(stderr, "  -H [int]    - Height in pixels\n");
     fprintf(stderr, "  -L [int]    - Landscape height in pixels\n");
+    fprintf(stderr, "  -R [int]    - Rounding radius in pixels\n");
     fprintf(stderr, "  --fn [font] - Set font (e.g: DejaVu Sans 20)\n");
     fprintf(stderr, "  --hidden    - Start hidden (send SIGUSR2 to show)\n");
     fprintf(
@@ -948,6 +950,12 @@ main(int argc, char **argv)
                 exit(1);
             }
             height = landscape_height = atoi(argv[++i]);
+        } else if (!strcmp(argv[i], "-R")) {
+            if (i >= argc - 1) {
+                usage(argv[0]);
+                exit(1);
+            }
+            rounding = atoi(argv[++i]);
         } else if (!strcmp(argv[i], "-D")) {
             keyboard.debug = true;
         } else if ((!strcmp(argv[i], "-fn")) || (!strcmp(argv[i], "--fn"))) {
@@ -986,6 +994,11 @@ main(int argc, char **argv)
     if (fc_font_pattern) {
         for (i = 0; i < countof(schemes); i++)
             schemes[i].font = fc_font_pattern;
+    }
+
+    if (rounding != DEFAULT_ROUNDING) {
+        for (i = 0; i < countof(schemes); i++)
+            schemes[i].rounding = rounding;
     }
 
     display = wl_display_connect(NULL);
