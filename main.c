@@ -46,6 +46,7 @@ static struct wp_fractional_scale_v1 *wfs_draw_surf;
 static struct wp_fractional_scale_manager_v1 *wfs_mgr;
 static struct wp_viewport *draw_surf_viewport, *popup_draw_surf_viewport;
 static struct wp_viewporter *viewporter;
+static bool popup_xdg_surface_configured;
 
 struct Output {
     uint32_t name;
@@ -75,6 +76,7 @@ static int cur_x = -1, cur_y = -1;
 static bool cur_press = false;
 static struct kbd keyboard;
 static uint32_t height, normal_height, landscape_height;
+static int rounding = DEFAULT_ROUNDING;
 static bool hidden = false;
 
 /* event handler prototypes */
@@ -190,6 +192,10 @@ wl_touch_down(void *data, struct wl_touch *wl_touch, uint32_t serial,
               uint32_t time, struct wl_surface *surface, int32_t id,
               wl_fixed_t x, wl_fixed_t y)
 {
+    if(!popup_xdg_surface_configured) {
+        return;
+    }
+
     struct key *next_key;
     uint32_t touch_x, touch_y;
 
@@ -212,6 +218,10 @@ void
 wl_touch_up(void *data, struct wl_touch *wl_touch, uint32_t serial,
             uint32_t time, int32_t id)
 {
+    if(!popup_xdg_surface_configured) {
+        return;
+    }
+
     kbd_release_key(&keyboard, time);
 }
 
@@ -219,6 +229,10 @@ void
 wl_touch_motion(void *data, struct wl_touch *wl_touch, uint32_t time,
                 int32_t id, wl_fixed_t x, wl_fixed_t y)
 {
+    if(!popup_xdg_surface_configured) {
+        return;
+    }
+
     uint32_t touch_x, touch_y;
 
     touch_x = wl_fixed_to_int(x);
@@ -267,6 +281,10 @@ void
 wl_pointer_motion(void *data, struct wl_pointer *wl_pointer, uint32_t time,
                   wl_fixed_t surface_x, wl_fixed_t surface_y)
 {
+    if(!popup_xdg_surface_configured) {
+        return;
+    }
+
     cur_x = wl_fixed_to_int(surface_x);
     cur_y = wl_fixed_to_int(surface_y);
 
@@ -279,6 +297,10 @@ void
 wl_pointer_button(void *data, struct wl_pointer *wl_pointer, uint32_t serial,
                   uint32_t time, uint32_t button, uint32_t state)
 {
+    if(!popup_xdg_surface_configured) {
+        return;
+    }
+
     struct key *next_key;
     cur_press = state == WL_POINTER_BUTTON_STATE_PRESSED;
 
@@ -304,6 +326,10 @@ void
 wl_pointer_axis(void *data, struct wl_pointer *wl_pointer, uint32_t time,
                 uint32_t axis, wl_fixed_t value)
 {
+    if(!popup_xdg_surface_configured) {
+        return;
+    }
+
     kbd_next_layer(&keyboard, NULL, (value >= 0));
     drwsurf_flip(keyboard.surf);
 }
@@ -489,6 +515,7 @@ xdg_popup_surface_configure(void *data, struct xdg_surface *xdg_surface,
                             uint32_t serial)
 {
     xdg_surface_ack_configure(xdg_surface, serial);
+    popup_xdg_surface_configured = true;
     drwsurf_flip(&popup_draw_surf);
 }
 
@@ -605,6 +632,7 @@ layer_surface_configure(void *data, struct zwlr_layer_surface_v1 *surface,
         wl_surface_set_input_region(popup_draw_surf.surf, empty_region);
         popup_xdg_surface =
             xdg_wm_base_get_xdg_surface(wm_base, popup_draw_surf.surf);
+        popup_xdg_surface_configured = false;
         xdg_surface_add_listener(popup_xdg_surface, &xdg_popup_surface_listener,
                                  NULL);
         popup_xdg_popup = xdg_surface_get_popup(popup_xdg_surface, NULL,
@@ -653,6 +681,7 @@ usage(char *argv0)
             "  -O          - Print intersected keys to standard output\n");
     fprintf(stderr, "  -H [int]    - Height in pixels\n");
     fprintf(stderr, "  -L [int]    - Landscape height in pixels\n");
+    fprintf(stderr, "  -R [int]    - Rounding radius in pixels\n");
     fprintf(stderr, "  --fn [font] - Set font (e.g: DejaVu Sans 20)\n");
     fprintf(stderr, "  --hidden    - Start hidden (send SIGUSR2 to show)\n");
     fprintf(
@@ -770,7 +799,7 @@ set_kbd_colors(uint8_t *bgra, char *hex)
     // bg, fg, text, high, swipe
     int length = strlen(hex);
     if (length == 6 || length == 8) {
-        char subhex[2];
+        char subhex[3] = { 0 };
         memcpy(subhex, hex, 2);
         bgra[2] = (int)strtol(subhex, NULL, 16);
         memcpy(subhex, hex + 2, 2);
@@ -921,6 +950,12 @@ main(int argc, char **argv)
                 exit(1);
             }
             height = landscape_height = atoi(argv[++i]);
+        } else if (!strcmp(argv[i], "-R")) {
+            if (i >= argc - 1) {
+                usage(argv[0]);
+                exit(1);
+            }
+            rounding = atoi(argv[++i]);
         } else if (!strcmp(argv[i], "-D")) {
             keyboard.debug = true;
         } else if ((!strcmp(argv[i], "-fn")) || (!strcmp(argv[i], "--fn"))) {
@@ -959,6 +994,11 @@ main(int argc, char **argv)
     if (fc_font_pattern) {
         for (i = 0; i < countof(schemes); i++)
             schemes[i].font = fc_font_pattern;
+    }
+
+    if (rounding != DEFAULT_ROUNDING) {
+        for (i = 0; i < countof(schemes); i++)
+            schemes[i].rounding = rounding;
     }
 
     display = wl_display_connect(NULL);
