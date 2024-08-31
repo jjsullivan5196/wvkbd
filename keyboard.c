@@ -276,13 +276,21 @@ kbd_get_layer_index(struct kbd *kb, struct layout *l)
 void
 kbd_unpress_key(struct kbd *kb, uint32_t time)
 {
-    bool unlatch_shift = false;
+    bool unlatch_shift, unlatch_ctrl, unlatch_alt, unlatch_super;
+    unlatch_shift = unlatch_ctrl = unlatch_alt = unlatch_super = false;
 
     if (kb->last_press) {
         unlatch_shift = (kb->mods & Shift) == Shift;
+        unlatch_ctrl = (kb->mods & Ctrl) == Ctrl;
+        unlatch_alt = (kb->mods & Alt) == Alt;
+        unlatch_super = (kb->mods & Super) == Super;
 
-        if (unlatch_shift) {
-            kb->mods ^= Shift;
+        if (unlatch_shift) kb->mods ^= Shift;
+        if (unlatch_ctrl) kb->mods ^= Ctrl;
+        if (unlatch_alt) kb->mods ^= Alt;
+        if (unlatch_super) kb->mods ^= Super;
+
+        if (unlatch_shift||unlatch_ctrl||unlatch_alt||unlatch_super) {
             zwp_virtual_keyboard_v1_modifiers(kb->vkbd, kb->mods, 0, 0, 0);
         }
 
@@ -304,7 +312,7 @@ kbd_unpress_key(struct kbd *kb, uint32_t time)
         if (kb->compose >= 2) {
             kb->compose = 0;
             kbd_switch_layout(kb, kb->last_abc_layout, kb->last_abc_index);
-        } else if (unlatch_shift) {
+        } else if (unlatch_shift||unlatch_ctrl||unlatch_alt||unlatch_super) {
             kbd_draw_layout(kb);
         } else {
             kbd_draw_key(kb, kb->last_press, Unpress);
@@ -418,7 +426,7 @@ kbd_press_key(struct kbd *kb, struct key *k, uint32_t time)
         break;
     case Mod:
         kb->mods ^= k->code;
-        if (k->code == Shift) {
+        if ((k->code == Shift) || (k->code == CapsLock)) {
             kbd_draw_layout(kb);
         } else {
             if (kb->mods & k->code) {
@@ -551,7 +559,7 @@ kbd_clear_last_popup(struct kbd *kb)
 void
 kbd_draw_key(struct kbd *kb, struct key *k, enum key_draw_type type)
 {
-    const char *label = (kb->mods & Shift) ? k->shift_label : k->label;
+    const char *label = ((kb->mods & Shift)||(kb->mods & CapsLock)) ? k->shift_label : k->label;
     if (kb->debug)
         fprintf(stderr, "Draw key +%d+%d %dx%d -> %s\n", k->x, k->y, k->w, k->h,
                 label);
