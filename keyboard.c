@@ -276,21 +276,23 @@ kbd_get_layer_index(struct kbd *kb, struct layout *l)
 void
 kbd_unpress_key(struct kbd *kb, uint32_t time)
 {
-    bool unlatch_shift, unlatch_ctrl, unlatch_alt, unlatch_super;
-    unlatch_shift = unlatch_ctrl = unlatch_alt = unlatch_super = false;
+    bool unlatch_shift, unlatch_ctrl, unlatch_alt, unlatch_super, unlatch_altgr;
+    unlatch_shift = unlatch_ctrl = unlatch_alt = unlatch_super = unlatch_altgr = false;
 
     if (kb->last_press) {
         unlatch_shift = (kb->mods & Shift) == Shift;
         unlatch_ctrl = (kb->mods & Ctrl) == Ctrl;
         unlatch_alt = (kb->mods & Alt) == Alt;
         unlatch_super = (kb->mods & Super) == Super;
+        unlatch_altgr = (kb->mods & AltGr) == AltGr;
 
         if (unlatch_shift) kb->mods ^= Shift;
         if (unlatch_ctrl) kb->mods ^= Ctrl;
         if (unlatch_alt) kb->mods ^= Alt;
         if (unlatch_super) kb->mods ^= Super;
+        if (unlatch_altgr) kb->mods ^= AltGr;
 
-        if (unlatch_shift||unlatch_ctrl||unlatch_alt||unlatch_super) {
+        if (unlatch_shift||unlatch_ctrl||unlatch_alt||unlatch_super||unlatch_altgr) {
             zwp_virtual_keyboard_v1_modifiers(kb->vkbd, kb->mods, 0, 0, 0);
         }
 
@@ -312,7 +314,7 @@ kbd_unpress_key(struct kbd *kb, uint32_t time)
         if (kb->compose >= 2) {
             kb->compose = 0;
             kbd_switch_layout(kb, kb->last_abc_layout, kb->last_abc_index);
-        } else if (unlatch_shift||unlatch_ctrl||unlatch_alt||unlatch_super) {
+        } else if (unlatch_shift||unlatch_ctrl||unlatch_alt||unlatch_super||unlatch_altgr) {
             kbd_draw_layout(kb);
         } else {
             kbd_draw_key(kb, kb->last_press, Unpress);
