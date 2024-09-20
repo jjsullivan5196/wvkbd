@@ -276,13 +276,23 @@ kbd_get_layer_index(struct kbd *kb, struct layout *l)
 void
 kbd_unpress_key(struct kbd *kb, uint32_t time)
 {
-    bool unlatch_shift = false;
+    bool unlatch_shift, unlatch_ctrl, unlatch_alt, unlatch_super, unlatch_altgr;
+    unlatch_shift = unlatch_ctrl = unlatch_alt = unlatch_super = unlatch_altgr = false;
 
     if (kb->last_press) {
         unlatch_shift = (kb->mods & Shift) == Shift;
+        unlatch_ctrl = (kb->mods & Ctrl) == Ctrl;
+        unlatch_alt = (kb->mods & Alt) == Alt;
+        unlatch_super = (kb->mods & Super) == Super;
+        unlatch_altgr = (kb->mods & AltGr) == AltGr;
 
-        if (unlatch_shift) {
-            kb->mods ^= Shift;
+        if (unlatch_shift) kb->mods ^= Shift;
+        if (unlatch_ctrl) kb->mods ^= Ctrl;
+        if (unlatch_alt) kb->mods ^= Alt;
+        if (unlatch_super) kb->mods ^= Super;
+        if (unlatch_altgr) kb->mods ^= AltGr;
+
+        if (unlatch_shift||unlatch_ctrl||unlatch_alt||unlatch_super||unlatch_altgr) {
             zwp_virtual_keyboard_v1_modifiers(kb->vkbd, kb->mods, 0, 0, 0);
         }
 
@@ -304,7 +314,7 @@ kbd_unpress_key(struct kbd *kb, uint32_t time)
         if (kb->compose >= 2) {
             kb->compose = 0;
             kbd_switch_layout(kb, kb->last_abc_layout, kb->last_abc_index);
-        } else if (unlatch_shift) {
+        } else if (unlatch_shift||unlatch_ctrl||unlatch_alt||unlatch_super||unlatch_altgr) {
             kbd_draw_layout(kb);
         } else {
             kbd_draw_key(kb, kb->last_press, Unpress);
@@ -418,7 +428,7 @@ kbd_press_key(struct kbd *kb, struct key *k, uint32_t time)
         break;
     case Mod:
         kb->mods ^= k->code;
-        if (k->code == Shift) {
+        if ((k->code == Shift) || (k->code == CapsLock)) {
             kbd_draw_layout(kb);
         } else {
             if (kb->mods & k->code) {
@@ -551,7 +561,7 @@ kbd_clear_last_popup(struct kbd *kb)
 void
 kbd_draw_key(struct kbd *kb, struct key *k, enum key_draw_type type)
 {
-    const char *label = (kb->mods & Shift) ? k->shift_label : k->label;
+    const char *label = ((kb->mods & Shift)||(kb->mods & CapsLock)) ? k->shift_label : k->label;
     if (kb->debug)
         fprintf(stderr, "Draw key +%d+%d %dx%d -> %s\n", k->x, k->y, k->w, k->h,
                 label);
@@ -561,15 +571,15 @@ kbd_draw_key(struct kbd *kb, struct key *k, enum key_draw_type type)
     case None:
     case Unpress:
         draw_inset(kb->surf, k->x, k->y, k->w, k->h, KBD_KEY_BORDER,
-                   scheme->fg);
+                   scheme->fg, scheme->rounding);
         break;
     case Press:
         draw_inset(kb->surf, k->x, k->y, k->w, k->h, KBD_KEY_BORDER,
-                   scheme->high);
+                   scheme->high, scheme->rounding);
         break;
     case Swipe:
         draw_over_inset(kb->surf, k->x, k->y, k->w, k->h, KBD_KEY_BORDER,
-                        scheme->swipe);
+                        scheme->swipe, scheme->rounding);
         break;
     }
 
@@ -586,9 +596,9 @@ kbd_draw_key(struct kbd *kb, struct key *k, enum key_draw_type type)
         kb->last_popup_h = k->h;
 
         drw_fill_rectangle(kb->popup_surf, scheme->bg, k->x,
-                           kb->last_popup_y, k->w, k->h);
+                           kb->last_popup_y, k->w, k->h, scheme->rounding);
         draw_inset(kb->popup_surf, k->x, kb->last_popup_y, k->w, k->h,
-                   KBD_KEY_BORDER, scheme->high);
+                   KBD_KEY_BORDER, scheme->high, scheme->rounding);
         drw_draw_text(kb->popup_surf, scheme->text, k->x, kb->last_popup_y,
                       k->w, k->h, KBD_KEY_BORDER, label,
                       scheme->font_description);
@@ -605,7 +615,7 @@ kbd_draw_layout(struct kbd *kb)
     if (kb->debug)
         fprintf(stderr, "Draw layout\n");
 
-    drw_fill_rectangle(d, kb->schemes[0].bg, 0, 0, kb->w, kb->h);
+    drw_fill_rectangle(d, kb->schemes[0].bg, 0, 0, kb->w, kb->h, 0);
 
     while (next_key->type != Last) {
         if ((next_key->type == Pad) || (next_key->type == EndRow)) {
@@ -647,17 +657,17 @@ kbd_resize(struct kbd *kb, struct layout *layouts, uint8_t layoutcount)
 
 void
 draw_inset(struct drwsurf *ds, uint32_t x, uint32_t y, uint32_t width,
-           uint32_t height, uint32_t border, Color color)
+           uint32_t height, uint32_t border, Color color, int rounding)
 {
     drw_fill_rectangle(ds, color, x + border, y + border, width - (border * 2),
-                       height - (border * 2));
+                       height - (border * 2), rounding);
 }
 void
 draw_over_inset(struct drwsurf *ds, uint32_t x, uint32_t y, uint32_t width,
-                uint32_t height, uint32_t border, Color color)
+                uint32_t height, uint32_t border, Color color, int rounding)
 {
     drw_over_rectangle(ds, color, x + border, y + border, width - (border * 2),
-                       height - (border * 2));
+                       height - (border * 2), rounding);
 }
 
 void
