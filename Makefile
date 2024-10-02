@@ -10,9 +10,10 @@ PKGS = wayland-client xkbcommon pangocairo
 WVKBD_SOURCES += $(wildcard $(SRC)/*.c)
 WVKBD_HEADERS += $(wildcard $(SRC)/*.h)
 
+PKG_CONFIG ?= pkg-config
 CFLAGS += -std=gnu99 -Wall -g -DWITH_WAYLAND_SHM -DLAYOUT=\"layout.${LAYOUT}.h\" -DKEYMAP=\"keymap.${LAYOUT}.h\"
-CFLAGS += $(shell pkg-config --cflags $(PKGS))
-LDFLAGS += $(shell pkg-config --libs $(PKGS)) -lm -lutil -lrt
+CFLAGS += $(shell $(PKG_CONFIG) --cflags $(PKGS))
+LDFLAGS += $(shell $(PKG_CONFIG) --libs $(PKGS)) -lm -lutil -lrt
 
 WAYLAND_HEADERS = $(wildcard proto/*.xml)
 
