@@ -1,5 +1,6 @@
 VERSION = 0.16
 CFLAGS = -DVERSION=\"$(VERSION)\" -D_XOPEN_SOURCE=700
+CFLAGS += -DMOTION_KEYS
 PREFIX = /usr/local
 MANPREFIX = ${PREFIX}/share/man
-LAYOUT = mobintl
+LAYOUT = anihortes
