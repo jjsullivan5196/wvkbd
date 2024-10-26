@@ -99,6 +99,8 @@ drw_do_rectangle(struct drwsurf *d, Color color, uint32_t x, uint32_t y,
         cairo_set_source_rgba(d->cairo, 0, 0, 0, 0.9);
         cairo_set_line_width(d->cairo, 1.0);
         cairo_stroke(d->cairo);
+
+        cairo_restore(d->cairo);
     }
     else {
         cairo_rectangle(d->cairo, x, y, w, h);
