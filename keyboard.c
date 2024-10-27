@@ -451,6 +451,9 @@ kbd_press_key(struct kbd *kb, struct key *k, uint32_t time)
         break;
     case Mod:
         kb->mods ^= k->code;
+#if MOTION_KEYS
+        kbd_draw_layout(kb);
+#else
         if ((k->code == Shift) || (k->code == CapsLock)) {
             kbd_draw_layout(kb);
         } else {
@@ -460,6 +463,7 @@ kbd_press_key(struct kbd *kb, struct key *k, uint32_t time)
                 kbd_draw_key(kb, k, Unpress);
             }
         }
+#endif
         zwp_virtual_keyboard_v1_modifiers(kb->vkbd, kb->mods, 0, 0, 0);
         break;
     case Layout:
@@ -634,6 +638,65 @@ kbd_draw_key(struct kbd *kb, struct key *k, enum key_draw_type type)
         wl_surface_damage(kb->popup_surf->surf, k->x, kb->last_popup_y, k->w,
                           k->h);
     }
+
+#ifdef MOTION_KEYS
+    /*
+     * display edge and corner keys
+     */
+    struct key **edge_keys = &k->north;
+    for(int i = 0; i < 8; i++) {
+        int x, y;
+        if (!(edge_keys[i]))
+            continue;
+        switch (i) {
+            case 0: /* north */
+                x = k->x;
+                y = k->y-(k->h/3);
+                break;
+            case 1: /* north east */
+                x = k->x+(k->w/3);
+                y = k->y-(k->h/3);
+                break;
+            case 2: /* east */
+                x = k->x+(k->w/3);
+                y = k->y;
+                break;
+            case 3: /* south east */
+                x = k->x+(k->w/3);
+                y = k->y+(k->h/3);
+                break;
+            case 4: /* south */
+                x = k->x;
+                y = k->y+(k->h/3);
+                break;
+            case 5: /* south west */
+                x = k->x-(k->w/3);
+                y = k->y+(k->h/3);
+                break;
+            case 6: /* west */
+                x = k->x-(k->w/3);
+                y = k->y;
+                break;
+            case 7: /* north west */
+                x = k->x-(k->w/3);
+                y = k->y-(k->h/3);
+                break;
+        }
+        scheme = &kb->schemes[edge_keys[i]->scheme];
+        label = (kb->mods & Shift) ? edge_keys[i]->shift_label : edge_keys[i]->label;
+
+        /*
+         * Hide Ctrl, Alt, and Super unless they are pressed
+         */
+        Color c = scheme->text;
+        if ((edge_keys[i]->type == Mod) && !(kb->mods & edge_keys[i]->code)) {
+            c.bgra[3] = 0;
+        }
+
+        drw_draw_text(kb->surf, c, x, y, k->w, k->h,
+                    KBD_KEY_BORDER, label, scheme->font_description);
+    }
+#endif
 }
 
 void
