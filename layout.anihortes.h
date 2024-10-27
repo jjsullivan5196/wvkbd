@@ -105,7 +105,7 @@ static struct key key_anihortes_r_north      = {"⇧", "⇧", 1.0, Mod, Shift, .
 static struct key key_anihortes_r_north_east = {")", "0", 1.0, Code, KEY_0, 0, Shift, .scheme = 4};
 static struct key key_anihortes_r_east       = {"⇥", "⇥", 1.0, Code, KEY_END, .scheme = 4};
 static struct key key_anihortes_r_south_east = {"]", "}", 1.0, Code, KEY_RIGHTBRACE, .scheme = 4};
-static struct key key_anihortes_r_south      = {"CpL", "CpL", 1.0, Mod, CapsLock, .scheme = 4};
+static struct key key_anihortes_r_south      = {"CpL", "CpL", 1.0, Mod, CapsLock, .scheme = 2};
 static struct key key_anihortes_r_south_west = {"@", "ᵃ", 1.0, Copy, 0x0040, 0 ,0x1D43, .scheme = 4};
 static struct key key_anihortes_r_west       = {"m", "M", 1.0, Code, KEY_M, .scheme = 2};
 static struct key key_anihortes_r_north_west = {"|", "¶", 1.0, Copy, 0x07C, 0, 0x00B6, .scheme = 4};
