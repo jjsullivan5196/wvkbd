@@ -69,7 +69,7 @@ static enum swipe_dir line_dir;
 
 extern struct kbd keyboard;
 
-#define MIN_LINE_LEN (15)
+#define MIN_LINE_LEN (19)
 #define MIN_LEN_SQUARED (MIN_LINE_LEN * MIN_LINE_LEN)
 
 static void
