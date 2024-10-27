@@ -693,7 +693,7 @@ kbd_draw_key(struct kbd *kb, struct key *k, enum key_draw_type type)
                 break;
         }
         scheme = &kb->schemes[edge_keys[i]->scheme];
-        label = (kb->mods & Shift) ? edge_keys[i]->shift_label : edge_keys[i]->label;
+        label = ((kb->mods & Shift)||(kb->mods & CapsLock)) ? edge_keys[i]->shift_label : edge_keys[i]->label;
 
         /*
          * Hide Ctrl, Alt, and Super unless they are pressed
