@@ -561,12 +561,7 @@ flip_landscape()
     if (current_output) {
         keyboard.landscape = current_output->w > current_output->h;
     } else if (wl_outputs_size) {
-        for (int i = 0; i < wl_outputs_size; i += 1) {
-            if (wl_outputs[i].w > wl_outputs[i].h) {
-                keyboard.landscape = true;
-                break;
-            }
-        }
+        keyboard.landscape = wl_outputs[0].w > wl_outputs[0].h;
     }
 
     enum layout_id layer;
@@ -1046,6 +1041,9 @@ main(int argc, char **argv)
     if (vkbd_mgr == NULL) {
         die("virtual_keyboard_manager not available\n");
     }
+
+    // A second round-trip to receive wl_outputs events
+    wl_display_roundtrip(display);
 
     empty_region = wl_compositor_create_region(compositor);
     popup_xdg_positioner = xdg_wm_base_create_positioner(wm_base);
