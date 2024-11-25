@@ -3,6 +3,7 @@
 #include <stddef.h>
 #include <stdio.h>
 #include <sys/mman.h>
+#include <ctype.h>
 #include "keyboard.h"
 #include "drw.h"
 #include "os-compatibility.h"
@@ -537,7 +538,8 @@ kbd_print_key_stdout(struct kbd *kb, struct key *k)
     }
 
     if (!handled) {
-        if ((kb->mods & Shift) || (kb->mods & CapsLock))
+        if ((kb->mods & Shift) || 
+            ((kb->mods & CapsLock) & (strlen(k->label) == 1 && isalpha(k->label[0]))))
             printf("%s", k->shift_label);
         else if (!(kb->mods & Ctrl) && !(kb->mods & Alt) && !(kb->mods & Super))
             printf("%s", k->label);
@@ -561,7 +563,8 @@ kbd_clear_last_popup(struct kbd *kb)
 void
 kbd_draw_key(struct kbd *kb, struct key *k, enum key_draw_type type)
 {
-    const char *label = ((kb->mods & Shift)||(kb->mods & CapsLock)) ? k->shift_label : k->label;
+    const char *label = ((kb->mods & Shift)||((kb->mods & CapsLock) && 
+        strlen(k->label) == 1 && isalpha(k->label[0]))) ? k->shift_label : k->label;
     if (kb->debug)
         fprintf(stderr, "Draw key +%d+%d %dx%d -> %s\n", k->x, k->y, k->w, k->h,
                 label);
