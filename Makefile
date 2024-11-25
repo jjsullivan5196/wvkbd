@@ -21,9 +21,12 @@ HDRS = $(WAYLAND_HEADERS:.xml=-client-protocol.h)
 WAYLAND_SRC = $(HDRS:.h=.c)
 SOURCES = $(WVKBD_SOURCES) $(WAYLAND_SRC)
 
+SCDOC=scdoc
+DOCS = wvkbd.1
+
 OBJECTS = $(SOURCES:.c=.o)
 
-all: ${BIN}
+all: ${BIN} ${DOCS}
 
 config.h:
 	cp config.def.h config.h
@@ -44,6 +47,9 @@ clean:
 
 format:
 	clang-format -i $(WVKBD_SOURCES) $(WVKBD_HEADERS)
+
+%: %.scd
+	$(SCDOC) < $< > $@
 
 install: all
 	mkdir -p ${DESTDIR}${PREFIX}/bin

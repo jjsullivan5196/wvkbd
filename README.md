@@ -42,6 +42,8 @@ You'll need the following developer packages
  - wayland-client
  - xkbcommon
 
+You also need [scdoc](https://git.sr.ht/~sircmpwn/scdoc/) to generate the documentation.
+
 Make any customizations you would like in `config.def.h` and run `make`
 
 The default set of layouts is called `mobintl` *(mobile international)*, which groups various layouts aimed at mobile devices
