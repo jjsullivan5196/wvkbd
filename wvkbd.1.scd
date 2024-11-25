@@ -100,6 +100,27 @@ You can send signals to wvkbd to hide/show it (e.g. using _kill_(1) with _-s_):
 *SIGRTMIN*
 	Toggle visibility
 
+# COMPOSE BUTTON
+
+The default mobile international layout features a Compose button (*Cmp*)
+which, when combined with another key, opens up a layout that offers variants
+for that key. This is similar to functionality that other keyboards implemented
+using a *long press* (wvkbd has no such notion, holding a key will repeat
+it like on a physical keyboard).
+
+For example, press Cmp + a to access variants with diacritics like á,à,â,ä, etc.. 
+
+Most layouts also feature the following that are less obvious:
+
+- Press Cmp and . to access more punctuation
+- Press Cmp and - or , to access 'mathematical' symbols (+,-,=,etc)
+- Press Cmp and ' or 0 or 9 to access more brackets and quotes
+- Press Cmp and q to access emojis
+
+Last, but not least, pressing Cmp + space or Cmp + ⌨  or Cmp + Abc opens up an
+index that allows you to immediately jump to any layout by name, even layouts
+not explicitly added to your layers on startup.
+
 # AUTHORS
 
 Created by John Sullivan <jsullivan@csumb.edu>, maintained by the Sxmo project
