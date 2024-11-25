@@ -43,7 +43,7 @@ wvkbd-${LAYOUT}: config.h $(OBJECTS) layout.${LAYOUT}.h
 	$(CC) -o wvkbd-${LAYOUT} $(OBJECTS) $(LDFLAGS)
 
 clean:
-	rm -f $(OBJECTS) $(HDRS) $(WAYLAND_SRC) ${BIN}
+	rm -f $(OBJECTS) $(HDRS) $(WAYLAND_SRC) ${BIN} ${DOCS}
 
 format:
 	clang-format -i $(WVKBD_SOURCES) $(WVKBD_HEADERS)
