@@ -162,9 +162,9 @@ static struct key key_anihortes_navigation_east       = UNUSED_KEY;
 static struct key key_anihortes_navigation_south_east = UNUSED_KEY;
 static struct key key_anihortes_navigation_south      = UNUSED_KEY;
 static struct key key_anihortes_navigation_south_west = UNUSED_KEY;
-static struct key key_anihortes_navigation_west       = UNUSED_KEY;
+static struct key key_anihortes_navigation_west       = {"№", "№", 1.0, Layout, 0, &layouts[NumPad], .scheme = 4};
 static struct key key_anihortes_navigation_north_west = UNUSED_KEY;
-static struct key key_anihortes_navigation_long_tap   = {"abc", "abc", 1.0, Layout, 0, &layouts[Anihortes], .scheme = 4};
+static struct key key_anihortes_navigation_long_tap   = {"abc", "abc", 1.0, Layout, 0, &layouts[Index], .scheme = 4};
 
 static struct key key_anihortes_space_north      = {"", "", 1.0, Command, ShowHideTertiaryKeys, 0, ShowHidePrimarySecondaryKeys, .scheme = 5};
 static struct key key_anihortes_space_north_east = {"Ctr", "Ctr", 1.0, Mod, Ctrl, .scheme = 1};
@@ -297,7 +297,7 @@ static struct key keys_anihortes[] = {
         .north_west = &key_anihortes_r_north_west,
         .long_tap   = &key_anihortes_r_long_tap,
     },
-    {"123", "123", -2.0, Layout, 0, &layouts[NumPad], .scheme = 0, .shape = OneSquare,
+    {"abc", "abc", -2.0, Layout, 0, &layouts[Anihortes], .scheme = 0, .shape = OneSquare,
         .north      = &key_anihortes_navigation_north,
         .north_east = &key_anihortes_navigation_north_east,
         .east       = &key_anihortes_navigation_east,
@@ -553,8 +553,8 @@ static struct key keys_navigation[] = {
     },
     {"6", "6", 1.0, Code, KEY_6, 0, Super, .scheme = 0, .shape = OneSquare,
     },
-    {"123", "123", -2.0, Layout, 0, &layouts[NumPad], .scheme = 1, .shape = OneSquare,
-        .north      = &key_anihortes_navigation_long_tap,  // NOTE: Swiping north (that's how we got here) also brings us back to anihortes
+    {"abc", "abc", -2.0, Layout, 0, &layouts[Anihortes], .scheme = 1, .shape = OneSquare,
+        .north      = &key_anihortes_navigation_north,
         .north_east = &key_anihortes_navigation_north_east,
         .east       = &key_anihortes_navigation_east,
         .south_east = &key_anihortes_navigation_south_east,
@@ -599,6 +599,8 @@ static struct key keys_navigation[] = {
 };
 
 static struct key keys_index[] = {
-    {"Ani", "Ani", 1.0, Layout, 0, &layouts[Anihortes], .scheme = 1},
+    {"abc", "abc", 1.0, Layout, 0, &layouts[Anihortes], .scheme = 1},
+    {"123", "123", 1.0, Layout, 0, &layouts[NumPad], .scheme = 1},
+    {"Nav", "Nav", 1.0, Layout, 0, &layouts[Navigation], .scheme = 1},
     {"", "", 0.0, Last},
 };
