@@ -117,6 +117,9 @@ void
 drw_fill_rectangle(struct drwsurf *d, Color color, uint32_t x, uint32_t y,
                    uint32_t w, uint32_t h, int rounding)
 {
+    // FIXME: Workaround for edge and corner key. This should be handled elsewhere.
+    if ((w==0)||(w>100000))
+        return;
     drw_do_rectangle(d, color, x, y, w, h, false, rounding);
 }
 
