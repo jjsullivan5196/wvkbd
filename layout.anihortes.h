@@ -188,6 +188,36 @@ static struct key key_anihortes_backspace_west       = {"⌫", "⌫", 1.0, Code,
 static struct key key_anihortes_backspace_north_west = UNUSED_KEY;
 static struct key key_anihortes_backspace_long_tap   = UNUSED_KEY;
 
+// corners of top left key in emoji layout
+//static struct key key_anihortes_emoji_1_north      = {"👌", "🤨", 1.0, Copy, 0x1f44c, 0, 0x1f928, .scheme = 4};
+//static struct key key_anihortes_emoji_1_north_east = {"😴", "🤬", 1.0, Copy, 0x1f634, 0, 0x1f92c, .scheme = 4};
+//static struct key key_anihortes_emoji_1_east       = {"🤤", "🤮", 1.0, Copy, 0x1f924, 0, 0x1f92e, .scheme = 4};
+static struct key key_anihortes_emoji_1_south_east = {"👌", "🤝", 1.0, Copy, 0x1f44c, 0, 0x1f91d, .scheme = 4};
+//static struct key key_anihortes_emoji_1_south      = {"🥳", "🎉", 1.0, Copy, 0x1f973, 0, 0x1f389, .scheme = 4};
+//static struct key key_anihortes_emoji_1_south_west = {"🥵", "🥶", 1.0, Copy, 0x1f975, 0, 0x1f976, .scheme = 4};
+//static struct key key_anihortes_emoji_1_west       = {"🤯", "🤦", 1.0, Copy, 0x1f92f, 0, 0x1f926, .scheme = 4};
+//static struct key key_anihortes_emoji_1_north_west = {"👍", "👎", 1.0, Copy, 0x1f44d, 0, 0x1f44e, .scheme = 4};
+
+// corners of top center key in emoji layout
+//static struct key key_anihortes_emoji_2_north      = {"👌", "🤨", 1.0, Copy, 0x1f44c, 0, 0x1f928, .scheme = 4};
+//static struct key key_anihortes_emoji_2_north_east = {"😴", "🤬", 1.0, Copy, 0x1f634, 0, 0x1f92c, .scheme = 4};
+//static struct key key_anihortes_emoji_2_east       = {"🤤", "🤮", 1.0, Copy, 0x1f924, 0, 0x1f92e, .scheme = 4};
+//static struct key key_anihortes_emoji_2_south_east = {"👌", "🤝", 1.0, Copy, 0x1f44c, 0, 0x1f91d, .scheme = 4};
+static struct key key_anihortes_emoji_2_south      = {"👋", "👏", 1.0, Copy, 0x1f44b, 0, 0x1f44f, .scheme = 4};
+//static struct key key_anihortes_emoji_2_south_west = {"🥵", "🥶", 1.0, Copy, 0x1f975, 0, 0x1f976, .scheme = 4};
+//static struct key key_anihortes_emoji_2_west       = {"🤯", "🤦", 1.0, Copy, 0x1f92f, 0, 0x1f926, .scheme = 4};
+//static struct key key_anihortes_emoji_2_north_west = {"👍", "👎", 1.0, Copy, 0x1f44d, 0, 0x1f44e, .scheme = 4};
+
+// corners of middle center key in emoji layout
+static struct key key_anihortes_emoji_5_north      = {"🤔", "🤨", 1.0, Copy, 0x1f914, 0, 0x1f928, .scheme = 4};
+static struct key key_anihortes_emoji_5_north_east = {"😴", "🤬", 1.0, Copy, 0x1f634, 0, 0x1f92c, .scheme = 4};
+static struct key key_anihortes_emoji_5_east       = {"🤤", "🤮", 1.0, Copy, 0x1f924, 0, 0x1f92e, .scheme = 4};
+static struct key key_anihortes_emoji_5_south_east = {"🤞", "🤩", 1.0, Copy, 0x1f91e, 0, 0x1f929, .scheme = 4};
+static struct key key_anihortes_emoji_5_south      = {"🥳", "🎉", 1.0, Copy, 0x1f973, 0, 0x1f389, .scheme = 4};
+static struct key key_anihortes_emoji_5_south_west = {"🥵", "🥶", 1.0, Copy, 0x1f975, 0, 0x1f976, .scheme = 4};
+static struct key key_anihortes_emoji_5_west       = {"🤯", "🤦", 1.0, Copy, 0x1f92f, 0, 0x1f926, .scheme = 4};
+static struct key key_anihortes_emoji_5_north_west = {"👍", "👎", 1.0, Copy, 0x1f44d, 0, 0x1f44e, .scheme = 4};
+
 /* key layouts
  *
  * define keys like:
@@ -606,7 +636,7 @@ static struct key keys_emoji[] = {
         //.north      = &key_anihortes_a_north,
         //.north_east = &key_anihortes_a_north_east,
         .east       = &key_anihortes_a_east,
-        //.south_east = &key_anihortes_a_south_east,
+        .south_east = &key_anihortes_emoji_1_south_east,
         //.south      = &key_anihortes_a_south,
         .south_west = &key_anihortes_a_south_west,
         //.west       = &key_anihortes_a_west,
@@ -614,14 +644,14 @@ static struct key keys_emoji[] = {
         //.long_tap   = &key_anihortes_a_long_tap,
     },
     {"😚", "😂", -2.0, Copy, 0x1f61a, 0, 0x1f602, .scheme = 1, .shape = OneSquare,
-        .north      = &key_anihortes_n_north,
-        .north_east = &key_anihortes_n_north_east,
-        .east       = &key_anihortes_n_east,
-        .south_east = &key_anihortes_n_south_east,
-        //.south      = &key_anihortes_n_south,
-        .south_west = &key_anihortes_n_south_west,
-        .west       = &key_anihortes_n_west,
-        .north_west = &key_anihortes_n_north_west,
+        //.north      = &key_anihortes_emoji_2_north,
+        //.north_east = &key_anihortes_emoji_2_north_east,
+        //.east       = &key_anihortes_emoji_2_east,
+        //.south_east = &key_anihortes_emoji_2_south_east,
+        .south      = &key_anihortes_emoji_2_south,
+        //.south_west = &key_anihortes_emoji_2_south_west,
+        //.west       = &key_anihortes_emoji_2_west,
+        //.north_west = &key_anihortes_emoji_2_north_west,
         .long_tap   = &key_anihortes_n_long_tap,
     },
     {"🥰", "😍", -2.0, Copy, 0x1f970, 0, 0x1f60d, .scheme = 1, .shape = OneSquare,
@@ -661,18 +691,18 @@ static struct key keys_emoji[] = {
         .north_west = &key_anihortes_h_north_west,
         .long_tap   = &key_anihortes_h_long_tap,
     },
-    {"☀️", "🦞", 1.0, Copy, 0x2600, 0, 0x1f99e, .scheme = 1, .shape = OneSquare,
-        //.north      = &key_anihortes_o_north,
-        //.north_east = &key_anihortes_o_north_east,
-        //.east       = &key_anihortes_o_east,
-        //.south_east = &key_anihortes_o_south_east,
-        //.south      = &key_anihortes_o_south,
-        //.south_west = &key_anihortes_o_south_west,
-        //.west       = &key_anihortes_o_west,
-        //.north_west = &key_anihortes_o_north_west,
+    {"😊", "😇", 1.0, Copy, 0x1f60a, 0, 0x1f607, .scheme = 1, .shape = OneSquare,
+        .north      = &key_anihortes_emoji_5_north,
+        .north_east = &key_anihortes_emoji_5_north_east,
+        .east       = &key_anihortes_emoji_5_east,
+        .south_east = &key_anihortes_emoji_5_south_east,
+        .south      = &key_anihortes_emoji_5_south,
+        .south_west = &key_anihortes_emoji_5_south_west,
+        .west       = &key_anihortes_emoji_5_west,
+        .north_west = &key_anihortes_emoji_5_north_west,
         .long_tap   = &key_anihortes_o_long_tap,
     },
-    {"😊", "😇", 1.0, Copy, 0x1f60a, 0, 0x1f607, .scheme = 1, .shape = OneSquare,
+    {"☀️", "🦞", 1.0, Copy, 0x2600, 0, 0x1f99e, .scheme = 1, .shape = OneSquare,
         .north      = &key_anihortes_r_north,
         .north_east = &key_anihortes_r_north_east,
         .east       = &key_anihortes_r_east,
