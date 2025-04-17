@@ -337,10 +337,7 @@ kbd_release_key(struct kbd *kb, uint32_t time)
         kb->last_swipe = NULL;
     }
 
-    drwsurf_flip(kb->surf);
-
     kbd_clear_last_popup(kb);
-    drwsurf_flip(kb->popup_surf);
 }
 
 void
@@ -366,10 +363,7 @@ kbd_motion_key(struct kbd *kb, uint32_t time, uint32_t x, uint32_t y)
         kbd_unpress_key(kb, time);
     }
 
-    drwsurf_flip(kb->surf);
-
     kbd_clear_last_popup(kb);
-    drwsurf_flip(kb->popup_surf);
 }
 
 void
@@ -501,9 +495,6 @@ kbd_press_key(struct kbd *kb, struct key *k, uint32_t time)
     default:
         break;
     }
-
-    drwsurf_flip(kb->surf);
-    drwsurf_flip(kb->popup_surf);
 }
 
 void
@@ -553,8 +544,13 @@ kbd_clear_last_popup(struct kbd *kb)
     if (kb->last_popup_w && kb->last_popup_h) {
         drw_do_clear(kb->popup_surf, kb->last_popup_x, kb->last_popup_y,
                      kb->last_popup_w, kb->last_popup_h);
-        wl_surface_damage(kb->popup_surf->surf, kb->last_popup_x,
-                          kb->last_popup_y, kb->last_popup_w, kb->last_popup_h);
+        drwsurf_damage(
+            kb->popup_surf,
+            kb->last_popup_x,
+            kb->last_popup_y,
+            kb->last_popup_w,
+            kb->last_popup_h
+        );
 
         kb->last_popup_w = kb->last_popup_h = 0;
     }
@@ -588,7 +584,7 @@ kbd_draw_key(struct kbd *kb, struct key *k, enum key_draw_type type)
 
     drw_draw_text(kb->surf, scheme->text, k->x, k->y, k->w, k->h,
                   KBD_KEY_BORDER, label, scheme->font_description);
-    wl_surface_damage(kb->surf->surf, k->x, k->y, k->w, k->h);
+    drwsurf_damage(kb->surf, k->x, k->y, k->w, k->h);
 
     if (type == Press || type == Unpress) {
         kbd_clear_last_popup(kb);
@@ -605,8 +601,7 @@ kbd_draw_key(struct kbd *kb, struct key *k, enum key_draw_type type)
         drw_draw_text(kb->popup_surf, scheme->text, k->x, kb->last_popup_y,
                       k->w, k->h, KBD_KEY_BORDER, label,
                       scheme->font_description);
-        wl_surface_damage(kb->popup_surf->surf, k->x, kb->last_popup_y, k->w,
-                          k->h);
+        drwsurf_damage(kb->popup_surf, k->x, kb->last_popup_y, k->w, k->h);
     }
 }
 
@@ -633,7 +628,7 @@ kbd_draw_layout(struct kbd *kb)
         }
         next_key++;
     }
-    wl_surface_damage(d->surf, 0, 0, kb->w, kb->h);
+    drwsurf_damage(d, 0, 0, kb->w, kb->h);
 }
 
 void

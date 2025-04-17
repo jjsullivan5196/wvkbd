@@ -62,6 +62,7 @@ static int wl_outputs_size;
 
 /* drawing */
 static struct drw draw_ctx;
+static struct drwbuf draw_surf_back_buffer, draw_surf_display_buffer, popup_draw_surf_back_buffer, popup_draw_surf_display_buffer;
 static struct drwsurf draw_surf, popup_draw_surf;
 
 /* layer surface parameters */
@@ -332,7 +333,6 @@ wl_pointer_axis(void *data, struct wl_pointer *wl_pointer, uint32_t time,
     }
 
     kbd_next_layer(&keyboard, NULL, (value >= 0));
-    drwsurf_flip(keyboard.surf);
 }
 
 void
@@ -1018,7 +1018,11 @@ main(int argc, char **argv)
     }
 
     draw_surf.ctx = &draw_ctx;
+    draw_surf.back_buffer = &draw_surf_back_buffer;
+    draw_surf.display_buffer = &draw_surf_display_buffer;
     popup_draw_surf.ctx = &draw_ctx;
+    popup_draw_surf.back_buffer = &popup_draw_surf_back_buffer;
+    popup_draw_surf.display_buffer = &popup_draw_surf_display_buffer;
     keyboard.surf = &draw_surf;
     keyboard.popup_surf = &popup_draw_surf;
 
