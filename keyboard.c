@@ -275,11 +275,27 @@ kbd_get_layer_index(struct kbd *kb, struct layout *l)
 }
 
 void
+zwp_virtual_keyboard_v1_key_mods(struct zwp_virtual_keyboard_v1 *vkbd, uint32_t time, uint32_t mods, enum wl_keyboard_key_state state)
+{
+    if ((mods & Shift) == Shift)
+        zwp_virtual_keyboard_v1_key(vkbd, time, KEY_LEFTSHIFT, state);
+    if ((mods & CapsLock) == CapsLock)
+        zwp_virtual_keyboard_v1_key(vkbd, time, KEY_CAPSLOCK, state);
+    if ((mods & Ctrl) == Ctrl)
+        zwp_virtual_keyboard_v1_key(vkbd, time, KEY_LEFTCTRL, state);
+    if ((mods & Alt) == Alt)
+        zwp_virtual_keyboard_v1_key(vkbd, time, KEY_LEFTALT, state);
+    if ((mods & Super) == Super)
+        zwp_virtual_keyboard_v1_key(vkbd, time, KEY_LEFTMETA, state);
+    if ((mods & AltGr) == AltGr)
+        zwp_virtual_keyboard_v1_key(vkbd, time, KEY_RIGHTALT, state);
+}
+
+void
 kbd_unpress_key(struct kbd *kb, uint32_t time)
 {
-    bool unlatch_shift, unlatch_ctrl, unlatch_alt, unlatch_super, unlatch_altgr;
-    unlatch_shift = unlatch_ctrl = unlatch_alt = unlatch_super = unlatch_altgr = false;
-
+    bool unlatch_shift, unlatch_ctrl, unlatch_alt, unlatch_super, unlatch_altgr, unlatch_tab;
+    unlatch_shift = unlatch_ctrl = unlatch_alt = unlatch_super = unlatch_altgr = unlatch_tab = false;
     if (kb->last_press) {
         unlatch_shift = (kb->mods & Shift) == Shift;
         unlatch_ctrl = (kb->mods & Ctrl) == Ctrl;
@@ -287,22 +303,15 @@ kbd_unpress_key(struct kbd *kb, uint32_t time)
         unlatch_super = (kb->mods & Super) == Super;
         unlatch_altgr = (kb->mods & AltGr) == AltGr;
 
-        if (unlatch_shift) kb->mods ^= Shift;
-        if (unlatch_ctrl) kb->mods ^= Ctrl;
-        if (unlatch_alt) kb->mods ^= Alt;
-        if (unlatch_super) kb->mods ^= Super;
-        if (unlatch_altgr) kb->mods ^= AltGr;
-
-        if (unlatch_shift||unlatch_ctrl||unlatch_alt||unlatch_super||unlatch_altgr) {
-            zwp_virtual_keyboard_v1_modifiers(kb->vkbd, kb->mods, 0, 0, 0);
-        }
-
         if (kb->last_press->type == Copy) {
             zwp_virtual_keyboard_v1_key(kb->vkbd, time, 127, // COMP key
                                         WL_KEYBOARD_KEY_STATE_RELEASED);
         } else {
             if ((kb->shift_space_is_tab) && (kb->last_press->code == KEY_SPACE) && (unlatch_shift)) {
                 // shift + space is tab
+                unlatch_shift = false;
+                unlatch_tab = true;
+                kb->mods ^= Shift;
                 zwp_virtual_keyboard_v1_key(kb->vkbd, time, KEY_TAB,
                                             WL_KEYBOARD_KEY_STATE_RELEASED);
             } else {
@@ -312,10 +321,35 @@ kbd_unpress_key(struct kbd *kb, uint32_t time)
             }
         }
 
+        if (unlatch_shift) {
+            kb->mods ^= Shift;
+            zwp_virtual_keyboard_v1_key_mods(kb->vkbd, time, Shift, WL_KEYBOARD_KEY_STATE_RELEASED);
+        }
+        if (unlatch_ctrl) {
+            kb->mods ^= Ctrl;
+            zwp_virtual_keyboard_v1_key_mods(kb->vkbd, time, Ctrl, WL_KEYBOARD_KEY_STATE_RELEASED);
+        }
+        if (unlatch_alt) {
+            kb->mods ^= Alt;
+            zwp_virtual_keyboard_v1_key_mods(kb->vkbd, time, Alt, WL_KEYBOARD_KEY_STATE_RELEASED);
+        }
+        if (unlatch_super) {
+            kb->mods ^= Super;
+            zwp_virtual_keyboard_v1_key_mods(kb->vkbd, time, Super, WL_KEYBOARD_KEY_STATE_RELEASED);
+        }
+        if (unlatch_altgr) {
+            kb->mods ^= AltGr;
+            zwp_virtual_keyboard_v1_key_mods(kb->vkbd, time, AltGr, WL_KEYBOARD_KEY_STATE_RELEASED);
+        }
+
+        if (unlatch_shift||unlatch_ctrl||unlatch_alt||unlatch_super||unlatch_altgr||unlatch_tab) {
+            zwp_virtual_keyboard_v1_modifiers(kb->vkbd, kb->mods, 0, 0, 0);
+        }
+
         if (kb->compose >= 2) {
             kb->compose = 0;
             kbd_switch_layout(kb, kb->last_abc_layout, kb->last_abc_index);
-        } else if (unlatch_shift||unlatch_ctrl||unlatch_alt||unlatch_super||unlatch_altgr) {
+        } else if (unlatch_shift||unlatch_ctrl||unlatch_alt||unlatch_super||unlatch_altgr||unlatch_tab) {
             kbd_draw_layout(kb);
         } else {
             kbd_draw_key(kb, kb->last_press, Unpress);
@@ -392,6 +426,7 @@ kbd_press_key(struct kbd *kb, struct key *k, uint32_t time)
     switch (k->type) {
     case Code:
         if (k->code_mod) {
+            zwp_virtual_keyboard_v1_key_mods(kb->vkbd, time, k->code_mod, WL_KEYBOARD_KEY_STATE_PRESSED);
             if (k->reset_mod) {
                 zwp_virtual_keyboard_v1_modifiers(kb->vkbd, k->code_mod, 0, 0,
                                                   0);
@@ -406,7 +441,8 @@ kbd_press_key(struct kbd *kb, struct key *k, uint32_t time)
         kbd_draw_key(kb, k, Press);
         if ((kb->shift_space_is_tab) && (k->code == KEY_SPACE) && (kb->mods & Shift)) {
             // shift space is tab
-            zwp_virtual_keyboard_v1_modifiers(kb->vkbd, 0, 0, 0, 0);
+            zwp_virtual_keyboard_v1_key_mods(kb->vkbd, time, Shift, WL_KEYBOARD_KEY_STATE_RELEASED);
+            zwp_virtual_keyboard_v1_modifiers(kb->vkbd, kb->mods ^ Shift, 0, 0, 0);
             zwp_virtual_keyboard_v1_key(kb->vkbd, time, KEY_TAB,
                                         WL_KEYBOARD_KEY_STATE_PRESSED);
         } else {
@@ -423,6 +459,11 @@ kbd_press_key(struct kbd *kb, struct key *k, uint32_t time)
         break;
     case Mod:
         kb->mods ^= k->code;
+        if (kb->mods & k->code) {
+            zwp_virtual_keyboard_v1_key_mods(kb->vkbd, time, k->code, WL_KEYBOARD_KEY_STATE_PRESSED);
+        } else {
+            zwp_virtual_keyboard_v1_key_mods(kb->vkbd, time, k->code, WL_KEYBOARD_KEY_STATE_RELEASED);
+        }
         if ((k->code == Shift) || (k->code == CapsLock)) {
             kbd_draw_layout(kb);
         } else {
