@@ -7,8 +7,8 @@
 #include "math.h"
 
 void drwbuf_handle_release(void *data, struct wl_buffer *wl_buffer) {
-    struct drwbuf *db = data;
-    db->released = true;
+    struct drwsurf *ds = data;
+    ds->released = true;
 };
 
 const struct wl_buffer_listener buffer_listener = {
@@ -23,11 +23,11 @@ void drwsurf_handle_frame_cb(void* data, struct wl_callback* callback,
     ds->frame_cb = NULL;
 
     cairo_rectangle_int_t r = {0};
-    for (int i = 0; i < cairo_region_num_rectangles(ds->back_buffer->damage); i++) {
-        cairo_region_get_rectangle(ds->back_buffer->damage, i, &r);
+    for (int i = 0; i < cairo_region_num_rectangles(ds->damage); i++) {
+        cairo_region_get_rectangle(ds->damage, i, &r);
         wl_surface_damage(ds->surf, r.x, r.y, r.width, r.height);
     };
-    cairo_region_subtract(ds->display_buffer->damage, ds->display_buffer->damage);
+    cairo_region_subtract(ds->damage, ds->damage);
 
     drwsurf_attach(ds);
 }
@@ -50,8 +50,8 @@ void drwsurf_register_frame_cb(struct drwsurf *ds)
 void drwsurf_damage(struct drwsurf *ds, uint32_t x, uint32_t y, uint32_t w, uint32_t h)
 {
     cairo_rectangle_int_t rect = { x, y, w, h };
-    cairo_region_union_rectangle(ds->back_buffer->damage, &rect);
-    cairo_region_union_rectangle(ds->back_buffer->backport_damage, &rect);
+    cairo_region_union_rectangle(ds->damage, &rect);
+    cairo_region_union_rectangle(ds->backport_damage, &rect);
     drwsurf_register_frame_cb(ds);
 }
 
@@ -61,6 +61,15 @@ drwsurf_resize(struct drwsurf *ds, uint32_t w, uint32_t h, double s)
     ds->scale = s;
     ds->width = ceil(w * s);
     ds->height = ceil(h * s);
+
+    if (ds->damage)
+        cairo_region_destroy(ds->damage);
+    ds->damage = cairo_region_create();
+    if (ds->backport_damage)
+        cairo_region_destroy(ds->backport_damage);
+    ds->backport_damage = cairo_region_create();
+
+    ds->released = true;
 
     setup_buffer(ds, ds->back_buffer);
     setup_buffer(ds, ds->display_buffer);
@@ -75,8 +84,8 @@ drwsurf_backport(struct drwsurf *ds)
     cairo_set_operator(ds->back_buffer->cairo, CAIRO_OPERATOR_SOURCE);
 
     cairo_rectangle_int_t r = {0};
-    for (int i = 0; i < cairo_region_num_rectangles(ds->display_buffer->backport_damage); i++) {
-        cairo_region_get_rectangle(ds->display_buffer->backport_damage, i, &r);
+    for (int i = 0; i < cairo_region_num_rectangles(ds->backport_damage); i++) {
+        cairo_region_get_rectangle(ds->backport_damage, i, &r);
 
         cairo_set_source_surface(ds->back_buffer->cairo, ds->display_buffer->cairo_surf, 0, 0);
         cairo_rectangle(
@@ -90,7 +99,7 @@ drwsurf_backport(struct drwsurf *ds)
     };
 
     cairo_restore(ds->back_buffer->cairo);
-    cairo_region_subtract(ds->display_buffer->backport_damage, ds->display_buffer->backport_damage);
+    cairo_region_subtract(ds->backport_damage, ds->backport_damage);
 }
 
 void
@@ -98,15 +107,16 @@ drwsurf_attach(struct drwsurf *ds)
 {
     wl_surface_attach(ds->surf, ds->back_buffer->buf, 0, 0);
     wl_surface_commit(ds->surf);
-    ds->back_buffer->released = false;
+    ds->released = false;
     ds->attached = true;
 }
 
 void
 drwsurf_flip(struct drwsurf *ds)
 {
-    if (ds->back_buffer->released)
+    if (ds->released)
         return;
+    ds->released = true;
     struct drwbuf *tmp = ds->back_buffer;
     ds->back_buffer = ds->display_buffer;
     ds->display_buffer = tmp;
@@ -250,8 +260,7 @@ setup_buffer(struct drwsurf *drwsurf, struct drwbuf *drwbuf)
                                   stride, WL_SHM_FORMAT_ARGB8888);
     wl_shm_pool_destroy(pool);
     close(fd);
-    wl_buffer_add_listener(drwbuf->buf, &buffer_listener, drwbuf);
-    drwbuf->released = true;
+    wl_buffer_add_listener(drwbuf->buf, &buffer_listener, drwsurf);
 
 
     if (drwbuf->cairo_surf)
@@ -259,13 +268,6 @@ setup_buffer(struct drwsurf *drwsurf, struct drwbuf *drwbuf)
     drwbuf->cairo_surf = cairo_image_surface_create_for_data(
         drwbuf->pool_data, CAIRO_FORMAT_ARGB32, drwsurf->width,
         drwsurf->height, stride);
-
-    if (drwbuf->damage)
-        cairo_region_destroy(drwbuf->damage);
-    drwbuf->damage = cairo_region_create();
-    if (drwbuf->backport_damage)
-        cairo_region_destroy(drwbuf->backport_damage);
-    drwbuf->backport_damage = cairo_region_create();
 
     if (drwbuf->cairo)
         cairo_destroy(drwbuf->cairo);

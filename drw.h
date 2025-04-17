@@ -10,12 +10,10 @@ struct drw {
 struct drwbuf {
 	uint32_t size;
 	struct wl_buffer *buf;
-	cairo_region_t *damage, *backport_damage;
 	cairo_surface_t *cairo_surf;
 	cairo_t *cairo;
 	PangoLayout *layout;
 	unsigned char *pool_data;
-	bool released;
 };
 struct drwsurf {
 	uint32_t width, height;
@@ -26,7 +24,9 @@ struct drwsurf {
 	struct wl_shm *shm;
 	struct wl_callback *frame_cb;
 
+	cairo_region_t *damage, *backport_damage;
 	bool attached;
+	bool released;
 
 	struct drwbuf *back_buffer;
 	struct drwbuf *display_buffer;
