@@ -10,11 +10,12 @@ struct drw {
 struct drwbuf {
 	uint32_t size;
 	struct wl_buffer *buf;
-	cairo_region_t *damage;
+	cairo_region_t *damage, *backport_damage;
 	cairo_surface_t *cairo_surf;
 	cairo_t *cairo;
 	PangoLayout *layout;
 	unsigned char *pool_data;
+	bool released;
 };
 struct drwsurf {
 	uint32_t width, height;
@@ -34,6 +35,7 @@ struct kbd;
 
 void drwsurf_damage(struct drwsurf *ds, uint32_t x, uint32_t y, uint32_t w, uint32_t h);
 void drwsurf_resize(struct drwsurf *ds, uint32_t w, uint32_t h, double s);
+void drwsurf_attach(struct drwsurf *ds);
 void drwsurf_flip(struct drwsurf *ds);
 
 typedef union {

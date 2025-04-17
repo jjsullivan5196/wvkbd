@@ -517,7 +517,7 @@ xdg_popup_surface_configure(void *data, struct xdg_surface *xdg_surface,
 {
     xdg_surface_ack_configure(xdg_surface, serial);
     popup_xdg_surface_configured = true;
-    drwsurf_flip(&popup_draw_surf);
+    drwsurf_attach(&popup_draw_surf);
 }
 
 static const struct xdg_surface_listener xdg_popup_surface_listener = {
@@ -664,7 +664,7 @@ layer_surface_configure(void *data, struct zwlr_layer_surface_v1 *surface,
 
         zwlr_layer_surface_v1_ack_configure(surface, serial);
         kbd_resize(&keyboard, layouts, NumLayouts);
-        drwsurf_flip(&draw_surf);
+        drwsurf_attach(&draw_surf);
     } else {
         zwlr_layer_surface_v1_ack_configure(surface, serial);
     }
