@@ -131,6 +131,7 @@ drw_draw_text(struct drwsurf *ds, Color color, uint32_t x, uint32_t y,
 {
     drwsurf_flip(ds);
     struct drwbuf *d = ds->back_buffer;
+    drwsurf_damage(ds, x, y, w, h);
 
     cairo_save(d->cairo);
 
@@ -159,6 +160,7 @@ drw_do_clear(struct drwsurf *ds, uint32_t x, uint32_t y, uint32_t w, uint32_t h)
 {
     drwsurf_flip(ds);
     struct drwbuf *d = ds->back_buffer;
+    drwsurf_damage(ds, x, y, w, h);
 
     cairo_save(d->cairo);
 
@@ -175,6 +177,7 @@ drw_do_rectangle(struct drwsurf *ds, Color color, uint32_t x, uint32_t y,
 {
     drwsurf_flip(ds);
     struct drwbuf *d = ds->back_buffer;
+    drwsurf_damage(ds, x, y, w, h);
 
     cairo_save(d->cairo);
 
