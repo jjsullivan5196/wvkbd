@@ -28,7 +28,7 @@
 #define countof(x) (sizeof(x) / sizeof(*x))
 
 /* client state */
-static const char *namespace = "wlroots";
+static const char *namespace = "wvkbd";
 static struct wl_display *display;
 static struct wl_compositor *compositor;
 static struct wl_seat *seat;
