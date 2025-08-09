@@ -717,6 +717,9 @@ usage(char *argv0)
             "  -l                     - Comma separated list of layers\n");
     fprintf(stderr, "  --landscape-layers     - Comma separated list of "
                     "landscape layers\n");
+    fprintf(stderr, "  --non-exclusive        - Allow the keyboard to overlap"
+                    " windows. Do not request an exclusive zone from the"
+                    "compositor\n");
 }
 
 void
@@ -783,7 +786,9 @@ show()
 
     zwlr_layer_surface_v1_set_size(layer_surface, 0, height);
     zwlr_layer_surface_v1_set_anchor(layer_surface, anchor);
-    zwlr_layer_surface_v1_set_exclusive_zone(layer_surface, height);
+    if (keyboard.exclusive) {
+        zwlr_layer_surface_v1_set_exclusive_zone(layer_surface, height);
+    }
     zwlr_layer_surface_v1_set_keyboard_interactivity(layer_surface, false);
     zwlr_layer_surface_v1_add_listener(layer_surface, &layer_surface_listener,
                                        NULL);
@@ -852,6 +857,7 @@ main(int argc, char **argv)
     keyboard.layer_index = 0;
     keyboard.preferred_scale = 1;
     keyboard.preferred_fractional_scale = 0;
+    keyboard.exclusive = true;
 
     uint8_t alpha = 0;
     bool alpha_defined = false;
@@ -987,6 +993,8 @@ main(int argc, char **argv)
                    (!strcmp(argv[i], "--list-layers"))) {
             list_layers();
             exit(0);
+        } else if ((!strcmp(argv[i], "-non-exclusive")) || (!strcmp(argv[i], "--non-exclusive"))) {
+            keyboard.exclusive = false;
         } else {
             fprintf(stderr, "Invalid argument: %s\n", argv[i]);
             usage(argv[0]);

@@ -102,6 +102,7 @@ struct kbd {
 	double preferred_scale, preferred_fractional_scale;
 	bool landscape;
 	bool shift_space_is_tab;
+	bool exclusive;
 	uint8_t mods;
 	uint8_t compose;
 	struct key *last_press;
