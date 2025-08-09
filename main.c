@@ -611,7 +611,7 @@ layer_surface_configure(void *data, struct zwlr_layer_surface_v1 *surface,
     }
 
     if (keyboard.w != w || keyboard.h != h || keyboard.scale != scale ||
-        hidden) {
+        keyboard.output != current_output || hidden) {
 
         keyboard.w = w;
         keyboard.h = h;
@@ -665,6 +665,7 @@ layer_surface_configure(void *data, struct zwlr_layer_surface_v1 *surface,
         zwlr_layer_surface_v1_ack_configure(surface, serial);
         kbd_resize(&keyboard, layouts, NumLayouts);
         drwsurf_attach(&draw_surf);
+        keyboard.output = current_output;
     } else {
         zwlr_layer_surface_v1_ack_configure(surface, serial);
     }

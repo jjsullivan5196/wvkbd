@@ -111,6 +111,7 @@ struct kbd {
 	size_t last_abc_index; //the layer index of the last alphabetical layout
 
 	struct layout *layouts;
+	struct Output *output; //only used to keep track of landscape flipping, never dereferenced
 	enum layout_id *layers;
 	enum layout_id *landscape_layers;
 
