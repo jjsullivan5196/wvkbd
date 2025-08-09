@@ -105,7 +105,7 @@ layout by name, even layouts not explicitly added to your layers on startup.
 
 Any contributions are welcome, there are two ways to contribute, the first one is **preferred**:
 
-1. [Sourcehut](https://git.sr.ht/~proycon/wvkbd) - Submit your patches using `git mail` to [~mil/sxmo-devel@lists.sr.ht](mailto:~mil/sxmo-devel@lists.sr.ht), follow [these contribution guidelines](https://sxmo.org/contribute/). Questions can also be asked on Sxmo's [mailing lists](https://sxmo.org/support/).
+1. [Sourcehut](https://git.sr.ht/~proycon/wvkbd) - Submit your patches using `git send-email` to [~mil/sxmo-devel@lists.sr.ht](mailto:~mil/sxmo-devel@lists.sr.ht), follow [these contribution guidelines](https://sxmo.org/contribute/). Questions can also be asked on Sxmo's [mailing lists](https://sxmo.org/support/).
 2. [Github](https://github.com/jjsullivan5196/wvkbd/) - Submit a pull request or open an issue *(legacy method)*
 
 This project was started by [John Sullivan](https://jsullivan.cc/) and is
