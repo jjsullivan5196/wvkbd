@@ -9,3 +9,4 @@ wvkbd
 *.1
 config.h
 wvkbd-mobintl
+wvkbd-deskintl

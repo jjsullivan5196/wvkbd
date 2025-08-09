@@ -49,9 +49,13 @@ Make any customizations you would like in `config.def.h` and run `make`
 The default set of layouts is called `mobintl` *(mobile international)*, which groups various layouts aimed at mobile devices
 and also attempts to accommodate various international users. The resulting binary is called `wvkbd-mobintl`.
 
+The other set of layouts is called `deskintl` *(desktop international)*, which groups layouts aimed at desktop, laptop, and
+tablet devices with a larger touchscreen. The set is US-International English. Run `make LAYOUT=deskintl`. The resulting binary
+is called `wvkbd-deskintl`.
+
 You can, however, define your own layouts by copying and modifying `layout.mobintl.h` and `keymap.mobintl.h`
-(replace `mobintl` for something like `yourlayout`). Then make your layout set using `make LAYOUT=yourlayout`, and
-the resulting binary will be `wvkbd-yourlayout`
+(replace `mobintl` for something like `yourlayout`), or `layout.deskintl.h` and `keymap.deskintl.h`. Then make your layout set
+using `make LAYOUT=yourlayout`, and the resulting binary will be `wvkbd-yourlayout`.
 
 ## Usage
 
