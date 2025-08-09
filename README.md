@@ -44,22 +44,20 @@ You'll need the following developer packages
 
 You also need [scdoc](https://git.sr.ht/~sircmpwn/scdoc/) to generate the documentation.
 
-Make any customizations you would like in `config.def.h` and run `make`
-
 The default set of layouts is called `mobintl` *(mobile international)*, which groups various layouts aimed at mobile devices
-and also attempts to accommodate various international users. The resulting binary is called `wvkbd-mobintl`.
+and also attempts to accommodate various international users. Run `make`. The resulting binary is called `wvkbd-mobintl`.
 
 The other set of layouts is called `deskintl` *(desktop international)*, which groups layouts aimed at desktop, laptop, and
 tablet devices with a larger touchscreen. The set is US-International English. Run `make LAYOUT=deskintl`. The resulting binary
 is called `wvkbd-deskintl`.
 
-You can, however, define your own layouts by copying and modifying `layout.mobintl.h` and `keymap.mobintl.h`
-(replace `mobintl` for something like `yourlayout`), or `layout.deskintl.h` and `keymap.deskintl.h`. Then make your layout set
-using `make LAYOUT=yourlayout`, and the resulting binary will be `wvkbd-yourlayout`.
+You can, however, define your own layouts by copying and modifying `config.mobintl.h`, `layout.mobintl.h` and `keymap.mobintl.h`
+(replace `mobintl` for something like `yourlayout`), or `config.deskintl.h`, `layout.deskintl.h` and `keymap.deskintl.h`. Then
+make your layout set using `make LAYOUT=yourlayout`, and the resulting binary will be `wvkbd-yourlayout`.
 
 ## Usage
 
-Run `wvkbd-mobintl` (or the binary for your custom layout set).
+Run `wvkbd-mobintl`, `wvkbd-deskintl` or the binary for your custom layout set.
 
 You can switch between the layouts/layers of the keyboard by pressing the
 ⌨ key (little keyboard) the bottom-left (press shift to iterate back instead of
