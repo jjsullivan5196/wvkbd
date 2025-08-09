@@ -7,6 +7,7 @@ wvkbd - on-screen virtual keyboard for wayland compositors using wlroots
 # SYNOPSIS
 
 wvkbd-mobintl [OPTIONS]...
+wvkbd-deskintl [OPTIONS]...
 
 *NOTE*: Your binary may have a different suffix depending on which layout you compiled.
 
@@ -49,6 +50,10 @@ can be patched to add new features.
 
 *--hidden*
 	Start hidden (send SIGUSR2 to show).
+
+*--non-exclusive*
+	Allow keyboard to overlap existing windows, do not request an
+	exclusive zone from the compositor.
 
 *--alpha* _int_
 	Set alpha value (i.e. transparency) for all colors [0-255]
