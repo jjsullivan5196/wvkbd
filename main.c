@@ -1058,6 +1058,11 @@ main(int argc, char **argv)
     if (keyboard.vkbd == NULL) {
         die("failed to init virtual keyboard_manager\n");
     }
+    #ifdef SHIFT_SPACE_IS_TAB
+    keyboard.shift_space_is_tab = true;
+    #else
+    keyboard.shift_space_is_tab = false;
+    #endif
 
     kbd_init(&keyboard, (struct layout *)&layouts, layer_names_list,
              landscape_layer_names_list);

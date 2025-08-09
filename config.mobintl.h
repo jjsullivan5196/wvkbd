@@ -3,6 +3,7 @@
 
 #define DEFAULT_FONT "Sans 14"
 #define DEFAULT_ROUNDING 5
+#define SHIFT_SPACE_IS_TAB
 static const int transparency = 255;
 
 struct clr_scheme schemes[] = {
