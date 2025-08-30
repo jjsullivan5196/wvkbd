@@ -12,6 +12,7 @@
 enum layout_id {
 	Full = 0,
 	Special,
+	Cyrillic,
 	ComposeA,
 	ComposeE,
 	ComposeY,
@@ -40,11 +41,21 @@ enum layout_id {
 	ComposeMath,
 	ComposePunctuation,
 	ComposeBracket,
+	ComposeCyrI,
+	ComposeCyrJ,
+	ComposeCyrE,
+	ComposeCyrL,
+	ComposeCyrU,
+	ComposeCyrN,
+	ComposeCyrTse,
+	ComposeCyrChe,
+	ComposeCyrG,
+	ComposeCyrK,
 	Index,
 	NumLayouts,
 };
 
-static struct key keys_full[], keys_special[],
+static struct key keys_full[], keys_special[], keys_cyrillic[],
   keys_compose_a[],
   keys_compose_e[], keys_compose_y[], keys_compose_u[], keys_compose_i[],
   keys_compose_o[], keys_compose_w[], keys_compose_r[], keys_compose_t[],
@@ -53,13 +64,17 @@ static struct key keys_full[], keys_special[],
   keys_compose_l[], keys_compose_z[], keys_compose_x[], keys_compose_c[],
   keys_compose_v[], keys_compose_b[], keys_compose_n[], keys_compose_m[],
   keys_compose_math[], keys_compose_punctuation[], keys_compose_bracket[],
-  keys_index[];
+  keys_compose_cyr_i[], keys_compose_cyr_j[], keys_compose_cyr_e[],
+  keys_compose_cyr_u[], keys_compose_cyr_l[], keys_compose_cyr_n[],
+  keys_compose_cyr_tse[], keys_compose_cyr_che[], keys_compose_cyr_g[],
+  keys_compose_cyr_k[], keys_index[];
 
 static struct layout layouts[NumLayouts] = {
   [Full] = {keys_full, "latin", "full", true}, // second parameter is the keymap name
                                          // third parameter is the layout name
 										 // last parameter indicates if it's an alphabetical/primary layout
   [Special] = {keys_special, "latin", "special", false},
+  [Cyrillic] = {keys_cyrillic, "cyrillic", "cyrillic", true},
   [ComposeA] = {keys_compose_a, "latin"},
   [ComposeE] = {keys_compose_e, "latin"},
   [ComposeY] = {keys_compose_y, "latin"},
@@ -88,6 +103,16 @@ static struct layout layouts[NumLayouts] = {
   [ComposeMath] = {keys_compose_math, "latin"},
   [ComposePunctuation] = {keys_compose_punctuation, "latin"},
   [ComposeBracket] = {keys_compose_bracket, "latin"},
+  [ComposeCyrI] = {keys_compose_cyr_i, "cyrillic"},
+  [ComposeCyrJ] = {keys_compose_cyr_j, "cyrillic"},
+  [ComposeCyrE] = {keys_compose_cyr_e, "cyrillic"},
+  [ComposeCyrU] = {keys_compose_cyr_u, "cyrillic"},
+  [ComposeCyrL] = {keys_compose_cyr_l, "cyrillic"},
+  [ComposeCyrN] = {keys_compose_cyr_n, "cyrillic"},
+  [ComposeCyrTse] = {keys_compose_cyr_tse, "cyrillic"},
+  [ComposeCyrChe] = {keys_compose_cyr_che, "cyrillic"},
+  [ComposeCyrG] = {keys_compose_cyr_g, "cyrillic"},
+  [ComposeCyrK] = {keys_compose_cyr_k, "cyrillic"},
 
   [Index] = {keys_index,"latin","index", false},
 };
@@ -250,6 +275,100 @@ static struct key keys_special[] = {
   {"", "", 0.0, Last},
 };
 
+static struct key keys_cyrillic[] = {
+  {"Esc", "Esc", 1.25, Code, KEY_ESC, .scheme = 1},
+  {"F1", "F1", 1.0, Code, KEY_F1, .scheme = 1},
+  {"F2", "F2", 1.0, Code, KEY_F2, .scheme = 1},
+  {"F3", "F3", 1.0, Code, KEY_F3, .scheme = 1},
+  {"F4", "F4", 1.0, Code, KEY_F4, .scheme = 1},
+  {"F5", "F5", 1.0, Code, KEY_F5, .scheme = 1},
+  {"F6", "F6", 1.0, Code, KEY_F6, .scheme = 1},
+  {"F7", "F7", 1.0, Code, KEY_F7, .scheme = 1},
+  {"F8", "F8", 1.0, Code, KEY_F8, .scheme = 1},
+  {"F9", "F9", 1.0, Code, KEY_F9, .scheme = 1},
+  {"F10", "F10", 1.0, Code, KEY_F10, .scheme = 1},
+  {"F11", "F11", 1.0, Code, KEY_F11, .scheme = 1},
+  {"F12", "F12", 1.0, Code, KEY_F12, .scheme = 1},
+  {"Del", "Del", 1.25, Code, KEY_DELETE, .scheme = 1},
+  {"", "", 0.0, EndRow},
+
+  {"ё", "Ё", 1.0, Code, KEY_GRAVE},
+  {"1", "!", 1.0, Code, KEY_1},
+  {"2", "\"", 1.0, Code, KEY_2},
+  {"3", "#", 1.0, Code, KEY_3},
+  {"4", "*", 1.0, Code, KEY_4},
+  {"5", ":", 1.0, Code, KEY_5},
+  {"6", ",", 1.0, Code, KEY_6},
+  {"7", ".", 1.0, Code, KEY_7},
+  {"8", ";", 1.0, Code, KEY_8},
+  {"9", "(", 1.0, Code, KEY_9, &layouts[ComposeBracket]},
+  {"0", ")", 1.0, Code, KEY_0, &layouts[ComposeBracket]},
+  {"-", "_", 1.0, Code, KEY_MINUS, &layouts[ComposeBracket]},
+  {"=", "+", 1.0, Code, KEY_EQUAL, &layouts[ComposeBracket]},
+  {"⌫", "⌫", 1.5, Code, KEY_BACKSPACE, .scheme = 1},
+  {"", "", 0.0, EndRow},
+
+  {"Tab", "Tab", 1.5, Code, KEY_TAB, .scheme = 1},
+  {"й", "Й", 1.0, Code, KEY_Q, &layouts[ComposeCyrJ]},
+  {"ц", "Ц", 1.0, Code, KEY_W, &layouts[ComposeCyrTse]},
+  {"у", "У", 1.0, Code, KEY_E},
+  {"к", "К", 1.0, Code, KEY_R, &layouts[ComposeCyrK]},
+  {"е", "Е", 1.0, Code, KEY_T, &layouts[ComposeCyrE]},
+  {"н", "Н", 1.0, Code, KEY_Y},
+  {"г", "Г", 1.0, Code, KEY_U, &layouts[ComposeCyrG]},
+  {"ш", "ш", 1.0, Code, KEY_I},
+  {"щ", "щ", 1.0, Code, KEY_O},
+  {"з", "з", 1.0, Code, KEY_P},
+  {"х", "Х", 1.0, Code, KEY_LEFTBRACE},
+  {"ъ", "Ъ", 1.0, Code, KEY_RIGHTBRACE},
+  {"\\", "|", 1.0, Code, KEY_BACKSLASH},
+  {"", "", 0.0, EndRow},
+
+  {"Cmp", "Cmp", 1.0, Compose, .scheme = 1},
+  {"Caps", "Caps", 1.0, Mod, CapsLock, .scheme = 1},
+  {"ф", "Ф", 1.0, Code, KEY_A},
+  {"ы", "Ы", 1.0, Code, KEY_S, &layouts[ComposeCyrI]},
+  {"в", "В", 1.0, Code, KEY_D},
+  {"а", "А", 1.0, Code, KEY_F},
+  {"п", "П", 1.0, Code, KEY_G},
+  {"р", "Р", 1.0, Code, KEY_H},
+  {"о", "О", 1.0, Code, KEY_J},
+  {"л", "Л", 1.0, Code, KEY_K, &layouts[ComposeCyrL]},
+  {"д", "Д", 1.0, Code, KEY_L},
+  {"ж", "Ж", 1.0, Code, KEY_SEMICOLON},
+  {"э","Э", 1.0, Code, KEY_APOSTROPHE, &layouts[ComposeCyrE]},
+  {"Enter", "Enter", 1.5, Code, KEY_ENTER, .scheme = 1},
+  {"", "", 0.0, EndRow},
+
+  {"⇧", "⇫", 2.5, Mod, Shift, .scheme = 1},
+  {"я", "Я", 1.0, Code, KEY_Z},
+  {"ч", "Ч", 1.0, Code, KEY_X, &layouts[ComposeCyrChe]},
+  {"c", "С", 1.0, Code, KEY_C},
+  {"м", "М", 1.0, Code, KEY_V},
+  {"и", "И", 1.0, Code, KEY_B, &layouts[ComposeCyrI]},
+  {"т", "Т", 1.0, Code, KEY_N},
+  {"ь", "Ь", 1.0, Code, KEY_M},
+  {"б", "Б", 1.0, Code, KEY_COMMA},
+  {"ю", "Ю", 1.0, Code, KEY_DOT},
+  {"/", "?", 1.0, Code, KEY_SLASH, &layouts[ComposePunctuation]},
+  {"↑", "↑", 1.0, Code, KEY_UP, .scheme = 1},
+  {"⇧", "⇫", 1.0, Mod, Shift, .scheme = 1},
+  {"", "", 0.0, EndRow},
+
+  {"⌨͕", "⌨͔", 1.5, NextLayer, .scheme = 1},
+  {"Ctr", "Ctr", 1.0, Mod, Ctrl, .scheme = 1},
+  {"Sup", "Sup", 1.0, Mod, Super, .scheme = 1},
+  {"Alt", "Alt", 1.0, Mod, Alt, .scheme = 1},
+  {"", "", 5.0, Code, KEY_SPACE},
+  {"AGr", "AGr", 1.0, Mod, AltGr, .scheme = 1},
+  {"Ctr", "Ctr", 1.0, Mod, Ctrl, .scheme = 1},
+  {"←", "←", 1.0, Code, KEY_LEFT, .scheme = 1},
+  {"↓", "↓", 1.0, Code, KEY_DOWN, .scheme = 1},
+  {"→", "→", 1.0, Code, KEY_RIGHT, .scheme = 1},
+  /* end of layout */
+  {"", "", 0.0, Last},
+};
+
 static struct key keys_compose_a[] = {
   {"à", "À", 1.0, Copy, 0x00E0, 0, 0x00C0},
   {"á", "Á", 1.0, Copy, 0x00E1, 0, 0x00C1},
@@ -388,6 +507,7 @@ static struct key keys_compose_i[] = {
 static struct key keys_index[] = {
   {"Full", "Full", 1.0, Layout, 0, &layouts[Full], .scheme = 1},
   {"Special", "Special", 1.0, Layout, 0, &layouts[Special], .scheme = 1},
+  {"Абв", "Абв", 1.0, Layout, 0, &layouts[Cyrillic], .scheme = 1},
   {"", "", 0.0, Last},
 };
 
@@ -749,5 +869,139 @@ static struct key keys_compose_bracket[] = {
   {"Abc", "Abc", 1.0, BackLayer, .scheme = 1},
   {"Ctr", "Ctr", 1.0, Mod, Ctrl, .scheme = 1},
   {"", "", 8, Pad},
+  {"", "", 0.0, Last},
+};
+
+static struct key keys_compose_cyr_i[] = {
+  {"і", "І", 1.0, Copy, 0x0456, 0, 0x0406},
+  {"ї", "Ї", 1.0, Copy, 0x0457, 0, 0x0407},
+  {"", "", 8.0, Pad},
+  {"", "", 0.0, EndRow},
+  {"", "", 0.0, EndRow},
+  {"⇧", "⇫", 1.5, Mod, Shift, .scheme = 1},
+  {"", "", 8.5, Pad},
+  {"", "", 0.0, EndRow},
+  {"Абв", "Абв", 1.0, BackLayer, .scheme = 1},
+  {"", "", 9, Pad},
+  {"", "", 0.0, Last},
+};
+
+static struct key keys_compose_cyr_j[] = {
+  {"ј", "Ј", 1.0, Copy, 0x0458, 0, 0x0408},
+  {"", "", 9.0, Pad},
+  {"", "", 0.0, EndRow},
+  {"", "", 0.0, EndRow},
+  {"⇧", "⇫", 1.5, Mod, Shift, .scheme = 1},
+  {"", "", 8.5, Pad},
+  {"", "", 0.0, EndRow},
+  {"Абв", "Абв", 1.0, BackLayer, .scheme = 1},
+  {"", "", 9, Pad},
+  {"", "", 0.0, Last},
+};
+
+static struct key keys_compose_cyr_e[] = {
+  {"є", "Є", 1.0, Copy, 0x0454, 0, 0x0404},
+  {"", "", 9.0, Pad},
+  {"", "", 0.0, EndRow},
+  {"", "", 0.0, EndRow},
+  {"⇧", "⇫", 1.5, Mod, Shift, .scheme = 1},
+  {"", "", 8.5, Pad},
+  {"", "", 0.0, EndRow},
+  {"Абв", "Абв", 1.0, BackLayer, .scheme = 1},
+  {"", "", 9, Pad},
+  {"", "", 0.0, Last},
+};
+
+static struct key keys_compose_cyr_u[] = {
+  {"ў", "Ў", 1.0, Copy, 0x045E, 0, 0x040E},
+  {"", "", 9.0, Pad},
+  {"", "", 0.0, EndRow},
+  {"", "", 0.0, EndRow},
+  {"⇧", "⇫", 1.5, Mod, Shift, .scheme = 1},
+  {"", "", 8.5, Pad},
+  {"", "", 0.0, EndRow},
+  {"Абв", "Абв", 1.0, BackLayer, .scheme = 1},
+  {"", "", 9, Pad},
+  {"", "", 0.0, Last},
+};
+
+static struct key keys_compose_cyr_l[] = {
+  {"љ", "Љ", 1.0, Copy, 0x0459, 0, 0x0409},
+  {"", "", 9.0, Pad},
+  {"", "", 0.0, EndRow},
+  {"", "", 0.0, EndRow},
+  {"⇧", "⇫", 1.5, Mod, Shift, .scheme = 1},
+  {"", "", 8.5, Pad},
+  {"", "", 0.0, EndRow},
+  {"Абв", "Абв", 1.0, BackLayer, .scheme = 1},
+  {"", "", 9, Pad},
+  {"", "", 0.0, Last},
+};
+
+static struct key keys_compose_cyr_n[] = {
+  {"њ", "Њ", 1.0, Copy, 0x045A, 0, 0x040A},
+  {"", "", 9.0, Pad},
+  {"", "", 0.0, EndRow},
+  {"", "", 0.0, EndRow},
+  {"⇧", "⇫", 1.5, Mod, Shift, .scheme = 1},
+  {"", "", 8.5, Pad},
+  {"", "", 0.0, EndRow},
+  {"Абв", "Абв", 1.0, BackLayer, .scheme = 1},
+  {"", "", 9, Pad},
+  {"", "", 0.0, Last},
+};
+
+static struct key keys_compose_cyr_che[] = {
+  {"ћ", "Ћ", 1.0, Copy, 0x045B, 0, 0x040B},
+  {"ђ", "Ђ", 1.0, Copy, 0x0452, 0, 0x0402},
+  {"", "", 8.0, Pad},
+  {"", "", 0.0, EndRow},
+  {"", "", 0.0, EndRow},
+  {"⇧", "⇫", 1.5, Mod, Shift, .scheme = 1},
+  {"", "", 8.5, Pad},
+  {"", "", 0.0, EndRow},
+  {"Абв", "Абв", 1.0, BackLayer, .scheme = 1},
+  {"", "", 9, Pad},
+  {"", "", 0.0, Last},
+};
+
+static struct key keys_compose_cyr_tse[] = {
+  {"џ", "Џ", 1.0, Copy, 0x045F, 0, 0x040F},
+  {"ѕ", "Ѕ", 1.0, Copy, 0x0455, 0, 0x0405},
+  {"", "", 8.0, Pad},
+  {"", "", 0.0, EndRow},
+  {"", "", 0.0, EndRow},
+  {"⇧", "⇫", 1.5, Mod, Shift, .scheme = 1},
+  {"", "", 8.5, Pad},
+  {"", "", 0.0, EndRow},
+  {"Абв", "Абв", 1.0, BackLayer, .scheme = 1},
+  {"", "", 9, Pad},
+  {"", "", 0.0, Last},
+};
+
+static struct key keys_compose_cyr_g[] = {
+  {"ѓ", "Ѓ", 1.0, Copy, 0x0453, 0, 0x0403},
+  {"ґ", "Ґ", 1.0, Copy, 0x0491, 0, 0x0490},
+  {"", "", 8.0, Pad},
+  {"", "", 0.0, EndRow},
+  {"", "", 0.0, EndRow},
+  {"⇧", "⇫", 1.5, Mod, Shift, .scheme = 1},
+  {"", "", 8.5, Pad},
+  {"", "", 0.0, EndRow},
+  {"Абв", "Абв", 1.0, BackLayer, .scheme = 1},
+  {"", "", 9, Pad},
+  {"", "", 0.0, Last},
+};
+
+static struct key keys_compose_cyr_k[] = {
+  {"ќ", "Ќ", 1.0, Copy, 0x0453, 0, 0x040C},
+  {"", "", 9.0, Pad},
+  {"", "", 0.0, EndRow},
+  {"", "", 0.0, EndRow},
+  {"⇧", "⇫", 1.5, Mod, Shift, .scheme = 1},
+  {"", "", 8.5, Pad},
+  {"", "", 0.0, EndRow},
+  {"Абв", "Абв", 1.0, BackLayer, .scheme = 1},
+  {"", "", 9, Pad},
   {"", "", 0.0, Last},
 };
