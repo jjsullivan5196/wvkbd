@@ -47,6 +47,7 @@ static struct wp_fractional_scale_manager_v1 *wfs_mgr;
 static struct wp_viewport *draw_surf_viewport, *popup_draw_surf_viewport;
 static struct wp_viewporter *viewporter;
 static bool popup_xdg_surface_configured;
+static bool layer_surface_configured;
 
 struct Output {
     uint32_t name;
@@ -194,7 +195,7 @@ wl_touch_down(void *data, struct wl_touch *wl_touch, uint32_t serial,
               uint32_t time, struct wl_surface *surface, int32_t id,
               wl_fixed_t x, wl_fixed_t y)
 {
-    if(!popup_xdg_surface_configured) {
+    if(!layer_surface_configured || !popup_xdg_surface_configured) {
         return;
     }
 
@@ -220,7 +221,7 @@ void
 wl_touch_up(void *data, struct wl_touch *wl_touch, uint32_t serial,
             uint32_t time, int32_t id)
 {
-    if(!popup_xdg_surface_configured) {
+    if(!layer_surface_configured || !popup_xdg_surface_configured) {
         return;
     }
 
@@ -231,7 +232,7 @@ void
 wl_touch_motion(void *data, struct wl_touch *wl_touch, uint32_t time,
                 int32_t id, wl_fixed_t x, wl_fixed_t y)
 {
-    if(!popup_xdg_surface_configured) {
+    if(!layer_surface_configured || !popup_xdg_surface_configured) {
         return;
     }
 
@@ -283,7 +284,7 @@ void
 wl_pointer_motion(void *data, struct wl_pointer *wl_pointer, uint32_t time,
                   wl_fixed_t surface_x, wl_fixed_t surface_y)
 {
-    if(!popup_xdg_surface_configured) {
+    if(!layer_surface_configured || !popup_xdg_surface_configured) {
         return;
     }
 
@@ -299,7 +300,7 @@ void
 wl_pointer_button(void *data, struct wl_pointer *wl_pointer, uint32_t serial,
                   uint32_t time, uint32_t button, uint32_t state)
 {
-    if(!popup_xdg_surface_configured) {
+    if(!layer_surface_configured || !popup_xdg_surface_configured) {
         return;
     }
 
@@ -328,7 +329,7 @@ void
 wl_pointer_axis(void *data, struct wl_pointer *wl_pointer, uint32_t time,
                 uint32_t axis, wl_fixed_t value)
 {
-    if(!popup_xdg_surface_configured) {
+    if(!layer_surface_configured || !popup_xdg_surface_configured) {
         return;
     }
 
@@ -558,11 +559,14 @@ flip_landscape()
 {
     bool previous_landscape = keyboard.landscape;
 
+    
     if (current_output) {
         keyboard.landscape = current_output->w > current_output->h;
     } else if (wl_outputs_size) {
         keyboard.landscape = wl_outputs[0].w > wl_outputs[0].h;
     }
+    
+    
 
     enum layout_id layer;
     if (keyboard.landscape) {
@@ -579,7 +583,7 @@ flip_landscape()
     keyboard.last_abc_layout = keyboard.layout;
     keyboard.last_abc_index = 0;
 
-    if (layer_surface && previous_landscape != keyboard.landscape) {
+    if (layer_surface && layer_surface_configured && previous_landscape != keyboard.landscape) {
         if (popup_xdg_popup) {
             xdg_popup_destroy(popup_xdg_popup);
             popup_xdg_popup = NULL;
@@ -595,8 +599,18 @@ flip_landscape()
 
         zwlr_layer_surface_v1_destroy(layer_surface);
         layer_surface = NULL;
+        layer_surface_configured = false;
+        
+        // Cancel pending frame callback before destroying surface
+        if (draw_surf.frame_cb) {
+            wl_callback_destroy(draw_surf.frame_cb);
+            draw_surf.frame_cb = NULL;
+        }
+        
         wl_surface_destroy(draw_surf.surf);
+        draw_surf.attached = false;
 
+        
         show();
     }
 }
@@ -605,13 +619,18 @@ void
 layer_surface_configure(void *data, struct zwlr_layer_surface_v1 *surface,
                         uint32_t serial, uint32_t w, uint32_t h)
 {
+    if (surface != layer_surface) {
+        // Configure event for old/destroyed surface, ignore it
+        return;
+    }
+    
     double scale = keyboard.preferred_scale;
     if (keyboard.preferred_fractional_scale) {
         scale = keyboard.preferred_fractional_scale;
     }
 
     if (keyboard.w != w || keyboard.h != h || keyboard.scale != scale ||
-        keyboard.output != current_output || hidden) {
+        keyboard.output != current_output || hidden || !layer_surface_configured) {
 
         keyboard.w = w;
         keyboard.h = h;
@@ -663,12 +682,16 @@ layer_surface_configure(void *data, struct zwlr_layer_surface_v1 *surface,
         wl_surface_commit(popup_draw_surf.surf);
 
         zwlr_layer_surface_v1_ack_configure(surface, serial);
+
         kbd_resize(&keyboard, layouts, NumLayouts);
         drwsurf_attach(&draw_surf);
+        layer_surface_configured = true;
         keyboard.output = current_output;
     } else {
         zwlr_layer_surface_v1_ack_configure(surface, serial);
+        layer_surface_configured = true;
     }
+    
 }
 
 void
@@ -750,8 +773,17 @@ hide()
     }
 
     zwlr_layer_surface_v1_destroy(layer_surface);
+    
+    // Cancel pending frame callback before destroying surface
+    if (draw_surf.frame_cb) {
+        wl_callback_destroy(draw_surf.frame_cb);
+        draw_surf.frame_cb = NULL;
+    }
+    
     wl_surface_destroy(draw_surf.surf);
+    draw_surf.attached = false;
     layer_surface = NULL;
+    layer_surface_configured = false;
     hidden = true;
 }
 
@@ -792,6 +824,7 @@ show()
     zwlr_layer_surface_v1_set_keyboard_interactivity(layer_surface, false);
     zwlr_layer_surface_v1_add_listener(layer_surface, &layer_surface_listener,
                                        NULL);
+    layer_surface_configured = false;
     wl_surface_commit(draw_surf.surf);
 }
 
