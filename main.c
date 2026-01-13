@@ -47,18 +47,10 @@ static struct wp_fractional_scale_manager_v1 *wfs_mgr;
 static struct wp_viewport *draw_surf_viewport, *popup_draw_surf_viewport;
 static struct wp_viewporter *viewporter;
 static bool popup_xdg_surface_configured;
+static bool layer_surface_configured;
 
-struct Output {
-    uint32_t name;
-    uint32_t w, h;
-    double scale;
-    struct wl_output *data;
-};
-static struct Output *current_output;
-
-#define WL_OUTPUTS_LIMIT 8
-static struct Output wl_outputs[WL_OUTPUTS_LIMIT];
-static int wl_outputs_size;
+static uint32_t available_width, available_height = 0;
+static void refresh_available_dimension();
 
 /* drawing */
 static struct drw draw_ctx;
@@ -116,11 +108,6 @@ static void seat_handle_capabilities(void *data, struct wl_seat *wl_seat,
 static void seat_handle_name(void *data, struct wl_seat *wl_seat,
                              const char *name);
 
-static void wl_surface_enter(void *data, struct wl_surface *wl_surface,
-                             struct wl_output *wl_output);
-static void wl_surface_leave(void *data, struct wl_surface *wl_surface,
-                             struct wl_output *wl_output);
-
 static void handle_global(void *data, struct wl_registry *registry,
                           uint32_t name, const char *interface,
                           uint32_t version);
@@ -132,8 +119,9 @@ static void layer_surface_configure(void *data,
                                     uint32_t serial, uint32_t w, uint32_t h);
 static void layer_surface_closed(void *data,
                                  struct zwlr_layer_surface_v1 *surface);
-static void flip_landscape();
+static void redimension_keyboard();
 static void show();
+static void hide();
 
 /* event handlers */
 static const struct wl_pointer_listener pointer_listener = {
@@ -159,14 +147,57 @@ static const struct wl_seat_listener seat_listener = {
     .name = seat_handle_name,
 };
 
+void
+wl_surface_enter(void *data, struct wl_surface *wl_surface,
+                 struct wl_output *wl_output)
+{
+}
+
+void
+wl_surface_leave(void *data, struct wl_surface *wl_surface,
+                 struct wl_output *wl_output) {
+}
+
+void
+wl_preferred_buffer_scale(void *data, struct wl_surface *wl_surface,
+                          int scale) {
+    keyboard.preferred_scale = scale;
+}
+
+void
+wl_preferred_buffer_transform(void *data, struct wl_surface *wl_surface,
+                              uint32_t transform) {
+}
+
 static const struct wl_surface_listener surface_listener = {
     .enter = wl_surface_enter,
     .leave = wl_surface_leave,
+    .preferred_buffer_scale = wl_preferred_buffer_scale,
+    .preferred_buffer_transform = wl_preferred_buffer_transform,
 };
 
 static const struct wl_registry_listener registry_listener = {
     .global = handle_global,
     .global_remove = handle_global_remove,
+};
+
+void
+initiate_configure(void *data, struct zwlr_layer_surface_v1 *surface,
+                   uint32_t serial, uint32_t w, uint32_t h)
+{
+    available_width = w;
+    available_height = h;
+    zwlr_layer_surface_v1_ack_configure(surface, serial);
+}
+
+void
+initiate_closed(void *data, struct zwlr_layer_surface_v1 *surface)
+{
+}
+
+static const struct zwlr_layer_surface_v1_listener initiate_listener = {
+    .configure = initiate_configure,
+    .closed = initiate_closed,
 };
 
 static const struct zwlr_layer_surface_v1_listener layer_surface_listener = {
@@ -368,82 +399,6 @@ seat_handle_name(void *data, struct wl_seat *wl_seat, const char *name)
 {
 }
 
-void
-wl_surface_enter(void *data, struct wl_surface *wl_surface,
-                 struct wl_output *wl_output)
-{
-    struct Output *old_output = current_output;
-    for (int i = 0; i < wl_outputs_size; i += 1) {
-        if (wl_outputs[i].data == wl_output) {
-            current_output = &wl_outputs[i];
-            break;
-        }
-    }
-    if (current_output == old_output) {
-        return;
-    }
-
-    keyboard.preferred_scale = current_output->scale;
-    flip_landscape();
-}
-
-void
-wl_surface_leave(void *data, struct wl_surface *wl_surface,
-                 struct wl_output *wl_output) {
-}
-
-
-static void
-display_handle_geometry(void *data, struct wl_output *wl_output, int x, int y,
-                        int physical_width, int physical_height, int subpixel,
-                        const char *make, const char *model, int transform)
-{
-    struct Output *output = data;
-
-    // Swap width and height on rotated displays
-    if (transform % 2 != 0) {
-        int tmp = physical_width;
-        physical_width = physical_height;
-        physical_height = tmp;
-    }
-
-    output->w = physical_width;
-    output->h = physical_height;
-
-    if (current_output == output) {
-        flip_landscape();
-    };
-}
-
-static void
-display_handle_done(void *data, struct wl_output *wl_output)
-{
-}
-
-static void
-display_handle_scale(void *data, struct wl_output *wl_output, int32_t scale)
-{
-    struct Output *output = data;
-    output->scale = scale;
-
-    if (current_output == output) {
-        keyboard.preferred_scale = scale;
-        flip_landscape();
-    };
-}
-
-static void
-display_handle_mode(void *data, struct wl_output *wl_output, uint32_t flags,
-                    int width, int height, int refresh)
-{
-}
-
-static const struct wl_output_listener output_listener = {
-    .geometry = display_handle_geometry,
-    .mode = display_handle_mode,
-    .done = display_handle_done,
-    .scale = display_handle_scale};
-
 static void
 xdg_wm_base_ping(void *data, struct xdg_wm_base *xdg_wm_base, uint32_t serial)
 {
@@ -460,19 +415,9 @@ handle_global(void *data, struct wl_registry *registry, uint32_t name,
 {
     if (strcmp(interface, wl_compositor_interface.name) == 0) {
         compositor =
-            wl_registry_bind(registry, name, &wl_compositor_interface, 3);
+            wl_registry_bind(registry, name, &wl_compositor_interface, 6);
     } else if (strcmp(interface, wl_shm_interface.name) == 0) {
         draw_ctx.shm = wl_registry_bind(registry, name, &wl_shm_interface, 1);
-    } else if (strcmp(interface, wl_output_interface.name) == 0) {
-        if (wl_outputs_size < WL_OUTPUTS_LIMIT) {
-            struct Output *output = &wl_outputs[wl_outputs_size];
-            output->data =
-                wl_registry_bind(registry, name, &wl_output_interface, 2);
-            output->name = name;
-            output->scale = 1;
-            wl_output_add_listener(output->data, &output_listener, output);
-            wl_outputs_size += 1;
-        }
     } else if (strcmp(interface, wl_seat_interface.name) == 0) {
         seat = wl_registry_bind(registry, name, &wl_seat_interface, 1);
         wl_seat_add_listener(seat, &seat_listener, NULL);
@@ -499,16 +444,6 @@ handle_global(void *data, struct wl_registry *registry, uint32_t name,
 void
 handle_global_remove(void *data, struct wl_registry *registry, uint32_t name)
 {
-    for (int i = 0; i < wl_outputs_size; i += 1) {
-        if (wl_outputs[i].name == name) {
-            wl_output_destroy(wl_outputs[i].data);
-            for (; i < wl_outputs_size - 1; i += 1) {
-                wl_outputs[i] = wl_outputs[i + 1];
-            }
-            wl_outputs_size -= 1;
-            break;
-        }
-    }
 }
 
 static void
@@ -554,15 +489,9 @@ static const struct wp_fractional_scale_v1_listener
 };
 
 void
-flip_landscape()
+redimension_keyboard()
 {
-    bool previous_landscape = keyboard.landscape;
-
-    if (current_output) {
-        keyboard.landscape = current_output->w > current_output->h;
-    } else if (wl_outputs_size) {
-        keyboard.landscape = wl_outputs[0].w > wl_outputs[0].h;
-    }
+    keyboard.landscape = available_width > available_height;
 
     enum layout_id layer;
     if (keyboard.landscape) {
@@ -573,102 +502,74 @@ flip_landscape()
         height = normal_height;
     }
 
+    keyboard.w = available_width;
+    keyboard.h = height;
     keyboard.layout = &keyboard.layouts[layer];
     keyboard.layer_index = 0;
     keyboard.prevlayout = keyboard.layout;
     keyboard.last_abc_layout = keyboard.layout;
     keyboard.last_abc_index = 0;
-
-    if (layer_surface && previous_landscape != keyboard.landscape) {
-        if (popup_xdg_popup) {
-            xdg_popup_destroy(popup_xdg_popup);
-            popup_xdg_popup = NULL;
-        }
-        if (popup_xdg_surface) {
-            xdg_surface_destroy(popup_xdg_surface);
-            popup_xdg_surface = NULL;
-        }
-        if (popup_draw_surf.surf) {
-            wl_surface_destroy(popup_draw_surf.surf);
-            popup_draw_surf.surf = NULL;
-        }
-
-        zwlr_layer_surface_v1_destroy(layer_surface);
-        layer_surface = NULL;
-        wl_surface_destroy(draw_surf.surf);
-
-        show();
-    }
 }
 
 void
 layer_surface_configure(void *data, struct zwlr_layer_surface_v1 *surface,
                         uint32_t serial, uint32_t w, uint32_t h)
 {
+    // Not what we expected, or redimension, refresh and restart
+    if (keyboard.w != w || keyboard.h != h) {
+        zwlr_layer_surface_v1_ack_configure(surface, serial);
+        hide();
+        show();
+        return;
+    };
+
+    // Swallow useless events
+    if (layer_surface_configured) {
+        return;
+    };
+    layer_surface_configured = true;
+
     double scale = keyboard.preferred_scale;
     if (keyboard.preferred_fractional_scale) {
         scale = keyboard.preferred_fractional_scale;
     }
 
-    if (keyboard.w != w || keyboard.h != h || keyboard.scale != scale ||
-        keyboard.output != current_output || hidden) {
+    keyboard.scale = scale;
+    hidden = false;
 
-        keyboard.w = w;
-        keyboard.h = h;
-        keyboard.scale = scale;
-        hidden = false;
-
-        if (wfs_mgr && viewporter) {
-            wp_viewport_set_destination(draw_surf_viewport, keyboard.w,
-                                        keyboard.h);
-        } else {
-            wl_surface_set_buffer_scale(draw_surf.surf, keyboard.scale);
-        }
-
-        if (popup_xdg_popup) {
-            xdg_popup_destroy(popup_xdg_popup);
-        }
-        if (popup_xdg_surface) {
-            xdg_surface_destroy(popup_xdg_surface);
-        }
-        if (popup_draw_surf.surf) {
-            wl_surface_destroy(popup_draw_surf.surf);
-        }
-
-        popup_draw_surf.surf = wl_compositor_create_surface(compositor);
-
-        xdg_positioner_set_size(popup_xdg_positioner, w, h * 2);
-        xdg_positioner_set_anchor_rect(popup_xdg_positioner, 0, -h, w, h * 2);
-
-        wl_surface_set_input_region(popup_draw_surf.surf, empty_region);
-        popup_xdg_surface =
-            xdg_wm_base_get_xdg_surface(wm_base, popup_draw_surf.surf);
-        popup_xdg_surface_configured = false;
-        xdg_surface_add_listener(popup_xdg_surface, &xdg_popup_surface_listener,
-                                 NULL);
-        popup_xdg_popup = xdg_surface_get_popup(popup_xdg_surface, NULL,
-                                                popup_xdg_positioner);
-        xdg_popup_add_listener(popup_xdg_popup, &xdg_popup_listener, NULL);
-        zwlr_layer_surface_v1_get_popup(layer_surface, popup_xdg_popup);
-
-        if (wfs_mgr && viewporter) {
-            popup_draw_surf_viewport =
-                wp_viewporter_get_viewport(viewporter, popup_draw_surf.surf);
-            wp_viewport_set_destination(popup_draw_surf_viewport, keyboard.w,
-                                        keyboard.h * 2);
-        } else {
-            wl_surface_set_buffer_scale(popup_draw_surf.surf, keyboard.scale);
-        }
-
-        wl_surface_commit(popup_draw_surf.surf);
-
-        zwlr_layer_surface_v1_ack_configure(surface, serial);
-        kbd_resize(&keyboard, layouts, NumLayouts);
-        drwsurf_attach(&draw_surf);
-        keyboard.output = current_output;
+    if (wfs_mgr && viewporter) {
+        wp_viewport_set_destination(draw_surf_viewport, keyboard.w,
+                                    keyboard.h);
     } else {
-        zwlr_layer_surface_v1_ack_configure(surface, serial);
+        wl_surface_set_buffer_scale(draw_surf.surf, keyboard.scale);
     }
+
+    popup_draw_surf.surf = wl_compositor_create_surface(compositor);
+
+    xdg_positioner_set_size(popup_xdg_positioner, w, h * 2);
+    xdg_positioner_set_anchor_rect(popup_xdg_positioner, 0, -h, w, h * 2);
+
+    wl_surface_set_input_region(popup_draw_surf.surf, empty_region);
+    popup_xdg_surface = xdg_wm_base_get_xdg_surface(wm_base, popup_draw_surf.surf);
+    popup_xdg_surface_configured = false;
+    xdg_surface_add_listener(popup_xdg_surface, &xdg_popup_surface_listener, NULL);
+    popup_xdg_popup = xdg_surface_get_popup(popup_xdg_surface, NULL, popup_xdg_positioner);
+    xdg_popup_add_listener(popup_xdg_popup, &xdg_popup_listener, NULL);
+    zwlr_layer_surface_v1_get_popup(layer_surface, popup_xdg_popup);
+
+    if (wfs_mgr && viewporter) {
+        popup_draw_surf_viewport = wp_viewporter_get_viewport(viewporter, popup_draw_surf.surf);
+        wp_viewport_set_destination(popup_draw_surf_viewport, keyboard.w, keyboard.h * 2);
+    } else {
+        wl_surface_set_buffer_scale(popup_draw_surf.surf, keyboard.scale);
+    }
+
+    wl_surface_commit(popup_draw_surf.surf);
+
+    zwlr_layer_surface_v1_ack_configure(surface, serial);
+
+    kbd_resize(&keyboard, layouts, NumLayouts);
+    drwsurf_attach(&draw_surf);
 }
 
 void
@@ -740,18 +641,32 @@ hide()
         return;
     }
 
-    if(wfs_draw_surf) {
+    if (wfs_draw_surf) {
         wp_fractional_scale_v1_destroy(wfs_draw_surf);
         wfs_draw_surf = NULL;
     }
-    if(draw_surf_viewport) {
+    if (draw_surf_viewport) {
         wp_viewport_destroy(draw_surf_viewport);
         draw_surf_viewport = NULL;
     }
+    if (popup_xdg_popup) {
+        xdg_popup_destroy(popup_xdg_popup);
+        popup_xdg_popup = NULL;
+    }
+    if (popup_xdg_surface) {
+        xdg_surface_destroy(popup_xdg_surface);
+        popup_xdg_surface = NULL;
+    }
+    if (popup_draw_surf.surf) {
+        wl_surface_destroy(popup_draw_surf.surf);
+        popup_draw_surf.surf = NULL;
+    }
 
     zwlr_layer_surface_v1_destroy(layer_surface);
-    wl_surface_destroy(draw_surf.surf);
     layer_surface = NULL;
+    layer_surface_configured = false;
+    wl_surface_destroy(draw_surf.surf);
+
     hidden = true;
 }
 
@@ -762,12 +677,12 @@ show()
         return;
     }
 
-    wl_display_sync(display);
-
-    flip_landscape();
+    refresh_available_dimension();
+    redimension_keyboard();
 
     draw_surf.surf = wl_compositor_create_surface(compositor);
-    wl_surface_add_listener(draw_surf.surf, &surface_listener, NULL);
+    wl_surface_add_listener(
+        draw_surf.surf, &surface_listener, NULL);
     if (wfs_mgr && viewporter) {
         wfs_draw_surf = wp_fractional_scale_manager_v1_get_fractional_scale(
             wfs_mgr, draw_surf.surf);
@@ -778,8 +693,6 @@ show()
     }
 
     struct wl_output *current_output_data = NULL;
-    if (current_output)
-        current_output_data = current_output->data;
 
     layer_surface = zwlr_layer_shell_v1_get_layer_surface(
         layer_shell, draw_surf.surf, current_output_data, layer, namespace);
@@ -828,6 +741,25 @@ set_kbd_colors(uint8_t *bgra, char *hex)
             bgra[3] = (int)strtol(subhex, NULL, 16);
         }
     }
+}
+
+void
+refresh_available_dimension()
+{
+    struct wl_surface *surface = wl_compositor_create_surface(compositor);
+    struct zwlr_layer_surface_v1 *layer_surface = zwlr_layer_shell_v1_get_layer_surface(
+        layer_shell, surface, NULL, layer, namespace);
+    zwlr_layer_surface_v1_set_anchor(layer_surface,
+                                     ZWLR_LAYER_SURFACE_V1_ANCHOR_TOP |
+                                     ZWLR_LAYER_SURFACE_V1_ANCHOR_BOTTOM |
+                                     ZWLR_LAYER_SURFACE_V1_ANCHOR_LEFT |
+                                     ZWLR_LAYER_SURFACE_V1_ANCHOR_RIGHT);
+    zwlr_layer_surface_v1_add_listener(layer_surface, &initiate_listener, NULL);
+    wl_surface_commit(surface);
+    wl_display_roundtrip(display);
+    zwlr_layer_surface_v1_destroy(layer_surface);
+    wl_surface_destroy(surface);
+    wl_display_roundtrip(display);
 }
 
 int
