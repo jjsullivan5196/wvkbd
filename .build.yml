@@ -6,6 +6,7 @@ packages:
   - libxkbcommon-dev
   - pango-dev
   - scdoc
+  - clang-format # needed for formatting
 sources:
   - https://git.sr.ht/~proycon/wvkbd
 triggers:
