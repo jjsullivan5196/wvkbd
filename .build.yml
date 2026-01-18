@@ -1,0 +1,21 @@
+arch: x86_64
+image: alpine/edge
+packages:
+  - fontconfig 
+  - wayland-dev 
+  - libxkbcommon-dev
+  - pango-dev
+  - scdoc
+sources:
+  - https://git.sr.ht/~proycon/wvkbd
+triggers:
+  - action: email
+    condition: failure
+    to: "~mil/sxmo-devel@lists.sr.ht"
+tasks:
+  - format: |
+      cd wvkbd
+      make format
+  - build: |
+      cd wvkbd
+      make
