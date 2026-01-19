@@ -515,6 +515,12 @@ void
 layer_surface_configure(void *data, struct zwlr_layer_surface_v1 *surface,
                         uint32_t serial, uint32_t w, uint32_t h)
 {
+    // Swallow events for old/destroyed surface
+    if (surface != layer_surface) {
+        zwlr_layer_surface_v1_ack_configure(surface, serial);
+        return;
+    };
+
     // Not what we expected, or redimension, refresh and restart
     if (keyboard.w != w || keyboard.h != h) {
         zwlr_layer_surface_v1_ack_configure(surface, serial);
@@ -665,7 +671,15 @@ hide()
     zwlr_layer_surface_v1_destroy(layer_surface);
     layer_surface = NULL;
     layer_surface_configured = false;
+
+    // Cancel pending frame callback before destroying surface
+    if (draw_surf.frame_cb) {
+        wl_callback_destroy(draw_surf.frame_cb);
+        draw_surf.frame_cb = NULL;
+    }
+
     wl_surface_destroy(draw_surf.surf);
+    draw_surf.attached = false;
 
     hidden = true;
 }
