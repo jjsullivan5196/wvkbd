@@ -225,7 +225,7 @@ wl_touch_down(void *data, struct wl_touch *wl_touch, uint32_t serial,
               uint32_t time, struct wl_surface *surface, int32_t id,
               wl_fixed_t x, wl_fixed_t y)
 {
-    if(!popup_xdg_surface_configured) {
+    if(!layer_surface_configured || !popup_xdg_surface_configured) {
         return;
     }
 
@@ -251,7 +251,7 @@ void
 wl_touch_up(void *data, struct wl_touch *wl_touch, uint32_t serial,
             uint32_t time, int32_t id)
 {
-    if(!popup_xdg_surface_configured) {
+    if(!layer_surface_configured || !popup_xdg_surface_configured) {
         return;
     }
 
@@ -262,7 +262,7 @@ void
 wl_touch_motion(void *data, struct wl_touch *wl_touch, uint32_t time,
                 int32_t id, wl_fixed_t x, wl_fixed_t y)
 {
-    if(!popup_xdg_surface_configured) {
+    if(!layer_surface_configured || !popup_xdg_surface_configured) {
         return;
     }
 
@@ -314,7 +314,7 @@ void
 wl_pointer_motion(void *data, struct wl_pointer *wl_pointer, uint32_t time,
                   wl_fixed_t surface_x, wl_fixed_t surface_y)
 {
-    if(!popup_xdg_surface_configured) {
+    if(!layer_surface_configured || !popup_xdg_surface_configured) {
         return;
     }
 
@@ -330,7 +330,7 @@ void
 wl_pointer_button(void *data, struct wl_pointer *wl_pointer, uint32_t serial,
                   uint32_t time, uint32_t button, uint32_t state)
 {
-    if(!popup_xdg_surface_configured) {
+    if(!layer_surface_configured || !popup_xdg_surface_configured) {
         return;
     }
 
@@ -359,7 +359,7 @@ void
 wl_pointer_axis(void *data, struct wl_pointer *wl_pointer, uint32_t time,
                 uint32_t axis, wl_fixed_t value)
 {
-    if(!popup_xdg_surface_configured) {
+    if(!layer_surface_configured || !popup_xdg_surface_configured) {
         return;
     }
 
