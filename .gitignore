@@ -5,8 +5,6 @@
 include/config.h
 .gdb_history
 *.log
-wvkbd
 *.1
-config.h
-wvkbd-mobintl
-wvkbd-deskintl
+build-*/*
+wvkbd-*

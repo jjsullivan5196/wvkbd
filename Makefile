@@ -1,5 +1,7 @@
 include config.mk
 
+BUILDDIR=build-${LAYOUT}
+
 NAME=wvkbd
 BIN=${NAME}-${LAYOUT}
 SRC=.
@@ -9,6 +11,7 @@ PKGS = wayland-client xkbcommon pangocairo
 
 WVKBD_SOURCES += $(wildcard $(SRC)/*.c)
 WVKBD_HEADERS += $(wildcard $(SRC)/*.h)
+WVKBD_DIR_SOURCES = $(foreach src, $(WVKBD_SOURCES), $(addprefix $(BUILDDIR)/, $(src)))
 
 PKG_CONFIG ?= pkg-config
 CFLAGS += -std=gnu99 -Wall -g -DWITH_WAYLAND_SHM -DLAYOUT=\"layout.${LAYOUT}.h\" -DKEYMAP=\"keymap.${LAYOUT}.h\"
@@ -20,16 +23,23 @@ WAYLAND_HEADERS = $(wildcard proto/*.xml)
 HDRS = $(WAYLAND_HEADERS:.xml=-client-protocol.h)
 WAYLAND_SRC = $(HDRS:.h=.c)
 SOURCES = $(WVKBD_SOURCES) $(WAYLAND_SRC)
+OBJECTS = $(WVKBD_DIR_SOURCES:.c=.o) $(WAYLAND_SRC:.c=.o)
 
 SCDOC=scdoc
 DOCS = wvkbd.1
 
-OBJECTS = $(SOURCES:.c=.o)
 
 all: ${BIN} ${DOCS}
 
-config.h:
-	cp config.${LAYOUT}.h config.h
+$(BUILDDIR):
+	mkdir -p $(BUILDDIR)
+
+$(BUILDDIR)/config.h: $(BUILDDIR)
+	cp config.$(LAYOUT).h $@
+
+$(BUILDDIR)/%.o: $(BUILDDIR)
+$(BUILDDIR)/%.o: %.c
+	$(CC) -I $(CURDIR) -I $(CURDIR)/$(BUILDDIR) -c $(CFLAGS) -o $@ $<
 
 proto/%-client-protocol.c: proto/%.xml
 	wayland-scanner code < $? > $@
@@ -39,11 +49,11 @@ proto/%-client-protocol.h: proto/%.xml
 
 $(OBJECTS): $(HDRS) $(WVKBD_HEADERS)
 
-wvkbd-${LAYOUT}: config.h $(OBJECTS) layout.${LAYOUT}.h
+wvkbd-${LAYOUT}: $(BUILDDIR)/config.h $(OBJECTS) layout.${LAYOUT}.h
 	$(CC) -o wvkbd-${LAYOUT} $(OBJECTS) $(LDFLAGS)
 
 clean:
-	rm -f $(OBJECTS) config.h $(HDRS) $(WAYLAND_SRC) ${BIN} ${DOCS}
+	rm -rf "$(BUILDDIR)" wvkbd-mobintl
 
 format:
 	clang-format -i $(WVKBD_SOURCES) $(WVKBD_HEADERS)
