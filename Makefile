@@ -31,14 +31,12 @@ DOCS = wvkbd.1
 
 all: ${BIN} ${DOCS}
 
-$(BUILDDIR):
+$(BUILDDIR)/config.h:
 	mkdir -p $(BUILDDIR)
-
-$(BUILDDIR)/config.h: $(BUILDDIR)
 	cp config.$(LAYOUT).h $@
 
-$(BUILDDIR)/%.o: $(BUILDDIR)
 $(BUILDDIR)/%.o: %.c
+	mkdir -p $(BUILDDIR)
 	$(CC) -I $(CURDIR) -I $(CURDIR)/$(BUILDDIR) -c $(CFLAGS) -o $@ $<
 
 proto/%-client-protocol.c: proto/%.xml
