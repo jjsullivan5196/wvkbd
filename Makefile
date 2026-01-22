@@ -53,7 +53,7 @@ wvkbd-${LAYOUT}: $(BUILDDIR)/config.h $(OBJECTS) layout.${LAYOUT}.h
 	$(CC) -o wvkbd-${LAYOUT} $(OBJECTS) $(LDFLAGS)
 
 clean:
-	rm -rf "$(BUILDDIR)" wvkbd-mobintl
+	rm -rf "$(BUILDDIR)" wvkbd-$(LAYOUT)
 
 format:
 	clang-format -i $(WVKBD_SOURCES) $(WVKBD_HEADERS)
