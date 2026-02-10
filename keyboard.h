@@ -139,6 +139,7 @@ void kbd_release_key(struct kbd *kb, uint32_t time);
 void kbd_motion_key(struct kbd *kb, uint32_t time, uint32_t x, uint32_t y);
 void kbd_press_key(struct kbd *kb, struct key *k, uint32_t time);
 void kbd_print_key_stdout(struct kbd *kb, struct key *k);
+void kbd_print_first_utf8_char_stdout(const char *str);
 void kbd_clear_last_popup(struct kbd *kb);
 void kbd_draw_key(struct kbd *kb, struct key *k, enum key_draw_type);
 void kbd_draw_layout(struct kbd *kb);
