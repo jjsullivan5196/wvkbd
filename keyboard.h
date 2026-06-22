@@ -93,6 +93,8 @@ struct layout {
 
 struct kbd {
 	bool debug;
+	bool show_popup;
+	bool show_highlight;
 
 	struct layout *layout;
 	struct clr_scheme *schemes;

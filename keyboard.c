@@ -646,9 +646,12 @@ kbd_draw_key(struct kbd *kb, struct key *k, enum key_draw_type type)
         break;
     case Press:
         draw_inset(kb->surf, k->x, k->y, k->w, k->h, KBD_KEY_BORDER,
-                   scheme->high, scheme->rounding);
-        drw_draw_text(kb->surf, scheme->text_press, k->x, k->y, k->w, k->h,
-                  KBD_KEY_BORDER, label, scheme->font_description);
+                   kb->show_highlight ? scheme->high : scheme->fg,
+                   scheme->rounding);
+        drw_draw_text(kb->surf,
+                  kb->show_highlight ? scheme->text_press : scheme->text,
+                  k->x, k->y, k->w, k->h, KBD_KEY_BORDER, label,
+                  scheme->font_description);
         break;
     case Swipe:
         draw_over_inset(kb->surf, k->x, k->y, k->w, k->h, KBD_KEY_BORDER,
@@ -662,7 +665,7 @@ kbd_draw_key(struct kbd *kb, struct key *k, enum key_draw_type type)
     }
 
 
-    if (type == Press || type == Unpress) {
+    if (kb->show_popup && (type == Press || type == Unpress)) {
         kbd_clear_last_popup(kb);
 
         kb->last_popup_x = k->x;
@@ -673,9 +676,12 @@ kbd_draw_key(struct kbd *kb, struct key *k, enum key_draw_type type)
         drw_fill_rectangle(kb->popup_surf, scheme->bg, k->x,
                            kb->last_popup_y, k->w, k->h, scheme->rounding);
         draw_inset(kb->popup_surf, k->x, kb->last_popup_y, k->w, k->h,
-                   KBD_KEY_BORDER, scheme->high, scheme->rounding);
-        drw_draw_text(kb->popup_surf, scheme->text_press, k->x, kb->last_popup_y,
-                      k->w, k->h, KBD_KEY_BORDER, label,
+                   KBD_KEY_BORDER,
+                   kb->show_highlight ? scheme->high : scheme->fg,
+                   scheme->rounding);
+        drw_draw_text(kb->popup_surf,
+                      kb->show_highlight ? scheme->text_press : scheme->text,
+                      k->x, kb->last_popup_y, k->w, k->h, KBD_KEY_BORDER, label,
                       scheme->font_description);
     }
 }

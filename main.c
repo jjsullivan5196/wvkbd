@@ -603,6 +603,10 @@ usage(char *argv0)
     fprintf(stderr, "  -R [int]    - Rounding radius in pixels\n");
     fprintf(stderr, "  --fn [font] - Set font (e.g: DejaVu Sans 20)\n");
     fprintf(stderr, "  --hidden    - Start hidden (send SIGUSR2 to show)\n");
+    fprintf(stderr, "  --no-popup  - Disable the key-press popup\n");
+    fprintf(stderr, "  --no-highlight - Don't highlight a key while pressed\n");
+    fprintf(stderr, "  --no-feedback - Disable all key-press feedback "
+                    "(--no-popup and --no-highlight)\n");
     fprintf(
         stderr,
         "  --alpha [int]          - Set alpha value for all colors [0-255]\n");
@@ -812,6 +816,8 @@ main(int argc, char **argv)
     keyboard.preferred_scale = 1;
     keyboard.preferred_fractional_scale = 0;
     keyboard.exclusive = true;
+    keyboard.show_popup = true;
+    keyboard.show_highlight = true;
 
     uint8_t alpha = 0;
     bool alpha_defined = false;
@@ -971,6 +977,16 @@ main(int argc, char **argv)
         } else if ((!strcmp(argv[i], "-hidden")) ||
                    (!strcmp(argv[i], "--hidden"))) {
             hidden = true;
+        } else if ((!strcmp(argv[i], "-no-popup")) ||
+                   (!strcmp(argv[i], "--no-popup"))) {
+            keyboard.show_popup = false;
+        } else if ((!strcmp(argv[i], "-no-highlight")) ||
+                   (!strcmp(argv[i], "--no-highlight"))) {
+            keyboard.show_highlight = false;
+        } else if ((!strcmp(argv[i], "-no-feedback")) ||
+                   (!strcmp(argv[i], "--no-feedback"))) {
+            keyboard.show_popup = false;
+            keyboard.show_highlight = false;
         } else if ((!strcmp(argv[i], "-list-layers")) ||
                    (!strcmp(argv[i], "--list-layers"))) {
             list_layers();
