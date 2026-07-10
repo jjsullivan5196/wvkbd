@@ -609,9 +609,9 @@ usage(char *argv0)
     fprintf(stderr, "  --bg [rrggbb|aa]       - Set color of background\n");
     fprintf(stderr, "  --fg [rrggbb|aa]       - Set color of keys\n");
     fprintf(stderr, "  --fg-sp [rrggbb|aa]    - Set color of special keys\n");
-    fprintf(stderr, "  --press [rrggbb|aa]     - Set color of pressed keys\n");
+    fprintf(stderr, "  --press [rrggbb|aa]    - Set color of pressed keys\n");
     fprintf(stderr,
-            "  --press-sp [rrggbb|aa]  - Set color of pressed special keys\n");
+            "  --press-sp [rrggbb|aa] - Set color of pressed special keys\n");
     fprintf(stderr, "  --swipe [rrggbb|aa]    - Set color of swiped keys\n");
     fprintf(stderr,
             "  --swipe-sp [rrggbb|aa] - Set color of swiped special keys\n");
@@ -619,20 +619,20 @@ usage(char *argv0)
     fprintf(stderr,
             "  --text-sp [rrggbb|aa]  - Set color of text on special keys\n");
     fprintf(stderr,
-            "  --text-press [rrggbb|aa]  - Set color of text on pressed keys\n");
+            "  --text-press [rrggbb|aa]    - Set color of text on pressed keys\n");
     fprintf(stderr,
-            "  --text-press-sp [rrggbb|aa]  - Set color of text on pressed special keys\n");
+            "  --text-press-sp [rrggbb|aa] - Set color of text on pressed special keys\n");
     fprintf(stderr,
-            "  --text-swipe [rrggbb|aa]  - Set color of text on swiped keys\n");
+            "  --text-swipe [rrggbb|aa]    - Set color of text on swiped keys\n");
     fprintf(stderr,
-            "  --text-swipe-sp [rrggbb|aa]  - Set color of text on swiped special keys\n");
+            "  --text-swipe-sp [rrggbb|aa] - Set color of text on swiped special keys\n");
     fprintf(stderr,
-            "  --list-layers          - Print the list of available layers\n");
+            "  --list-layers      - Print the list of available layers\n");
     fprintf(stderr,
-            "  -l                     - Comma separated list of layers\n");
-    fprintf(stderr, "  --landscape-layers     - Comma separated list of "
+            "  -l                 - Comma separated list of layers\n");
+    fprintf(stderr, "  --landscape-layers - Comma separated list of "
                     "landscape layers\n");
-    fprintf(stderr, "  --non-exclusive        - Allow the keyboard to overlap"
+    fprintf(stderr, "  --non-exclusive    - Allow the keyboard to overlap"
                     " windows. Do not request an exclusive zone from the"
                     "compositor\n");
 }
