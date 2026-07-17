@@ -22,8 +22,9 @@ new features.
  - Emoji support
  - Compose key for character variants (e.g. diacritics)
  - Show/hide keyboard on signals (SIGUSR1 = hide, SIGUSR2 = show, SIGRTMIN = toggle)
+ - Auto-show/hide keyboard on text input fields (use `--auto` parameter), requires
+   a wayland compositor that implements the zwp_input_method_v2 protocol.
  - Automatic portrait/landscape detection and subsequent layout switching
-
 
 <img src="https://raw.githubusercontent.com/jjsullivan5196/wvkbd/master/contrib/wvkbd-mobintl-landscape.jpg" width=640 />
 
@@ -67,7 +68,7 @@ which you want and in what order you want to cycle through them using the
 that are defined in your layout set.
 
 The keyboard can be hidden by sending it a `SIGUSR1` signal, shown again by sending it `SIGUSR2` or toggled by sending it `SIGRTMIN`.
-This saves some start up time and may be appropriate in some low-resource environments.
+This saves some start up time and may be appropriate in some low-resource environments. If your compositor implements the zwp_input_method_v2 protocol, you can also have the keyboard automatically pop-up and hide on text input fields; start with the `--auto` parameter to eanble this behaviour.
 
 Wvkbd has an output mode `-o` that will echo its output to standard output. This facility can be used if users want
 audio/haptic feedback, a feature explicitly out of scope for wvkbd. To achieve this, simply pipe wvkbd's output through the external tool

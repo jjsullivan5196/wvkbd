@@ -58,6 +58,10 @@ can be patched to add new features.
 *--alpha* _int_
 	Set alpha value (i.e. transparency) for all colors [0-255]
 	
+*--auto*
+	Automatically toggle keyboard :visibility based on focus. Requires a compositor
+	that implements the zwp_input_method_v2 protocol.
+	
 *--bg* _rrggbb|aa_ 
 	Set color of background
 
