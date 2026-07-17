@@ -666,9 +666,9 @@ usage(char *argv0)
     fprintf(stderr, "  -R [int]    - Rounding radius in pixels\n");
     fprintf(stderr, "  --fn [font] - Set font (e.g: DejaVu Sans 20)\n");
     fprintf(stderr, "  --hidden    - Start hidden (send SIGUSR2 to show)\n");
-    fprintf(stderr, "  --no-popup  - Disable the key-press popup\n");
-    fprintf(stderr, "  --no-highlight - Don't highlight a key while pressed\n");
-    fprintf(stderr, "  --no-feedback - Disable all key-press feedback "
+    fprintf(stderr, "  --no-popup             - Disable the key-press popup\n");
+    fprintf(stderr, "  --no-highlight         - Don't highlight a key while pressed\n");
+    fprintf(stderr, "  --no-feedback          - Disable all key-press feedback "
                     "(--no-popup and --no-highlight)\n");
     fprintf(
         stderr,
