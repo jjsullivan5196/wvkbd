@@ -74,6 +74,10 @@ static uint32_t height, normal_height, landscape_height;
 static int rounding = DEFAULT_ROUNDING;
 static bool hidden = false;
 static bool im_auto = false;
+/* show() round-trips before assigning layer_surface, so it can be re-entered */
+static bool showing = false;
+static bool hide_pending = false;
+static bool restart_pending = false;
 
 /* event handler prototypes */
 static void wl_pointer_enter(void *data, struct wl_pointer *wl_pointer,
@@ -587,6 +591,12 @@ layer_surface_configure(void *data, struct zwlr_layer_surface_v1 *surface,
     // Not what we expected, or redimension, refresh and restart
     if (keyboard.w != w || keyboard.h != h) {
         zwlr_layer_surface_v1_ack_configure(surface, serial);
+        // Restarting from inside show() would orphan the surface it is
+        // building, so defer to the end of show().
+        if (showing) {
+            restart_pending = true;
+            return;
+        }
         hide();
         show();
         return;
@@ -719,6 +729,13 @@ list_layers()
 void
 hide()
 {
+    // Inside show(), layer_surface is not assigned yet, so hiding here would
+    // silently do nothing. Defer to the end of show().
+    if (showing) {
+        hide_pending = true;
+        return;
+    }
+
     if (!layer_surface) {
         return;
     }
@@ -757,15 +774,17 @@ hide()
     wl_surface_destroy(draw_surf.surf);
     draw_surf.attached = false;
 
+    restart_pending = false;
     hidden = true;
 }
 
 void
 show()
 {
-    if (layer_surface) {
+    if (layer_surface || showing) {
         return;
     }
+    showing = true;
 
     refresh_available_dimension();
     redimension_keyboard();
@@ -796,6 +815,17 @@ show()
     zwlr_layer_surface_v1_add_listener(layer_surface, &layer_surface_listener,
                                        NULL);
     wl_surface_commit(draw_surf.surf);
+
+    showing = false;
+    if (hide_pending) {
+        hide_pending = false;
+        restart_pending = false;
+        hide();
+    } else if (restart_pending) {
+        restart_pending = false;
+        hide();
+        show();
+    }
 }
 
 void
