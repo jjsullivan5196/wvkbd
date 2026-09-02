@@ -75,6 +75,8 @@ struct key {
 	struct layout *layout;   // pointer back to the parent layout that holds this
 	                         // key
 	const uint32_t code_mod; /* modifier to force when this key is pressed */
+	const uint32_t
+	  shift_code;            /* shift_code: secondary scancode */
 	uint8_t scheme;          // index of the scheme to use
 	bool reset_mod;          /* reset modifiers when clicked */
 

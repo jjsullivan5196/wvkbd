@@ -182,7 +182,7 @@ static struct key keys_full[] = {
   {"'", "\"", 1.0, Code, KEY_APOSTROPHE, &layouts[ComposeBracket] },
   {"-", "_", 1.0, Code, KEY_MINUS, &layouts[ComposeMath] },
   {"/", ">", 1.0, Code, KEY_SLASH,  &layouts[ComposePunctuation] },
-  {"Tab", "Tab", 1.0, Code, KEY_TAB, .scheme = 1},
+  {"Tab", "Ins", 1.0, Code, KEY_TAB, .shift_code = KEY_INSERT, .scheme = 1},
   {"", "", 0.0, EndRow},
 
   {"1", "!", 1.0, Code, KEY_1},
@@ -254,7 +254,7 @@ static struct key keys_full_wide[] = {
   {"'", "\"", 1.0, Code, KEY_APOSTROPHE, &layouts[ComposeBracket] },
   {";", ":", 1.0, Code, KEY_SEMICOLON, &layouts[ComposePunctuation] },
   {"/", ">", 1.0, Code, KEY_SLASH,  &layouts[ComposePunctuation] },
-  {"Tab", "Tab", 1.0, Code, KEY_TAB, .scheme = 1},
+  {"Tab", "Ins", 1.0, Code, KEY_TAB, .shift_code = KEY_INSERT, .scheme = 1},
   {"", "", 0.0, EndRow},
 
   {"1", "!", 1.0, Code, KEY_1},

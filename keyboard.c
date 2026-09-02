@@ -318,7 +318,8 @@ kbd_unpress_key(struct kbd *kb, uint32_t time)
                                             WL_KEYBOARD_KEY_STATE_RELEASED);
             } else {
                 zwp_virtual_keyboard_v1_key(kb->vkbd, time,
-                                            kb->last_press->code,
+                                            unlatch_shift && kb->last_press->shift_code ?
+                                            kb->last_press->shift_code : kb->last_press->code,
                                             WL_KEYBOARD_KEY_STATE_RELEASED);
             }
         }
@@ -449,7 +450,8 @@ kbd_press_key(struct kbd *kb, struct key *k, uint32_t time)
             zwp_virtual_keyboard_v1_key(kb->vkbd, time, KEY_TAB,
                                         WL_KEYBOARD_KEY_STATE_PRESSED);
         } else {
-            zwp_virtual_keyboard_v1_key(kb->vkbd, time, kb->last_press->code,
+            zwp_virtual_keyboard_v1_key(kb->vkbd, time, (kb->mods & Shift) && k->shift_code ?
+                                        k->shift_code : k->code,
                                         WL_KEYBOARD_KEY_STATE_PRESSED);
         }
         if (kb->print || kb->print_intersect)
