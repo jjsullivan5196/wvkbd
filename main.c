@@ -725,6 +725,10 @@ hide()
         return;
     }
 
+    // Ensure active keys are released, so they're not repeated infinitely.
+    uint32_t time = (uint32_t) (monotime() + keyboard.last_press_offset);
+    kbd_unpress_key(&keyboard, time);
+
     if (wfs_draw_surf) {
         wp_fractional_scale_v1_destroy(wfs_draw_surf);
         wfs_draw_surf = NULL;

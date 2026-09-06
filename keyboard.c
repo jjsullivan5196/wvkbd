@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <sys/mman.h>
 #include <ctype.h>
+#include <time.h>
 #include "keyboard.h"
 #include "drw.h"
 #include "os-compatibility.h"
@@ -442,6 +443,7 @@ kbd_press_key(struct kbd *kb, struct key *k, uint32_t time)
             zwp_virtual_keyboard_v1_modifiers(kb->vkbd, kb->mods, 0, 0, 0);
         }
         kb->last_swipe = kb->last_press = k;
+        kb->last_press_offset = time - monotime();
         kbd_draw_key(kb, k, Press);
         if ((kb->shift_space_is_tab) && (k->code == KEY_SPACE) && (kb->mods & Shift)) {
             // shift space is tab
@@ -531,6 +533,7 @@ kbd_press_key(struct kbd *kb, struct key *k, uint32_t time)
     case Copy:
         // copy code as unicode chr by setting a temporary keymap
         kb->last_swipe = kb->last_press = k;
+        kb->last_press_offset = time - monotime();
         kbd_draw_key(kb, k, Press);
         if (kb->mods & Shift) {
             if (kb->debug)
@@ -784,4 +787,14 @@ create_and_upload_keymap(struct kbd *kb, const char *name, uint32_t comp_unichr)
     zwp_virtual_keyboard_v1_keymap(kb->vkbd, WL_KEYBOARD_KEYMAP_FORMAT_XKB_V1,
                                    keymap_fd, keymap_size);
     free((void *)keymap_str);
+}
+
+// Get a monotonic millisecond timer.
+int64_t
+monotime()
+{
+    struct timespec spec;
+    clock_gettime(CLOCK_MONOTONIC, &spec);
+
+    return (spec.tv_sec * 1000 + spec.tv_nsec / 1000000);
 }
