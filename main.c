@@ -703,6 +703,8 @@ usage(char *argv0)
     fprintf(stderr, "  --non-exclusive    - Allow the keyboard to overlap"
                     " windows. Do not request an exclusive zone from the"
                     "compositor\n");
+    fprintf(stderr, "  --wayland-layer [background|bottom|top|overlay]"
+                    " - Wayland layer shell z index\n");
 }
 
 void
@@ -1060,6 +1062,26 @@ main(int argc, char **argv)
         } else if ((!strcmp(argv[i], "-auto")) ||
                    (!strcmp(argv[i], "--auto"))) {
             im_auto = true;
+        } else if ((!strcmp(argv[i], "-wayland-layer")) ||
+                   (!strcmp(argv[i], "--wayland-layer"))) {
+            if (i >= argc - 1) {
+                usage(argv[0]);
+                exit(1);
+            }
+            ++i;
+
+            if (!strcmp(argv[i], "background")) {
+                layer = ZWLR_LAYER_SHELL_V1_LAYER_BACKGROUND;
+            } else if (!strcmp(argv[i], "bottom")) {
+                layer = ZWLR_LAYER_SHELL_V1_LAYER_BOTTOM;
+            } else if (!strcmp(argv[i], "top")) {
+                layer = ZWLR_LAYER_SHELL_V1_LAYER_TOP;
+            } else if (!strcmp(argv[i], "overlay")) {
+                layer = ZWLR_LAYER_SHELL_V1_LAYER_OVERLAY;
+            } else {
+                usage(argv[0]);
+                exit(1);
+            }
         } else {
             fprintf(stderr, "Invalid argument: %s\n", argv[i]);
             usage(argv[0]);
