@@ -382,6 +382,14 @@ kbd_release_key(struct kbd *kb, uint32_t time)
 void
 kbd_motion_key(struct kbd *kb, uint32_t time, uint32_t x, uint32_t y)
 {
+    struct key *intersect_key;
+    intersect_key = kbd_get_key(kb, x, y);
+
+    // Ignore keyboard motion until a new key is reached.
+    if (kb->last_press == intersect_key) {
+        return;
+    }
+
     // Output intersecting keys
     // (for external 'swiping'-based accelerators).
     if (kb->print_intersect) {
@@ -390,8 +398,7 @@ kbd_motion_key(struct kbd *kb, uint32_t time, uint32_t x, uint32_t y)
             // Redraw last press as a swipe.
             kbd_draw_key(kb, kb->last_swipe, Swipe);
         }
-        struct key *intersect_key;
-        intersect_key = kbd_get_key(kb, x, y);
+
         if (intersect_key && (!kb->last_swipe ||
                               intersect_key->label != kb->last_swipe->label)) {
             kbd_print_key_stdout(kb, intersect_key);
