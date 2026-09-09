@@ -6,6 +6,8 @@
 #include <ctype.h>
 #include <time.h>
 #include "keyboard.h"
+#include <linux/input-event-codes.h>
+
 #include "drw.h"
 #include "os-compatibility.h"
 
@@ -706,7 +708,12 @@ kbd_draw_layout(struct kbd *kb)
     if (kb->debug)
         fprintf(stderr, "Draw layout\n");
 
-    drw_fill_rectangle(d, kb->schemes[0].bg, 0, 0, kb->w, kb->h, 0);
+    if (kb->corner_radius > 0) {
+        drw_do_clear(d, 0, 0, kb->w, kb->h);
+        drw_fill_rectangle(d, kb->schemes[0].bg, 0, 0, kb->w, kb->h, kb->corner_radius);
+    } else {
+        drw_fill_rectangle(d, kb->schemes[0].bg, 0, 0, kb->w, kb->h, 0);
+    }
 
     while (next_key->type != Last) {
         if ((next_key->type == Pad) || (next_key->type == EndRow)) {

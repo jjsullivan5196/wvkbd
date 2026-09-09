@@ -104,6 +104,7 @@ struct kbd {
 	bool print;
 	bool print_intersect;
 	uint32_t w, h;
+	int corner_radius;
 	double scale;
 	double preferred_scale, preferred_fractional_scale;
 	bool landscape;

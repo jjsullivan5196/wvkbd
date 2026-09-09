@@ -70,6 +70,24 @@ can be patched to add new features.
 *--wayland-layer* _[background|bottom|top|overlay]_
 	Wayland layer shell z index
 
+*--dock* _left|right|full_
+	Dock keyboard to the left or right screen corner for comfortable one-handed
+	typing on tablets and foldables. Defaults to full.
+
+*--ratio* _float_
+	Width ratio when docked [0.3-1.0]. Defaults to 0.68.
+
+*--width* _int_
+	Explicit custom width in pixels.
+
+*--corner-radius* _int_
+	Corner radius in pixels for the keyboard window background (defaults to 16 when docked,
+	0 when full-width).
+
+*--bg-alpha* _int_
+	Set independent alpha value for the keyboard baseplate [0-255]. Allows
+	semi-opaque or opaque backing while maintaining translucent keycaps.
+
 *--alpha* _int_
 	Set alpha value (i.e. transparency) for all colors [0-255]
 	
