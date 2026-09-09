@@ -74,6 +74,14 @@ static uint32_t height, normal_height, landscape_height;
 static int rounding = DEFAULT_ROUNDING;
 static bool hidden = false;
 static bool im_auto = false;
+static uint32_t custom_width = 0;
+static double width_ratio = 1.0;
+static enum { DOCK_FULL = 0, DOCK_LEFT = 1, DOCK_RIGHT = 2 } dock_mode = DOCK_FULL;
+static uint8_t bg_alpha = 0;
+static bool bg_alpha_defined = false;
+static int corner_radius = -1;
+
+
 
 /* event handler prototypes */
 static void wl_pointer_enter(void *data, struct wl_pointer *wl_pointer,
@@ -565,7 +573,13 @@ redimension_keyboard()
         height = normal_height;
     }
 
-    keyboard.w = available_width;
+    if (custom_width > 0) {
+        keyboard.w = custom_width;
+    } else if (dock_mode != DOCK_FULL) {
+        keyboard.w = (uint32_t)((double)available_width * width_ratio);
+    } else {
+        keyboard.w = available_width;
+    }
     keyboard.h = height;
     keyboard.layout = &keyboard.layouts[layer];
     keyboard.layer_index = 0;
@@ -700,8 +714,14 @@ usage(char *argv0)
             "  -l                 - Comma separated list of layers\n");
     fprintf(stderr, "  --landscape-layers - Comma separated list of "
                     "landscape layers\n");
-    fprintf(stderr, "  --non-exclusive    - Allow the keyboard to overlap"
-                    " windows. Do not request an exclusive zone from the"
+    fprintf(stderr, "  --dock [left|right|full] - Dock keyboard to left or right edge\n");
+    fprintf(stderr, "  --ratio [0.3-1.0]        - Screen width ratio for docked keyboard\n");
+    fprintf(stderr, "  --width [pixels]         - Custom fixed width in pixels\n");
+    fprintf(stderr, "  --corner-radius [pixels] - Corner radius of keyboard window\n");
+    fprintf(stderr, "  --bg-alpha [0-255]       - Independent opacity for keyboard baseplate\n");
+    fprintf(stderr, "  --double-space-period    - Double tap space to insert period and space\n");
+    fprintf(stderr, "  --non-exclusive    - Allow the keyboard to overlap "
+                    "windows. Do not request an exclusive zone from the "
                     "compositor\n");
 }
 
@@ -787,7 +807,19 @@ show()
     layer_surface = zwlr_layer_shell_v1_get_layer_surface(
         layer_shell, draw_surf.surf, current_output_data, layer, namespace);
 
-    zwlr_layer_surface_v1_set_size(layer_surface, 0, height);
+    anchor = ZWLR_LAYER_SURFACE_V1_ANCHOR_BOTTOM;
+    uint32_t req_w = 0;
+    if (dock_mode == DOCK_LEFT) {
+        anchor |= ZWLR_LAYER_SURFACE_V1_ANCHOR_LEFT;
+        req_w = keyboard.w;
+    } else if (dock_mode == DOCK_RIGHT) {
+        anchor |= ZWLR_LAYER_SURFACE_V1_ANCHOR_RIGHT;
+        req_w = keyboard.w;
+    } else {
+        anchor |= ZWLR_LAYER_SURFACE_V1_ANCHOR_LEFT | ZWLR_LAYER_SURFACE_V1_ANCHOR_RIGHT;
+        req_w = 0;
+    }
+    zwlr_layer_surface_v1_set_size(layer_surface, req_w, height);
     zwlr_layer_surface_v1_set_anchor(layer_surface, anchor);
     if (keyboard.exclusive) {
         zwlr_layer_surface_v1_set_exclusive_zone(layer_surface, height);
@@ -880,6 +912,8 @@ main(int argc, char **argv)
     keyboard.preferred_scale = 1;
     keyboard.preferred_fractional_scale = 0;
     keyboard.exclusive = true;
+    keyboard.double_space_period = false;
+    keyboard.corner_radius = 0;
     keyboard.show_popup = true;
     keyboard.show_highlight = true;
 
@@ -925,6 +959,13 @@ main(int argc, char **argv)
             }
             alpha = atoi(argv[++i]);
             alpha_defined = true;
+        } else if (!strcmp(argv[i], "--bg-alpha")) {
+            if (i >= argc - 1) {
+                usage(argv[0]);
+                exit(1);
+            }
+            bg_alpha = atoi(argv[++i]);
+            bg_alpha_defined = true;
         } else if ((!strcmp(argv[i], "-fg")) || (!strcmp(argv[i], "--fg"))) {
             if (i >= argc - 1) {
                 usage(argv[0]);
@@ -1060,6 +1101,44 @@ main(int argc, char **argv)
         } else if ((!strcmp(argv[i], "-auto")) ||
                    (!strcmp(argv[i], "--auto"))) {
             im_auto = true;
+        } else if (!strcmp(argv[i], "--double-space-period")) {
+            keyboard.double_space_period = true;
+        } else if (!strcmp(argv[i], "--dock")) {
+            if (i >= argc - 1) {
+                usage(argv[0]);
+                exit(1);
+            }
+            i++;
+            if (!strcmp(argv[i], "left")) {
+                dock_mode = DOCK_LEFT;
+                if (width_ratio == 1.0) width_ratio = 0.68;
+            } else if (!strcmp(argv[i], "right")) {
+                dock_mode = DOCK_RIGHT;
+                if (width_ratio == 1.0) width_ratio = 0.68;
+            } else {
+                dock_mode = DOCK_FULL;
+                width_ratio = 1.0;
+            }
+        } else if (!strcmp(argv[i], "--corner-radius")) {
+            if (i >= argc - 1) {
+                usage(argv[0]);
+                exit(1);
+            }
+            corner_radius = atoi(argv[++i]);
+        } else if (!strcmp(argv[i], "--width")) {
+            if (i >= argc - 1) {
+                usage(argv[0]);
+                exit(1);
+            }
+            custom_width = atoi(argv[++i]);
+        } else if (!strcmp(argv[i], "--ratio")) {
+            if (i >= argc - 1) {
+                usage(argv[0]);
+                exit(1);
+            }
+            width_ratio = atof(argv[++i]);
+            if (width_ratio < 0.3) width_ratio = 0.3;
+            if (width_ratio > 1.0) width_ratio = 1.0;
         } else {
             fprintf(stderr, "Invalid argument: %s\n", argv[i]);
             usage(argv[0]);
@@ -1067,13 +1146,24 @@ main(int argc, char **argv)
         }
     }
 
+    if (corner_radius >= 0) {
+        keyboard.corner_radius = corner_radius;
+    } else if (dock_mode != DOCK_FULL) {
+        keyboard.corner_radius = 16;
+    } else {
+        keyboard.corner_radius = 0;
+    }
+
     if (alpha_defined) {
-        keyboard.schemes[0].bg.bgra[3] = alpha;
+        keyboard.schemes[0].bg.bgra[3] = bg_alpha_defined ? bg_alpha : alpha;
         keyboard.schemes[0].fg.bgra[3] = alpha;
         keyboard.schemes[0].high.bgra[3] = alpha;
-        keyboard.schemes[1].bg.bgra[3] = alpha;
+        keyboard.schemes[1].bg.bgra[3] = bg_alpha_defined ? bg_alpha : alpha;
         keyboard.schemes[1].fg.bgra[3] = alpha;
         keyboard.schemes[1].high.bgra[3] = alpha;
+    } else if (bg_alpha_defined) {
+        keyboard.schemes[0].bg.bgra[3] = bg_alpha;
+        keyboard.schemes[1].bg.bgra[3] = bg_alpha;
     }
 
     if (fc_font_pattern) {

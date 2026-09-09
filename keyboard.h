@@ -102,11 +102,13 @@ struct kbd {
 	bool print;
 	bool print_intersect;
 	uint32_t w, h;
+	int corner_radius;
 	double scale;
 	double preferred_scale, preferred_fractional_scale;
 	bool landscape;
 	bool shift_space_is_tab;
 	bool exclusive;
+	bool double_space_period;
 	uint8_t mods;
 	uint8_t compose;
 	struct key *last_press;

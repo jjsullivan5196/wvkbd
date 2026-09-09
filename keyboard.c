@@ -5,6 +5,11 @@
 #include <sys/mman.h>
 #include <ctype.h>
 #include "keyboard.h"
+#include <linux/input-event-codes.h>
+#include <sys/time.h>
+
+static uint64_t last_space_time_ms = 0;
+
 #include "drw.h"
 #include "os-compatibility.h"
 
@@ -449,6 +454,22 @@ kbd_press_key(struct kbd *kb, struct key *k, uint32_t time)
             zwp_virtual_keyboard_v1_key(kb->vkbd, time, KEY_TAB,
                                         WL_KEYBOARD_KEY_STATE_PRESSED);
         } else {
+            if (kb->double_space_period && kb->last_press->code == KEY_SPACE) {
+                struct timeval tv;
+                gettimeofday(&tv, NULL);
+                uint64_t now_ms = (uint64_t)(tv.tv_sec) * 1000 + (uint64_t)(tv.tv_usec) / 1000;
+                if (now_ms - last_space_time_ms <= 450) {
+                    zwp_virtual_keyboard_v1_key(kb->vkbd, time, KEY_BACKSPACE, WL_KEYBOARD_KEY_STATE_PRESSED);
+                    zwp_virtual_keyboard_v1_key(kb->vkbd, time, KEY_BACKSPACE, WL_KEYBOARD_KEY_STATE_RELEASED);
+                    zwp_virtual_keyboard_v1_key(kb->vkbd, time, KEY_DOT, WL_KEYBOARD_KEY_STATE_PRESSED);
+                    zwp_virtual_keyboard_v1_key(kb->vkbd, time, KEY_DOT, WL_KEYBOARD_KEY_STATE_RELEASED);
+                    last_space_time_ms = 0;
+                } else {
+                    last_space_time_ms = now_ms;
+                }
+            } else {
+                last_space_time_ms = 0;
+            }
             zwp_virtual_keyboard_v1_key(kb->vkbd, time, kb->last_press->code,
                                         WL_KEYBOARD_KEY_STATE_PRESSED);
         }
@@ -694,7 +715,12 @@ kbd_draw_layout(struct kbd *kb)
     if (kb->debug)
         fprintf(stderr, "Draw layout\n");
 
-    drw_fill_rectangle(d, kb->schemes[0].bg, 0, 0, kb->w, kb->h, 0);
+    if (kb->corner_radius > 0) {
+        drw_do_clear(d, 0, 0, kb->w, kb->h);
+        drw_fill_rectangle(d, kb->schemes[0].bg, 0, 0, kb->w, kb->h, kb->corner_radius);
+    } else {
+        drw_fill_rectangle(d, kb->schemes[0].bg, 0, 0, kb->w, kb->h, 0);
+    }
 
     while (next_key->type != Last) {
         if ((next_key->type == Pad) || (next_key->type == EndRow)) {
