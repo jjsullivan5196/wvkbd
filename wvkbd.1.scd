@@ -67,6 +67,9 @@ can be patched to add new features.
 	Allow keyboard to overlap existing windows, do not request an
 	exclusive zone from the compositor.
 
+*--wayland-layer* _[background|bottom|top|overlay]_
+	Wayland layer shell z index
+
 *--alpha* _int_
 	Set alpha value (i.e. transparency) for all colors [0-255]
 	
