@@ -779,6 +779,10 @@ hide()
         wl_callback_destroy(draw_surf.frame_cb);
         draw_surf.frame_cb = NULL;
     }
+    if (popup_draw_surf.frame_cb) {
+        wl_callback_destroy(popup_draw_surf.frame_cb);
+        popup_draw_surf.frame_cb = NULL;
+    }
 
     wl_surface_destroy(draw_surf.surf);
     draw_surf.attached = false;
