@@ -1,3 +1,8 @@
+# Unreleased
+
+[Emiel Kollof]
+* Add `terminal` layout set: compact 60%-style layout for small UMPC/tablet touchscreens (GPD Pocket), traditional ISO-like arrangement with modifiers, arrows and shifted punctuation on the primary layer; identical primary layer for portrait and landscape
+
 # v0.21 - 2026-10-27
 
 [Willow Barraco]
