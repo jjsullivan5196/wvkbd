@@ -600,10 +600,20 @@ layer_surface_configure(void *data, struct zwlr_layer_surface_v1 *surface,
 
     // Not what we expected, or redimension, refresh and restart
     if (keyboard.w != w || keyboard.h != h) {
-        zwlr_layer_surface_v1_ack_configure(surface, serial);
-        hide();
-        show();
-        return;
+        if (keyboard.h == h) {
+            // Request full width, some compositor may give size < request
+            // if another exclusive zone already exists (sway/waybar)
+            keyboard.w = w;
+            if (layer_surface_configured) {
+                kbd_resize(&keyboard, layouts, NumLayouts);
+                drwsurf_attach(&draw_surf);
+            }
+        } else {
+            zwlr_layer_surface_v1_ack_configure(surface, serial);
+            hide();
+            show();
+            return;
+        }
     };
 
     // Swallow useless events
