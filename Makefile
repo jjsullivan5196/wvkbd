@@ -23,7 +23,8 @@ WAYLAND_HEADERS = $(wildcard proto/*.xml)
 HDRS = $(WAYLAND_HEADERS:.xml=-client-protocol.h)
 WAYLAND_SRC = $(HDRS:.h=.c)
 SOURCES = $(WVKBD_SOURCES) $(WAYLAND_SRC)
-OBJECTS = $(WVKBD_DIR_SOURCES:.c=.o) $(WAYLAND_SRC:.c=.o)
+WAYLAND_OBJS = $(addprefix $(BUILDDIR)/, $(WAYLAND_SRC:.c=.o))
+OBJECTS = $(WVKBD_DIR_SOURCES:.c=.o) $(WAYLAND_OBJS)
 
 SCDOC=scdoc
 DOCS = wvkbd.1
@@ -36,14 +37,14 @@ $(BUILDDIR)/config.h:
 	cp config.$(LAYOUT).h $@
 
 $(BUILDDIR)/%.o: %.c
-	mkdir -p $(BUILDDIR)
+	mkdir -p $(dir $@)
 	$(CC) -I $(CURDIR) -I $(CURDIR)/$(BUILDDIR) -c $(CFLAGS) -o $@ $<
 
 proto/%-client-protocol.c: proto/%.xml
-	wayland-scanner code < $? > $@
+	wayland-scanner private-code < $< > $@
 
 proto/%-client-protocol.h: proto/%.xml
-	wayland-scanner client-header < $? > $@
+	wayland-scanner client-header < $< > $@
 
 $(OBJECTS): $(HDRS) $(WVKBD_HEADERS)
 

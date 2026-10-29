@@ -75,6 +75,8 @@ struct key {
 	struct layout *layout;   // pointer back to the parent layout that holds this
 	                         // key
 	const uint32_t code_mod; /* modifier to force when this key is pressed */
+	const uint32_t
+	  shift_code;            /* shift_code: secondary scancode */
 	uint8_t scheme;          // index of the scheme to use
 	bool reset_mod;          /* reset modifiers when clicked */
 
@@ -102,6 +104,7 @@ struct kbd {
 	bool print;
 	bool print_intersect;
 	uint32_t w, h;
+	int corner_radius;
 	double scale;
 	double preferred_scale, preferred_fractional_scale;
 	bool landscape;
@@ -115,6 +118,7 @@ struct kbd {
 	size_t layer_index;
 	struct layout *last_abc_layout; //the last alphabetical layout to fall back to (may be further away than prevlayout)
 	size_t last_abc_index; //the layer index of the last alphabetical layout
+	int64_t last_press_offset; // Delta between processor and compositor time during `last_press`
 
 	struct layout *layouts;
 	struct Output *output; //only used to keep track of landscape flipping, never dereferenced
@@ -152,8 +156,8 @@ uint8_t kbd_get_rows(struct layout *l);
 double kbd_get_row_length(struct key *k);
 void kbd_next_layer(struct kbd *kb, struct key *k, bool invert);
 void kbd_switch_layout(struct kbd *kb, struct layout *l, size_t layer_index);
-
 void create_and_upload_keymap(struct kbd *kb, const char *name, uint32_t comp_unichr);
+int64_t monotime();
 
 #ifndef LAYOUT
 #error "make sure to define LAYOUT"

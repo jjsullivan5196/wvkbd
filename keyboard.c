@@ -4,7 +4,10 @@
 #include <stdio.h>
 #include <sys/mman.h>
 #include <ctype.h>
+#include <time.h>
 #include "keyboard.h"
+#include <linux/input-event-codes.h>
+
 #include "drw.h"
 #include "os-compatibility.h"
 
@@ -318,7 +321,8 @@ kbd_unpress_key(struct kbd *kb, uint32_t time)
                                             WL_KEYBOARD_KEY_STATE_RELEASED);
             } else {
                 zwp_virtual_keyboard_v1_key(kb->vkbd, time,
-                                            kb->last_press->code,
+                                            unlatch_shift && kb->last_press->shift_code ?
+                                            kb->last_press->shift_code : kb->last_press->code,
                                             WL_KEYBOARD_KEY_STATE_RELEASED);
             }
         }
@@ -380,6 +384,14 @@ kbd_release_key(struct kbd *kb, uint32_t time)
 void
 kbd_motion_key(struct kbd *kb, uint32_t time, uint32_t x, uint32_t y)
 {
+    struct key *intersect_key;
+    intersect_key = kbd_get_key(kb, x, y);
+
+    // Ignore keyboard motion until a new key is reached.
+    if (kb->last_press == intersect_key) {
+        return;
+    }
+
     // Output intersecting keys
     // (for external 'swiping'-based accelerators).
     if (kb->print_intersect) {
@@ -388,8 +400,7 @@ kbd_motion_key(struct kbd *kb, uint32_t time, uint32_t x, uint32_t y)
             // Redraw last press as a swipe.
             kbd_draw_key(kb, kb->last_swipe, Swipe);
         }
-        struct key *intersect_key;
-        intersect_key = kbd_get_key(kb, x, y);
+
         if (intersect_key && (!kb->last_swipe ||
                               intersect_key->label != kb->last_swipe->label)) {
             kbd_print_key_stdout(kb, intersect_key);
@@ -441,6 +452,7 @@ kbd_press_key(struct kbd *kb, struct key *k, uint32_t time)
             zwp_virtual_keyboard_v1_modifiers(kb->vkbd, kb->mods, 0, 0, 0);
         }
         kb->last_swipe = kb->last_press = k;
+        kb->last_press_offset = time - monotime();
         kbd_draw_key(kb, k, Press);
         if ((kb->shift_space_is_tab) && (k->code == KEY_SPACE) && (kb->mods & Shift)) {
             // shift space is tab
@@ -449,7 +461,8 @@ kbd_press_key(struct kbd *kb, struct key *k, uint32_t time)
             zwp_virtual_keyboard_v1_key(kb->vkbd, time, KEY_TAB,
                                         WL_KEYBOARD_KEY_STATE_PRESSED);
         } else {
-            zwp_virtual_keyboard_v1_key(kb->vkbd, time, kb->last_press->code,
+            zwp_virtual_keyboard_v1_key(kb->vkbd, time, (kb->mods & Shift) && k->shift_code ?
+                                        k->shift_code : k->code,
                                         WL_KEYBOARD_KEY_STATE_PRESSED);
         }
         if (kb->print || kb->print_intersect)
@@ -529,6 +542,7 @@ kbd_press_key(struct kbd *kb, struct key *k, uint32_t time)
     case Copy:
         // copy code as unicode chr by setting a temporary keymap
         kb->last_swipe = kb->last_press = k;
+        kb->last_press_offset = time - monotime();
         kbd_draw_key(kb, k, Press);
         if (kb->mods & Shift) {
             if (kb->debug)
@@ -694,7 +708,12 @@ kbd_draw_layout(struct kbd *kb)
     if (kb->debug)
         fprintf(stderr, "Draw layout\n");
 
-    drw_fill_rectangle(d, kb->schemes[0].bg, 0, 0, kb->w, kb->h, 0);
+    if (kb->corner_radius > 0) {
+        drw_do_clear(d, 0, 0, kb->w, kb->h);
+        drw_fill_rectangle(d, kb->schemes[0].bg, 0, 0, kb->w, kb->h, kb->corner_radius);
+    } else {
+        drw_fill_rectangle(d, kb->schemes[0].bg, 0, 0, kb->w, kb->h, 0);
+    }
 
     while (next_key->type != Last) {
         if ((next_key->type == Pad) || (next_key->type == EndRow)) {
@@ -782,4 +801,14 @@ create_and_upload_keymap(struct kbd *kb, const char *name, uint32_t comp_unichr)
     zwp_virtual_keyboard_v1_keymap(kb->vkbd, WL_KEYBOARD_KEYMAP_FORMAT_XKB_V1,
                                    keymap_fd, keymap_size);
     free((void *)keymap_str);
+}
+
+// Get a monotonic millisecond timer.
+int64_t
+monotime()
+{
+    struct timespec spec;
+    clock_gettime(CLOCK_MONOTONIC, &spec);
+
+    return (spec.tv_sec * 1000 + spec.tv_nsec / 1000000);
 }

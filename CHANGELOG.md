@@ -3,6 +3,22 @@
 [Emiel Kollof]
 * Add `terminal` layout set: compact 60%-style layout for small UMPC/tablet touchscreens (GPD Pocket), traditional ISO-like arrangement with modifiers, arrows and shifted punctuation on the primary layer; identical primary layer for portrait and landscape
 
+# v0.21 - 2026-10-27
+
+[Willow Barraco]
+* Fix segmentation fault after hiding the keyboard
+
+[Johnny Guerra]
+* add one-handed docking, baseplate opacity
+
+[Christian Duerr]
+* Add CLI argument --wayland-layer for setting layer shell position
+* Fix missing release on hide after key press
+* Fix repeat cancel on minimal touch motions
+
+[Emeric Dupont]
+* Added Shift+Insert for primary paste
+
 # v0.20 - 2026-07-24
 
 This release implements automatic focus-based visibility toggling, thanks to Christian Duerr. Start wvkbd with the `--auto` parameter to opt-in for this feature (it is not the default yet).
