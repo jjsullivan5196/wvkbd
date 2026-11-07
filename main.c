@@ -313,6 +313,11 @@ wl_touch_frame(void *data, struct wl_touch *wl_touch)
 void
 wl_touch_cancel(void *data, struct wl_touch *wl_touch)
 {
+    if(!layer_surface_configured || !popup_xdg_surface_configured) {
+        return;
+    }
+
+    kbd_release_key(&keyboard, 0);
 }
 
 void
