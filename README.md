@@ -111,10 +111,6 @@ This project was started by [John Sullivan](https://jsullivan.cc/) and is
 currently being maintained by the [Sxmo](https://sxmo.org) project, whose
 maintainers will ensure both git remotes are kept in sync at all times.
 
-For code contributions, please run `make format` (requires `clang-format`)
-before sending a patch (opening a PR) and include as much relevant detail as
-possible.
-
 ## Related projects
 
 * [clickclack](https://git.sr.ht/~proycon/clickclack) - Audio/haptic feedback (standalone)
