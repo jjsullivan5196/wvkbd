@@ -4,6 +4,7 @@
 #include "proto/fractional-scale-v1-client-protocol.h"
 #include "proto/viewporter-client-protocol.h"
 #include "proto/input-method-unstable-v2-protocol.h"
+#include "proto/tablet-v2-client-protocol.h"
 #include <errno.h>
 #include <linux/input-event-codes.h>
 #include <stdio.h>
@@ -48,6 +49,8 @@ static struct wp_fractional_scale_manager_v1 *wfs_mgr;
 static struct wp_viewport *draw_surf_viewport, *popup_draw_surf_viewport;
 static struct wp_viewporter *viewporter;
 static struct zwp_input_method_manager_v2 *im_mgr;
+static struct zwp_tablet_manager_v2 *tablet_mgr;
+static struct zwp_tablet_seat_v2 *tablet_seat;
 static bool popup_xdg_surface_configured;
 static bool layer_surface_configured;
 
@@ -402,6 +405,194 @@ wl_pointer_axis(void *data, struct wl_pointer *wl_pointer, uint32_t time,
     kbd_next_layer(&keyboard, NULL, (value >= 0));
 }
 
+/* Stylus support (tablet-v2). Tool events carry no timestamp of their own, so
+ * down/up/motion are collected and handled when the frame event arrives. */
+static int pen_x = -1, pen_y = -1;
+static uint32_t pen_time;
+static bool pen_down = false;
+static bool pen_ev_down = false, pen_ev_up = false, pen_ev_motion = false;
+
+static void
+pen_proximity_in(void *data, struct zwp_tablet_tool_v2 *tool, uint32_t serial,
+                 struct zwp_tablet_v2 *tablet, struct wl_surface *surface)
+{
+}
+
+static void
+pen_proximity_out(void *data, struct zwp_tablet_tool_v2 *tool)
+{
+    if (pen_down) {
+        pen_down = false;
+        kbd_release_key(&keyboard, pen_time);
+    }
+    pen_x = pen_y = -1;
+    pen_ev_down = pen_ev_up = pen_ev_motion = false;
+}
+
+static void
+pen_down_cb(void *data, struct zwp_tablet_tool_v2 *tool, uint32_t serial)
+{
+    pen_ev_down = true;
+}
+
+static void
+pen_up_cb(void *data, struct zwp_tablet_tool_v2 *tool)
+{
+    pen_ev_up = true;
+}
+
+static void
+pen_motion(void *data, struct zwp_tablet_tool_v2 *tool, wl_fixed_t x,
+           wl_fixed_t y)
+{
+    pen_x = wl_fixed_to_int(x);
+    pen_y = wl_fixed_to_int(y);
+    pen_ev_motion = true;
+}
+
+static void
+pen_frame(void *data, struct zwp_tablet_tool_v2 *tool, uint32_t time)
+{
+    pen_time = time;
+
+    if (layer_surface_configured && popup_xdg_surface_configured) {
+        if (pen_ev_down) {
+            struct key *next_key = NULL;
+
+            pen_down = true;
+            kbd_unpress_key(&keyboard, time);
+            if (pen_x >= 0 && pen_y >= 0) {
+                next_key = kbd_get_key(&keyboard, pen_x, pen_y);
+            }
+            if (next_key) {
+                kbd_press_key(&keyboard, next_key, time);
+            } else if (keyboard.compose) {
+                keyboard.compose = 0;
+                kbd_switch_layout(&keyboard, keyboard.prevlayout,
+                                  keyboard.last_abc_index);
+            }
+        } else if (pen_ev_motion && pen_down) {
+            kbd_motion_key(&keyboard, time, pen_x, pen_y);
+        }
+
+        if (pen_ev_up) {
+            pen_down = false;
+            kbd_release_key(&keyboard, time);
+        }
+    }
+
+    pen_ev_down = pen_ev_up = pen_ev_motion = false;
+}
+
+static void
+pen_removed(void *data, struct zwp_tablet_tool_v2 *tool)
+{
+    pen_proximity_out(data, tool);
+    zwp_tablet_tool_v2_destroy(tool);
+}
+
+/* libwayland aborts when an event has no handler, so unused events of the
+ * tool interface get empty handlers */
+static void
+pen_type(void *d, struct zwp_tablet_tool_v2 *t, uint32_t v)
+{
+}
+static void
+pen_hardware_serial(void *d, struct zwp_tablet_tool_v2 *t, uint32_t hi,
+                    uint32_t lo)
+{
+}
+static void
+pen_hardware_id_wacom(void *d, struct zwp_tablet_tool_v2 *t, uint32_t hi,
+                      uint32_t lo)
+{
+}
+static void
+pen_capability(void *d, struct zwp_tablet_tool_v2 *t, uint32_t v)
+{
+}
+static void
+pen_done(void *d, struct zwp_tablet_tool_v2 *t)
+{
+}
+static void
+pen_pressure(void *d, struct zwp_tablet_tool_v2 *t, uint32_t v)
+{
+}
+static void
+pen_distance(void *d, struct zwp_tablet_tool_v2 *t, uint32_t v)
+{
+}
+static void
+pen_tilt(void *d, struct zwp_tablet_tool_v2 *t, wl_fixed_t x, wl_fixed_t y)
+{
+}
+static void
+pen_rotation(void *d, struct zwp_tablet_tool_v2 *t, wl_fixed_t v)
+{
+}
+static void
+pen_slider(void *d, struct zwp_tablet_tool_v2 *t, int32_t v)
+{
+}
+static void
+pen_wheel(void *d, struct zwp_tablet_tool_v2 *t, wl_fixed_t degrees,
+          int32_t clicks)
+{
+}
+static void
+pen_button(void *d, struct zwp_tablet_tool_v2 *t, uint32_t serial,
+           uint32_t button, uint32_t state)
+{
+}
+
+static const struct zwp_tablet_tool_v2_listener pen_listener = {
+    .type = pen_type,
+    .hardware_serial = pen_hardware_serial,
+    .hardware_id_wacom = pen_hardware_id_wacom,
+    .capability = pen_capability,
+    .done = pen_done,
+    .removed = pen_removed,
+    .proximity_in = pen_proximity_in,
+    .proximity_out = pen_proximity_out,
+    .down = pen_down_cb,
+    .up = pen_up_cb,
+    .motion = pen_motion,
+    .pressure = pen_pressure,
+    .distance = pen_distance,
+    .tilt = pen_tilt,
+    .rotation = pen_rotation,
+    .slider = pen_slider,
+    .wheel = pen_wheel,
+    .button = pen_button,
+    .frame = pen_frame,
+};
+
+static void
+tablet_seat_tablet_added(void *data, struct zwp_tablet_seat_v2 *tablet_seat,
+                         struct zwp_tablet_v2 *tablet)
+{
+}
+
+static void
+tablet_seat_tool_added(void *data, struct zwp_tablet_seat_v2 *tablet_seat,
+                       struct zwp_tablet_tool_v2 *tool)
+{
+    zwp_tablet_tool_v2_add_listener(tool, &pen_listener, NULL);
+}
+
+static void
+tablet_seat_pad_added(void *data, struct zwp_tablet_seat_v2 *tablet_seat,
+                      struct zwp_tablet_pad_v2 *pad)
+{
+}
+
+static const struct zwp_tablet_seat_v2_listener tablet_seat_listener = {
+    .tablet_added = tablet_seat_tablet_added,
+    .tool_added = tablet_seat_tool_added,
+    .pad_added = tablet_seat_pad_added,
+};
+
 void
 seat_handle_capabilities(void *data, struct wl_seat *wl_seat,
                          enum wl_seat_capability caps)
@@ -476,6 +667,9 @@ handle_global(void *data, struct wl_registry *registry, uint32_t name,
             registry, name, &zwp_virtual_keyboard_manager_v1_interface, 1);
     } else if (im_auto && strcmp(interface, zwp_input_method_manager_v2_interface.name) == 0) {
         im_mgr = wl_registry_bind(registry, name, &zwp_input_method_manager_v2_interface, 1);
+    } else if (strcmp(interface, zwp_tablet_manager_v2_interface.name) == 0) {
+        tablet_mgr = wl_registry_bind(registry, name,
+                                      &zwp_tablet_manager_v2_interface, 1);
     }
 }
 
@@ -1247,6 +1441,12 @@ main(int argc, char **argv)
 
     empty_region = wl_compositor_create_region(compositor);
     popup_xdg_positioner = xdg_wm_base_create_positioner(wm_base);
+
+    if (tablet_mgr != NULL) {
+        tablet_seat = zwp_tablet_manager_v2_get_tablet_seat(tablet_mgr, seat);
+        zwp_tablet_seat_v2_add_listener(tablet_seat, &tablet_seat_listener,
+                                        NULL);
+    }
 
     keyboard.vkbd =
         zwp_virtual_keyboard_manager_v1_create_virtual_keyboard(vkbd_mgr, seat);
