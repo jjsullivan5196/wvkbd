@@ -52,6 +52,12 @@ The other set of layouts is called `deskintl` *(desktop international)*, which g
 tablet devices with a larger touchscreen. The set is US-International English. Run `make LAYOUT=deskintl`. The resulting binary
 is called `wvkbd-deskintl`.
 
+The `terminal` layout set is a compact 60%-style keyboard aimed at small UMPC/tablet touchscreens (e.g. GPD Pocket). It uses
+a traditional ISO-like arrangement — number row, `Esc`/`Ctrl`/`Alt`/`Super`/arrows always visible, CapsLock, dual shifts and
+full shifted punctuation (`|`, `{`, `}`, `~`, `?`) on the primary layer — and uses the same primary layer in portrait and
+landscape, so nothing moves around when the device rotates. Run `make LAYOUT=terminal`. The resulting binary is called
+`wvkbd-terminal`.
+
 You can, however, define your own layouts by copying and modifying `config.mobintl.h`, `layout.mobintl.h` and `keymap.mobintl.h`
 (replace `mobintl` for something like `yourlayout`), or `config.deskintl.h`, `layout.deskintl.h` and `keymap.deskintl.h`. Then
 make your layout set using `make LAYOUT=yourlayout`, and the resulting binary will be `wvkbd-yourlayout`.
